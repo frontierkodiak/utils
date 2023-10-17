@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: notion_to_pdf",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/notion_to_pdf.py",
+            "console": "integratedTerminal",
+            "args": [
+                "\\\\100.118.87.109\\pond\\vault\\Documents\\Pitch Decks",
+                "C:\\Users\\front\\Documents\\GitHub\\utils\\links.yaml"
+            ]
+        }
+    ]
+}
