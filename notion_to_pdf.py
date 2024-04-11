@@ -5,7 +5,12 @@ from bs4 import BeautifulSoup
 import img2pdf
 import yaml
 from urllib.parse import unquote
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # Check if the output directory and links file arguments are provided
 if len(sys.argv) < 3:
@@ -22,6 +27,13 @@ if not os.path.exists(output_dir):
 with open(links_file, 'r') as file:
     entries = yaml.safe_load(file)
 
+# Specify the path to chromedriver.exe
+chromedriver_path = r'C:\extras\webdriver\chromedriver.exe'  # Update this path if necessary
+
+# Create a new instance of the Chrome driver
+driver = webdriver.Chrome(executable_path=chromedriver_path)
+
+
 for entry in entries:
     link = entry['link']
     title = entry['title']
@@ -29,8 +41,10 @@ for entry in entries:
 
     pdf_filename = os.path.join(output_dir, f"{title}_{found_round}_deck.pdf")
 
-    response = requests.get(link)
-    html_content = response.text
+    driver.get(link)
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'img')))
+    html_content = driver.page_source
+
     soup = BeautifulSoup(html_content, 'lxml')  
     images = soup.find_all('img')
     image_urls = [unquote(img.get('src')) for img in images if '.png' in unquote(img.get('src'))]
@@ -51,3 +65,5 @@ for entry in entries:
         f.write(img2pdf.convert([i for i in image_files if i.endswith(".png")]))
 
     print(f"PDF created successfully: {pdf_filename}")
+
+driver.quit()
