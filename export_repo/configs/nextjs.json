@@ -1,0 +1,8 @@
+{
+    "repo_root": "/home/caleb/repo/polli-labs-mantine/",
+    "export_name": "polli_labs_nextjs_repo_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["components", "content", "pages", "public", "theme", "types"],
+    "include_top_level_files": ["package.json", "tsconfig.json"],
+    "included_extensions": [".ts", ".js", ".tsx", ".jsx", ".json"]
+  }
