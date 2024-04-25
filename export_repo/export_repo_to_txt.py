@@ -25,6 +25,8 @@ included_extensions = config['included_extensions']
 subdirs_to_exclude = config.get('subdirs_to_exclude', [])
 files_to_exclude = config.get('files_to_exclude', [])
 depth = config.get('depth', -1)  # Default to -1 for full traversal
+exhaustive_dir_tree = config.get('exhaustive_dir_tree', False)
+blacklisted_dirs = ['__pycache__']  # Blacklist of subdirs to always omit
 
 # Determine export file path
 if os.path.isabs(export_name):
@@ -77,19 +79,28 @@ def traverse_directory(directory, current_depth=0):
 
         break  # Ensure we don't double-traverse directories
 
-def get_directory_tree(directory, prefix=''):
+def get_directory_tree(directory, prefix='', exhaustive=False):
     """
     Generate a string representation of the directory tree.
+    If exhaustive is False, exclude subdirectories that are not in dirs_to_traverse.
+    Always exclude blacklisted directories.
     """
     tree_str = ''
     items = sorted(os.listdir(directory))
     for i, item in enumerate(items):
         path = os.path.join(directory, item)
         connector = '├── ' if i < len(items) - 1 else '└── '
-        tree_str += f"{prefix}{connector}{item}\n"
-        if os.path.isdir(path):
-            extension = '' if i < len(items) - 1 else '    '
-            tree_str += get_directory_tree(path, prefix + extension + '│   ')
+        if os.path.isdir(path) and item in blacklisted_dirs:
+            tree_str += f"{prefix}{connector}{item}\n"
+            tree_str += f"{prefix}│   └── (omitted)\n"
+        else:
+            tree_str += f"{prefix}{connector}{item}\n"
+            if os.path.isdir(path):
+                if exhaustive or item in dirs_to_traverse:
+                    extension = '' if i < len(items) - 1 else '    '
+                    tree_str += get_directory_tree(path, prefix + extension + '│   ', exhaustive)
+                else:
+                    tree_str += f"{prefix}│   └── (omitted)\n"
     return tree_str
 
 # Clear the output file before starting
@@ -97,15 +108,12 @@ with open(output_file, 'w', encoding='utf-8') as f:
     pass
 
 # Write the export configuration to the output file, starting fresh
-write_to_file(f"Export Configuration for {export_name} with root {repo_root}:", mode='w')
+write_to_file(f"Export Configuration:\n{json.dumps(config, indent=2)}", mode='w')
 
-# Generate and write the directory tree structure for dirs_to_traverse at the top
-for dir in dirs_to_traverse:
-    dir_path = os.path.join(repo_root, dir)
-    tree_structure = f"Directory Tree for {dir}:\n"
-    tree_structure += get_directory_tree(dir_path)
-    write_to_file(tree_structure)  # Default mode='a' appends the content
-
+# Generate and write the directory tree structure starting from the repo_root
+tree_structure = f"Directory tree, stemming from root \"{repo_root}\":\n"
+tree_structure += get_directory_tree(repo_root, exhaustive=exhaustive_dir_tree)
+write_to_file(tree_structure)
 
 # Handle top-level files
 if include_top_level_files == 'all':
@@ -133,10 +141,10 @@ elif isinstance(include_top_level_files, list):
 for dir in dirs_to_traverse:
     dir_path = os.path.join(repo_root, dir)
     traverse_directory(dir_path, current_depth=0)
-    
+
 # At the end of the script, after all processing
 print(f"Exported to: {output_file}")
 print(f"Total number of lines: {total_lines}")
 print("Number of exported files by extension:")
 for ext, count in exported_files_count.items():
-    print(f"{ext}: {count}") 
+    print(f"{ext}: {count}")
