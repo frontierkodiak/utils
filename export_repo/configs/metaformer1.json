@@ -5,6 +5,7 @@
   "dirs_to_traverse": ["models"],
   "include_top_level_files": "all",
   "included_extensions": [".py", ".yaml", ".md"],
-  "exhaustive_dir_tree": false
+  "exhaustive_dir_tree": false,
+  "files_to_include": ["experiment_log.md", "base2.yaml"]
 }
 

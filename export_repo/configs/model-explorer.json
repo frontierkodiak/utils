@@ -1,0 +1,13 @@
+{
+    "repo_root": "/home/caleb/repo/Polli-Brain/model-explorer",
+    "export_name": "model-explorer-repo-export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["example_colabs", "src", "model-explorer.wiki"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml", ".md"],
+    "exhaustive_dir_tree": false,
+    "subdirs_to_exclude": ["server"],
+    "depth": 10
+  }
+  
+  

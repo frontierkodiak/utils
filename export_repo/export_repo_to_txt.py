@@ -27,6 +27,7 @@ files_to_exclude = config.get('files_to_exclude', [])
 depth = config.get('depth', -1)  # Default to -1 for full traversal
 exhaustive_dir_tree = config.get('exhaustive_dir_tree', False)
 blacklisted_dirs = ['__pycache__']  # Blacklist of subdirs to always omit
+files_to_include = config.get('files_to_include', [])  # Additional files to include explicitly
 
 # Determine export file path
 if os.path.isabs(export_name):
@@ -78,6 +79,20 @@ def traverse_directory(directory, current_depth=0):
             traverse_directory(os.path.join(root, dir), current_depth + 1)
 
         break  # Ensure we don't double-traverse directories
+
+def include_specific_files(root_dir):
+    """
+    Traverse the entire directory tree from the root to include specific files.
+    """
+    for root, dirs, files in os.walk(root_dir):
+        for file in files:
+            file_path = os.path.join(root, file)
+            relative_path = os.path.relpath(file_path, root_dir)
+            for include_file in files_to_include:
+                if relative_path.endswith(include_file):
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    write_to_file(content, relative_path)
 
 def get_directory_tree(directory, prefix='', exhaustive=False):
     """
@@ -141,6 +156,9 @@ elif isinstance(include_top_level_files, list):
 for dir in dirs_to_traverse:
     dir_path = os.path.join(repo_root, dir)
     traverse_directory(dir_path, current_depth=0)
+
+# Include specific files by traversing from the root directory
+include_specific_files(repo_root)
 
 # At the end of the script, after all processing
 print(f"Exported to: {output_file}")

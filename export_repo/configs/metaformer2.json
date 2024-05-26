@@ -2,9 +2,9 @@
   "repo_root": "/home/caleb/repo/Polli-Brain/metaformer",
   "export_name": "metaformer_repo_export.txt",
   "delimiter": "----",
-  "dirs_to_traverse": ["models"],
+  "dirs_to_traverse": ["models", "data"],
   "include_top_level_files": "all",
-  "included_extensions": [".py", ".yaml", ".md"],
+  "included_extensions": [".py", ".yaml"],
   "exhaustive_dir_tree": false
 }
 
