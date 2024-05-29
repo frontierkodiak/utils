@@ -1,5 +1,9 @@
 ### Brief Documentation for `export_repo_to_txt.py`
 
+```bash
+export_repo hFormer-serve.json
+```
+
 **Quick Start:**
 - **Purpose**: Export repository content to a text file, including directory structures and file contents.
 - **Usage**: `python export_repo_to_txt.py <config_file>.json`
