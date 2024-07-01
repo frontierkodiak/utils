@@ -1,0 +1,10 @@
+{
+    "repo_root": "/home/caleb/repo/ibrida/ibrida",
+    "export_name": "ibrida_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["."],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml", ".properties", ".sh", ".xml", ".txt"],
+    "subdirs_to_exclude": ["pkgs", "test"],
+    "exhaustive_dir_tree": false
+  }
