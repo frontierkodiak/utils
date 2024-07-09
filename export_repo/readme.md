@@ -1,59 +1,88 @@
-### Brief Documentation for `export_repo_to_txt.py`
+# Export Repository to Text File
+
+## Overview
+
+This tool exports repository content to a text file, including directory structures and file contents. It provides flexible configuration options to control what is included in the export.
+
+## Usage
 
 ```bash
-export_repo hFormer-serve.json
+python export_repo_to_txt.py <config_file>.json
 ```
 
-**Quick Start:**
-- **Purpose**: Export repository content to a text file, including directory structures and file contents.
-- **Usage**: `python export_repo_to_txt.py <config_file>.json`
+or
 
-**Configuration Parameters:**
+```bash
+python export_repo_to_txt.py <repo_root>
+```
+
+## Configuration Parameters
+
 - `repo_root`: Path to the repository's root directory.
-- `export_name`: Export file name or path. If a path, exports there; if a name, exports to `repo_root`.
+- `export_name`: Name or path for the export file. If a path, exports there; if a name, exports to `repo_root`.
 - `delimiter`: Separator string for entries in the export file.
-- `dirs_to_traverse`: Directories within `repo_root` for full traversal and export.
-- `include_top_level_files`: Specifies top-level files for inclusion in export. Set to `"all"` for all files, or list specific files. Does not affect dir tree.
-- `included_extensions`: File extensions to include. Applies to files in `dirs_to_traverse` and top-level files if `"all"` is selected.
-- `depth`: Specifies the depth of directory traversal relative to each directory in `dirs_to_traverse`. `-1` for full traversal, `0` for the directory itself, and any positive integer for that many levels deep.
-- `subdirs_to_exclude`: List of subdirectory names to exclude from traversal. Directories with these names will not be traversed.
-- `files_to_exclude`: List of file names to exclude from the export. Files with these names will not be included in the export file.
-- `exhaustive_dir_tree`: If set to `true`, the exported directory tree will include all top-level files and recurse through all subdirectories, regardless of `dirs_to_traverse` and `subdirs_to_exclude`. If `false` (default), the directory tree will only include the top-level files and the directories specified in `dirs_to_traverse`.
+- `dirs_to_traverse`: List of directories within `repo_root` for full traversal and export.
+- `files_to_include`: List of specific files to include in the export, regardless of their location in the repository.
+- `include_top_level_files`: Specifies top-level files for inclusion. Set to `"all"` for all files, or list specific files.
+- `included_extensions`: File extensions to include. Use `"all"` for all extensions.
+- `subdirs_to_exclude`: List of subdirectory names or paths to exclude from traversal.
+- `files_to_exclude`: List of file names to exclude from the export.
+- `always_exclude_patterns`: List of filename patterns to always exclude (e.g., ["export.txt"]).
+- `depth`: Depth of directory traversal. `-1` for full traversal (default).
+- `exhaustive_dir_tree`: If `true`, exports full directory tree regardless of other settings.
 
-**Example Config:**
+## Example Configuration
+
 ```json
 {
-  "repo_root": "/path/to/repo",
-  "export_name": "exported_repo_summary.txt",
+  "repo_root": "/home/user/myrepo",
+  "export_name": "repo_export.txt",
   "delimiter": "----",
   "dirs_to_traverse": ["src", "docs"],
+  "files_to_include": ["README.md", "config.json"],
   "include_top_level_files": "all",
-  "included_extensions": [".py", ".md"]
+  "included_extensions": [".py", ".md", ".json"],
+  "subdirs_to_exclude": ["tests", "build"],
+  "files_to_exclude": ["secrets.yaml"],
+  "always_exclude_patterns": ["export.txt", "*.log"],
+  "depth": -1,
+  "exhaustive_dir_tree": false
 }
 ```
 
-### Example Configuration Files
+## Notes
 
-**nextjs.json:**
+- The tool will automatically exclude the output file from the export.
+- If no config file is provided, default settings will be used.
+- The `subdirs_to_exclude` option supports partial paths (e.g., "foo/bar" will exclude all "bar" directories under any "foo" directory).
+- Use `always_exclude_patterns` for files you want to exclude regardless of their location or other inclusion rules.
+
+## Example Configurations
+
+### NextJS Project
+
 ```json
 {
-  "repo_root": "/home/caleb/repo/polli-labs-mantine/",
-  "export_name": "polli_labs_nextjs_repo_export.txt",
+  "repo_root": "/home/user/nextjs-project",
+  "export_name": "nextjs_project_export.txt",
   "delimiter": "----",
-  "dirs_to_traverse": ["components", "content", "pages", "public", "theme", "types"],
-  "include_top_level_files": ["package.json", "tsconfig.json"],
-  "included_extensions": [".ts", ".js", ".tsx", ".jsx", ".json"]
+  "dirs_to_traverse": ["components", "pages", "styles", "public"],
+  "include_top_level_files": ["package.json", "next.config.js"],
+  "included_extensions": [".js", ".jsx", ".ts", ".tsx", ".css"]
 }
 ```
 
-**metaformer.json:**
+### Python Project
+
 ```json
 {
-  "repo_root": "/home/caleb/repo/Polli-Brain/metaformer",
-  "export_name": "metaformer_repo_export.txt",
+  "repo_root": "/home/user/python-project",
+  "export_name": "python_project_export.txt",
   "delimiter": "----",
-  "dirs_to_traverse": ["data", "models"],
+  "dirs_to_traverse": ["src", "tests", "docs"],
+  "files_to_include": ["requirements.txt", "setup.py"],
   "include_top_level_files": "all",
-  "included_extensions": [".py", ".yaml", ".md"]
+  "included_extensions": [".py", ".md", ".yml"],
+  "subdirs_to_exclude": ["__pycache__", ".venv"]
 }
 ```

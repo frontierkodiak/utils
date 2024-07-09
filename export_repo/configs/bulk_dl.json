@@ -1,10 +1,14 @@
 {
-    "repo_root": "/home/caleb/repo/ibrida/ibrida",
-    "export_name": "ibrida_export.txt",
-    "delimiter": "----",
-    "dirs_to_traverse": ["."],
-    "include_top_level_files": "all",
-    "included_extensions": [".py", ".yaml", ".properties", ".sh", ".xml", ".txt"],
-    "subdirs_to_exclude": ["pkgs", "test"],
-    "exhaustive_dir_tree": false
-  }
+  "repo_root": "/home/caleb/repo/ibrida/ibrida",
+  "export_name": "ibrida_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["s3/download", "s3/download/utils"],
+  "files_to_include": ["s3_bulk_dl_v6.py", "b2.py", "config.py", "file.py", "graceful_shutdown.py", "init.py", 
+  "monitoring.py", "processing.py", "internet_connectivity_checker.py", "csv_schema.py", "paths.py", "chunk_postprocessor.py"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py", ".yaml", ".properties", ".sh", ".xml"],
+  "subdirs_to_exclude": ["pkgs", "test", "fo_dataset", "utils"],
+  "files_to_exclude": ["convert_multitask_dataset_to_mmlab2.py"],
+  "always_exclude_patterns": ["export.txt", "other_pattern.txt"],
+  "exhaustive_dir_tree": false
+}

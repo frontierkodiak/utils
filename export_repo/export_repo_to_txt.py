@@ -15,9 +15,11 @@ class RepoExporter:
         self.depth = config.get('depth', -1)  # Default to -1 for full traversal
         self.exhaustive_dir_tree = config.get('exhaustive_dir_tree', False)
         self.blacklisted_dirs = ['__pycache__']  # Blacklist of subdirs to always omit
+        self.blacklisted_files = []  # Blacklist of files to always omit
         self.files_to_include = config.get('files_to_include', [])  # Additional files to include explicitly
         self.output_file = self.get_output_file_path()
         self.files_to_exclude.append(os.path.basename(self.output_file))  # Add output file to exclude list
+        self.always_exclude_patterns = config.get('always_exclude_patterns', ['export.txt'])
         self.exported_files_count = {}
         self.total_lines = 0
 
@@ -38,41 +40,48 @@ class RepoExporter:
             else:
                 f.write(f"{content}\n")
 
-    def traverse_directory(self, directory, current_depth=0):
-        if self.depth != -1 and current_depth > self.depth:
-            return  # Stop recursion if the current depth exceeds the specified depth
+    def should_exclude_file(self, file_path):
+        relative_path = os.path.relpath(file_path, self.repo_root)
+        filename = os.path.basename(file_path)
+        return (any(relative_path.endswith(exclude) for exclude in self.files_to_exclude) or
+                any(filename.endswith(pattern) for pattern in self.always_exclude_patterns))
 
-        for root, dirs, files in os.walk(directory, topdown=True):
-            # Exclude subdirectories if they are in subdirs_to_exclude
-            dirs[:] = [d for d in dirs if d not in self.subdirs_to_exclude]
+    def should_exclude_dir(self, dir_path):
+        relative_path = os.path.relpath(dir_path, self.repo_root)
+        return any(relative_path.startswith(exclude.rstrip('*')) for exclude in self.subdirs_to_exclude)
+
+    def traverse_directory(self, directory):
+        # Ensure the directory path is absolute
+        abs_directory = os.path.join(self.repo_root, directory)
+
+        if not os.path.exists(abs_directory):
+            print(f"Warning: Directory {abs_directory} does not exist. Skipping.")
+            return
+
+        for root, dirs, files in os.walk(abs_directory):
+            dirs[:] = [d for d in dirs if not self.should_exclude_dir(os.path.join(root, d))]
 
             for file in files:
-                if file in self.files_to_exclude:  # Skip files in files_to_exclude
+                file_path = os.path.join(root, file)
+                if self.should_exclude_file(file_path):
                     continue
                 file_extension = os.path.splitext(file)[1]
-                if file_extension in self.included_extensions or self.included_extensions == 'all':
-                    file_path = os.path.join(root, file)
+                if self.included_extensions == 'all' or file_extension in self.included_extensions:
                     relative_path = os.path.relpath(file_path, self.repo_root)
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                    self.write_to_file(content, relative_path)
-
-            # Recursively traverse subdirectories, adjusting depth
-            for dir in dirs:
-                self.traverse_directory(os.path.join(root, dir), current_depth + 1)
-
-            break  # Ensure we don't double-traverse directories
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                        self.write_to_file(content, relative_path)
+                    except Exception as e:
+                        print(f"Error reading file {file_path}: {str(e)}")
 
     def include_specific_files(self, root_dir):
-        """
-        Traverse the entire directory tree from the root to include specific files.
-        """
         for root, dirs, files in os.walk(root_dir):
             for file in files:
                 file_path = os.path.join(root, file)
                 relative_path = os.path.relpath(file_path, root_dir)
-                for include_file in self.files_to_include:
-                    if relative_path.endswith(include_file):
+                if any(relative_path.endswith(include_file) for include_file in self.files_to_include):
+                    if not self.should_exclude_file(file_path):
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
                         self.write_to_file(content, relative_path)
@@ -136,8 +145,7 @@ class RepoExporter:
 
         # Start traversal from each specified directory in dirs_to_traverse
         for dir in self.dirs_to_traverse:
-            dir_path = os.path.join(self.repo_root, dir)
-            self.traverse_directory(dir_path, current_depth=0)
+            self.traverse_directory(dir)
 
         # Include specific files by traversing from the root directory
         self.include_specific_files(self.repo_root)
@@ -172,7 +180,8 @@ def get_default_config(repo_root):
         'files_to_exclude': [],
         'depth': 10,
         'exhaustive_dir_tree': False,
-        'files_to_include': []
+        'files_to_include': [],
+        'always_exclude_patterns': ['export.txt']
     }
 
 def main():
