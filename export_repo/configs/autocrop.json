@@ -4,7 +4,7 @@
     "delimiter": "----",
     "dirs_to_traverse": ["utils", "configs", "models"],
     "include_top_level_files": "all",
-    "included_extensions": [".py", ".yaml"],
+    "included_extensions": [".py", ".yaml", ".md"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
