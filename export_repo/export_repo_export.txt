@@ -1,9 +1,58 @@
+Export Configuration:
+{
+  "repo_root": "/home/caleb/repo/utils/export_repo",
+  "export_name": "export_repo_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": [
+    "configs"
+  ],
+  "include_top_level_files": "all",
+  "included_extensions": [
+    ".py",
+    ".json"
+  ],
+  "subdirs_to_exclude": [],
+  "files_to_exclude": [
+    "export_repo_export.txt"
+  ],
+  "depth": -1,
+  "exhaustive_dir_tree": false,
+  "blacklisted_dirs": [
+    "__pycache__"
+  ],
+  "blacklisted_files": [],
+  "files_to_include": [],
+  "output_file": "/home/caleb/repo/utils/export_repo/export_repo_export.txt",
+  "always_exclude_patterns": [
+    "export.txt"
+  ],
+  "exported_files_count": {},
+  "total_lines": 0
+}
+Directory tree, stemming from root "/home/caleb/repo/utils/export_repo":
+├── configs
+│   ├── autocrop.json
+│   ├── bulk_dl.json
+│   ├── export_repo.json
+│   ├── hFormer-serve.json
+│   ├── metaformer.json
+│   ├── metaformer1.json
+│   ├── metaformer2.json
+│   ├── model-explorer.json
+│   ├── nextjs.json
+│   ├── polliOS.json
+│   └── sam2.json
+├── export_repo_export.txt
+├── export_repo_to_txt.py
+├── ipynb_to_md.py
+└── readme.md
+
+----
+Full Path: export_repo_to_txt.py
+
 import os
 import json
 import sys
-import nbformat
-from nbconvert import MarkdownExporter
-from nbconvert.preprocessors import ClearOutputPreprocessor
 
 class RepoExporter:
     def __init__(self, config):
@@ -25,17 +74,7 @@ class RepoExporter:
         self.always_exclude_patterns = config.get('always_exclude_patterns', ['export.txt'])
         self.exported_files_count = {}
         self.total_lines = 0
-        
-    def convert_ipynb_to_md(self, notebook_content):
-        notebook = nbformat.reads(notebook_content, as_version=4)
-        
-        # Clear outputs
-        clear_output = ClearOutputPreprocessor()
-        clear_output.preprocess(notebook, {})
-        
-        markdown_exporter = MarkdownExporter()
-        markdown_content, _ = markdown_exporter.from_notebook_node(notebook)
-        return markdown_content
+
     def get_output_file_path(self):
         if os.path.isabs(self.export_name):
             return self.export_name
@@ -47,14 +86,9 @@ class RepoExporter:
             if file_path:
                 extension = os.path.splitext(file_path)[1]
                 self.exported_files_count[extension] = self.exported_files_count.get(extension, 0) + 1
-                lines = content.count('\n') + 1
+                lines = content.count('\n') + 1  # Counting lines in the content
                 self.total_lines += lines
-                
-                # Add a note for converted ipynb files
-                if extension == '.ipynb':
-                    f.write(f"{self.delimiter}\nFull Path: {file_path}\n(NOTE: ipynb notebook converted to md)\n\n{content}\n\n")
-                else:
-                    f.write(f"{self.delimiter}\nFull Path: {file_path}\n\n{content}\n\n")
+                f.write(f"{self.delimiter}\nFull Path: {file_path}\n\n{content}\n\n")
             else:
                 f.write(f"{content}\n")
 
@@ -89,11 +123,6 @@ class RepoExporter:
                     try:
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
-                        
-                        # Convert ipynb to markdown if necessary
-                        if file_extension == '.ipynb':
-                            content = self.convert_ipynb_to_md(content)
-                        
                         self.write_to_file(content, relative_path)
                     except Exception as e:
                         print(f"Error reading file {file_path}: {str(e)}")
@@ -224,3 +253,99 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+----
+Full Path: ipynb_to_md.py
+
+import json
+
+def convert_ipynb_to_md(ipynb_path, md_path):
+    with open(ipynb_path, 'r', encoding='utf-8') as f:
+        notebook = json.load(f)
+    
+    md_content = ""
+    
+    for cell in notebook['cells']:
+        if cell['cell_type'] == 'markdown':
+            md_content += ''.join(cell['source']) + "\n\n"
+        elif cell['cell_type'] == 'code':
+            md_content += "```python\n"
+            md_content += ''.join(cell['source']) + "\n"
+            md_content += "```\n\n"
+    
+    with open(md_path, 'w', encoding='utf-8') as f:
+        f.write(md_content)
+
+# Path to the Jupyter notebook
+ipynb_path = 'notebooks/image_predictor_example.ipynb'
+# Path to the output Markdown file
+md_path = 'notebooks/image_predictor_example.md'
+
+# Convert the notebook to Markdown
+convert_ipynb_to_md(ipynb_path, md_path)
+
+
+----
+Full Path: configs/metaformer1.json
+
+{
+  "repo_root": "/home/caleb/repo/Polli-Brain/metaformer",
+  "export_name": "metaformer_repo_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["models"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py", ".yaml", ".md"],
+  "exhaustive_dir_tree": false,
+  "files_to_include": ["experiment_log.md", "base2.yaml"]
+}
+
+
+
+----
+...excluded several configs...
+
+----
+Full Path: configs/sam2.json
+
+{
+    "repo_root": "/home/caleb/repo/ibrida/segment-anything-2",
+    "export_name": "sam2_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["notebooks", "configs", "models"],
+    "files_to_include": ["build_sam.py", "sam2_image_predictor.py", "sam2_video_predictor.py"],
+    "include_top_level_files": "README.md",
+    "included_extensions": [".py", ".yaml", ".md", ".ipynb"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }
+
+----
+Full Path: configs/metaformer.json
+
+{
+  "repo_root": "/home/caleb/repo/Polli-Brain/metaformer",
+  "export_name": "metaformer_repo_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["models"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py", ".yaml", ".md"],
+  "exhaustive_dir_tree": false
+}
+
+
+
+----
+Full Path: configs/autocrop.json
+
+{
+    "repo_root": "/home/caleb/repo/ibrida/ibrida/s3/postprocess/autocrop",
+    "export_name": "autocrop_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["utils", "configs", "models"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }
+

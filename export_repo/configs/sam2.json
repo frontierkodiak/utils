@@ -1,0 +1,11 @@
+{
+    "repo_root": "/home/caleb/repo/ibrida/segment-anything-2",
+    "export_name": "sam2_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["notebooks", "configs", "models"],
+    "files_to_include": ["build_sam.py", "sam2_image_predictor.py", "sam2_video_predictor.py"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml", ".md", ".ipynb"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }
