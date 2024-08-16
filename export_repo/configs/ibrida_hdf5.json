@@ -1,0 +1,10 @@
+{
+    "repo_root": "/home/caleb/repo/ibrida/ibrida/hdf5",
+    "export_name": "ibrida_hdf5_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["configs"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml", ".md"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }
