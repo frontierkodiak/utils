@@ -1,3 +1,4 @@
+import platform
 import os
 import json
 import sys
@@ -179,14 +180,38 @@ class RepoExporter:
         print("Number of exported files by extension:")
         for ext, count in self.exported_files_count.items():
             print(f"{ext}: {count}")
+            
+def get_base_path():
+    """
+    Determine the base path based on the host platform.
+    """
+    if platform.system() == "Darwin":  # macOS
+        return "/Users/caleb/Documents/GitHub"
+    else:  # Linux or other
+        return "/home/caleb/repo"
 
 def load_config(config_filename):
     """
-    Load configuration from a JSON file located in the specified configs directory.
+    Load configuration from a JSON file and adjust paths if necessary.
     """
-    config_path = os.path.join('/home/caleb/repo/utils/export_repo/configs', config_filename)
+    base_path = get_base_path()
+    
+    if platform.system() == "Darwin":  # macOS
+        config_path = os.path.join(base_path, "utils/export_repo/configs", config_filename)
+    else:  # Linux or other
+        config_path = os.path.join(base_path, "utils/export_repo/configs", config_filename)
+    
     with open(config_path, 'r', encoding='utf-8') as config_file:
-        return json.load(config_file)
+        config = json.load(config_file)
+    
+    # Adjust repo_root path if it exists in the config
+    if 'repo_root' in config:
+        if platform.system() == "Darwin":  # macOS
+            config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", base_path)
+        else:  # Linux or other
+            config['repo_root'] = config['repo_root'].replace("/Users/caleb/Documents/GitHub", base_path)
+    
+    return config
 
 def get_default_config(repo_root):
     """
@@ -213,11 +238,14 @@ def main():
         sys.exit(1)
 
     arg = sys.argv[1]
-    if arg.endswith('.json'):
-        config = load_config(arg)
+    if os.path.isdir(arg):
+        # If the argument is a directory, use it as repo_root with default config
+        config = get_default_config(arg)
     else:
-        repo_root = arg
-        config = get_default_config(repo_root)
+        # If not a directory, treat it as a config file name
+        if not arg.endswith('.json'):
+            arg += '.json'
+        config = load_config(arg)
 
     exporter = RepoExporter(config)
     exporter.export_repo()
