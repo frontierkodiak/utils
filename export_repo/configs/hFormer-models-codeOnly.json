@@ -1,0 +1,11 @@
+{
+    "repo_root": "/home/caleb/repo/hFormer/hFormer/models",
+    "export_name": "hFormer_models_codeOnly_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["layers", "components", "blocks", "attention", "normalization", "utils"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml"],
+    "files_to_exclude": [],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }
