@@ -183,11 +183,13 @@ class RepoExporter:
             
 def get_base_path():
     """
-    Determine the base path based on the host platform.
+    Determine the base path based on the host platform or command-line argument.
     """
-    if platform.system() == "Darwin":  # macOS
+    if '--pop' in sys.argv:
+        return '/home/caleb/Documents/GitHub/' # our pop-xps popOS system
+    elif platform.system() == "Darwin":  # macOS
         return "/Users/caleb/Documents/GitHub"
-    else:  # Linux or other
+    else:  # Linux or other (our dev server, or polliserve instances)
         return "/home/caleb/repo"
 
 def load_config(config_filename):
@@ -196,21 +198,17 @@ def load_config(config_filename):
     """
     base_path = get_base_path()
     
-    if platform.system() == "Darwin":  # macOS
-        config_path = os.path.join(base_path, "utils/export_repo/configs", config_filename)
-    else:  # Linux or other
-        config_path = os.path.join(base_path, "utils/export_repo/configs", config_filename)
+    config_path = os.path.join(base_path, "utils/export_repo/configs", config_filename)
     
     with open(config_path, 'r', encoding='utf-8') as config_file:
         config = json.load(config_file)
     
     # Adjust repo_root path if it exists in the config
     if 'repo_root' in config:
-        if platform.system() == "Darwin":  # macOS
-            config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", base_path)
-        else:  # Linux or other
+        if '--pop' in sys.argv or platform.system() != "Darwin":
             config['repo_root'] = config['repo_root'].replace("/Users/caleb/Documents/GitHub", base_path)
-    
+        else:
+            config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", base_path)
     return config
 
 def get_default_config(repo_root):
@@ -233,11 +231,11 @@ def get_default_config(repo_root):
     }
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python script.py <config_filename> or <repo_root>")
+    if len(sys.argv) < 2 or (len(sys.argv) == 2 and sys.argv[1] == '--pop'):
+        print("Usage: python script.py [--pop] <config_filename> or <repo_root>")
         sys.exit(1)
 
-    arg = sys.argv[1]
+    arg = sys.argv[-1]  # Get the last argument (config or repo_root)
     if os.path.isdir(arg):
         # If the argument is a directory, use it as repo_root with default config
         config = get_default_config(arg)

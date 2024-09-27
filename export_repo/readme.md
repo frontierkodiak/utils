@@ -87,33 +87,56 @@ python export_repo_to_txt.py <repo_root>
 }
 ```
 
-## Setting up the `export_repo` alias on macOS
+## Setting up the `export_repo` alias
 
-To set up an alias for easy access to the export_repo script on macOS, follow these steps:
+### On macOS
 
 1. Open your terminal.
 
 2. Open your shell configuration file (for zsh, it's usually `~/.zshrc`):
-```bash
-nano ~/.zshrc
-```
+   ```bash
+   nano ~/.zshrc
+   ```
 
 3. Add the following line at the end of the file:
-```bash
-alias export_repo='/Users/caleb/Documents/GitHub/utils/.venv/bin/python /Users/caleb/Documents/GitHub/utils/export_repo/export_repo_to_txt.py'
-```
+   ```bash
+   alias export_repo='/Users/caleb/Documents/GitHub/utils/.venv/bin/python /Users/caleb/Documents/GitHub/utils/export_repo/export_repo_to_txt.py'
+   ```
 
 4. Save the file and exit the editor (in nano, press Ctrl+X, then Y, then Enter).
 
 5. Reload your shell configuration:
-```bash
-source ~/.zshrc
-```
+   ```bash
+   source ~/.zshrc
+   ```
 
-Now you can use the `export_repo` command from anywhere in your terminal. For example:
+### On PopOS (Linux)
+
+1. Open your terminal.
+
+2. Open your shell configuration file (for bash, it's usually `~/.bashrc`):
+   ```bash
+   nano ~/.bashrc
+   ```
+
+3. Add the following line at the end of the file:
+   ```bash
+   alias export_repo='/home/caleb/Documents/GitHub/utils/.venv/bin/python /home/caleb/Documents/GitHub/utils/export_repo/export_repo_to_txt.py --pop'
+   ```
+
+4. Save the file and exit the editor (in nano, press Ctrl+X, then Y, then Enter).
+
+5. Reload your shell configuration:
+   ```bash
+   source ~/.bashrc
+   ```
+
+Now you can use the `export_repo` command from anywhere in your terminal on both macOS and PopOS. For example:
 
 ```bash
 export_repo hFormer-codeOnly
 # or 
 export_repo /path/to/your/repo
 ```
+
+Note: On PopOS, the `--pop` flag is automatically included in the alias to ensure the correct base path is used.
