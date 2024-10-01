@@ -2,7 +2,7 @@
     "repo_root": "/home/caleb/repo/hFormer/hFormer",
     "export_name": "hFormer_codeOnly_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["aug", "h5data", "configs/debug_h5", "models", "loss", "utils", "components"],
+    "dirs_to_traverse": ["aug", "h5data", "configs", "models", "loss", "utils", "components", "ibrida", "evaluation", "serving"],
     "include_top_level_files": "all",
     "included_extensions": [".py", ".yaml"],
     "files_to_exclude": ["main_v0.py", "main_v1.py", "completed_plans.md"],

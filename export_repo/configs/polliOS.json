@@ -1,12 +1,12 @@
 {
-    "repo_root": "/home/caleb/repo/polliOS-core",
+    "repo_root": "/home/caleb/repo/polliOS-core/PolliOS",
     "export_name": "polliOS-core-repo-export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["configs", "docs", "PolliOS"],
+    "dirs_to_traverse": ["PolliOS"],
     "include_top_level_files": "none",
     "included_extensions": [".py", ".yml", ".md"],
     "exhaustive_dir_tree": false,
-    "subdirs_to_exclude": ["polliCLI", "updaters", "logger", "utils"],
+    "subdirs_to_exclude": ["updaters", "utils"],
     "depth": 10
   }
   

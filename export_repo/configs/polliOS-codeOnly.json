@@ -1,0 +1,13 @@
+{
+    "repo_root": "/home/caleb/repo/polliOS-core/PolliOS",
+    "export_name": "polliOS-core-codeOnly-export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["backend", "brain", "engine", "logger", "polliCLI", "runner", "swarm", "updaters", "utils"],
+    "include_top_level_files": "none",
+    "included_extensions": [".py"],
+    "exhaustive_dir_tree": false,
+    "subdirs_to_exclude": ["updaters", "utils", ".git"],
+    "depth": 10
+  }
+  
+  

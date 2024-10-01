@@ -205,10 +205,10 @@ def load_config(config_filename):
     
     # Adjust repo_root path if it exists in the config
     if 'repo_root' in config:
-        if '--pop' in sys.argv or platform.system() != "Darwin":
-            config['repo_root'] = config['repo_root'].replace("/Users/caleb/Documents/GitHub", base_path)
-        else:
-            config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", base_path)
+        if '--pop' in sys.argv:
+            config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", '/home/caleb/Documents/GitHub/')
+        elif platform.system() == "Darwin":
+            config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", "/Users/caleb/Documents/GitHub")
     return config
 
 def get_default_config(repo_root):
@@ -231,19 +231,33 @@ def get_default_config(repo_root):
     }
 
 def main():
-    if len(sys.argv) < 2 or (len(sys.argv) == 2 and sys.argv[1] == '--pop'):
+    args = sys.argv[1:]
+    config_filename = None
+    pop_flag = False
+
+    for arg in args:
+        if arg == '--pop':
+            pop_flag = True
+        elif not arg.startswith('--'):
+            config_filename = arg
+
+    if not config_filename:
         print("Usage: python script.py [--pop] <config_filename> or <repo_root>")
         sys.exit(1)
 
-    arg = sys.argv[-1]  # Get the last argument (config or repo_root)
-    if os.path.isdir(arg):
+    if os.path.isdir(config_filename):
         # If the argument is a directory, use it as repo_root with default config
-        config = get_default_config(arg)
+        config = get_default_config(config_filename)
     else:
         # If not a directory, treat it as a config file name
-        if not arg.endswith('.json'):
-            arg += '.json'
-        config = load_config(arg)
+        if not config_filename.endswith('.json'):
+            config_filename += '.json'
+        config = load_config(config_filename)
+
+    # Adjust repo_root based on pop_flag
+    if pop_flag:
+        base_path = '/home/caleb/Documents/GitHub/'
+        config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", base_path)
 
     exporter = RepoExporter(config)
     exporter.export_repo()
