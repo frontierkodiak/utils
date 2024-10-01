@@ -7,13 +7,13 @@ This tool exports repository content to a text file, including directory structu
 ## Usage
 
 ```bash
-python export_repo_to_txt.py <config_file>.json
+python export_repo_to_txt.py <config_file>.json [--dump-config]
 ```
 
 or
 
 ```bash
-python export_repo_to_txt.py <repo_root>
+python export_repo_to_txt.py <repo_root> [--dump-config]
 ```
 
 ## Configuration Parameters
@@ -30,6 +30,7 @@ python export_repo_to_txt.py <repo_root>
 - `always_exclude_patterns`: List of filename patterns to always exclude (e.g., ["export.txt"]).
 - `depth`: Depth of directory traversal. `-1` for full traversal (default).
 - `exhaustive_dir_tree`: If `true`, exports full directory tree regardless of other settings.
+- `dump_config`: If `true`, dumps the export configuration JSON at the top of the output file.
 
 ## Example Configuration
 
@@ -46,7 +47,8 @@ python export_repo_to_txt.py <repo_root>
   "files_to_exclude": ["secrets.yaml"],
   "always_exclude_patterns": ["export.txt", "*.log"],
   "depth": -1,
-  "exhaustive_dir_tree": false
+  "exhaustive_dir_tree": false,
+  "dump_config": false
 }
 ```
 
@@ -56,6 +58,7 @@ python export_repo_to_txt.py <repo_root>
 - If no config file is provided, default settings will be used.
 - The `subdirs_to_exclude` option supports partial paths (e.g., "foo/bar" will exclude all "bar" directories under any "foo" directory).
 - Use `always_exclude_patterns` for files you want to exclude regardless of their location or other inclusion rules.
+- To include the export configuration in the output file, use the `--dump-config` flag when running the script.
 
 ## Example Configurations
 
@@ -136,7 +139,7 @@ Now you can use the `export_repo` command from anywhere in your terminal on both
 ```bash
 export_repo hFormer-codeOnly
 # or 
-export_repo /path/to/your/repo
+export_repo /path/to/your/repo --dump-config
 ```
 
 Note: On PopOS, the `--pop` flag is automatically included in the alias to ensure the correct base path is used.

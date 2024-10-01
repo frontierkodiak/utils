@@ -17,6 +17,7 @@ class RepoExporter:
         self.subdirs_to_exclude = config.get('subdirs_to_exclude', [])
         self.files_to_exclude = config.get('files_to_exclude', [])
         self.depth = config.get('depth', -1)  # Default to -1 for full traversal
+        self.dump_config = config.get('dump_config', False)
         self.exhaustive_dir_tree = config.get('exhaustive_dir_tree', False)
         self.blacklisted_dirs = ['__pycache__']  # Blacklist of subdirs to always omit
         self.blacklisted_files = []  # Blacklist of files to always omit
@@ -137,13 +138,14 @@ class RepoExporter:
         with open(self.output_file, 'w', encoding='utf-8') as f:
             pass
 
-        # Write the export configuration to the output file, starting fresh
-        self.write_to_file(f"Export Configuration:\n{json.dumps(vars(self), indent=2)}", mode='w')
+        # Write the export configuration to the output file if dump_config is True
+        if self.dump_config:
+            self.write_to_file(f"Export Configuration:\n{json.dumps(vars(self), indent=2)}", mode='w')
 
         # Generate and write the directory tree structure starting from the repo_root
         tree_structure = f"Directory tree, stemming from root \"{self.repo_root}\":\n"
         tree_structure += self.get_directory_tree(self.repo_root, current_depth=0)
-        self.write_to_file(tree_structure)
+        self.write_to_file(tree_structure, mode='w' if not self.dump_config else 'a')
 
         # Handle top-level files
         if self.include_top_level_files == 'all':
@@ -227,22 +229,26 @@ def get_default_config(repo_root):
         'depth': 10,
         'exhaustive_dir_tree': False,
         'files_to_include': [],
-        'always_exclude_patterns': ['export.txt']
+        'always_exclude_patterns': ['export.txt'],
+        'dump_config': False
     }
 
 def main():
     args = sys.argv[1:]
     config_filename = None
     pop_flag = False
+    dump_config = False
 
     for arg in args:
         if arg == '--pop':
             pop_flag = True
+        elif arg == '--dump-config':
+            dump_config = True
         elif not arg.startswith('--'):
             config_filename = arg
 
     if not config_filename:
-        print("Usage: python script.py [--pop] <config_filename> or <repo_root>")
+        print("Usage: python script.py [--pop] [--dump-config] <config_filename> or <repo_root>")
         sys.exit(1)
 
     if os.path.isdir(config_filename):
@@ -258,6 +264,9 @@ def main():
     if pop_flag:
         base_path = '/home/caleb/Documents/GitHub/'
         config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", base_path)
+
+    # Set dump_config based on command-line flag
+    config['dump_config'] = dump_config
 
     exporter = RepoExporter(config)
     exporter.export_repo()
