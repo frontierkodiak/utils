@@ -1,6 +1,6 @@
 {
-    "repo_root": "/home/caleb/repo/Polli-Brain/metaformer/torchserve/hFormer0",
-    "export_name": "hFormer_serve_export.txt",
+    "repo_root": "/home/caleb/repo/Polli-Brain/metaformer/torchserve/polliFormer0",
+    "export_name": "polliFormer_serve_export.txt",
     "delimiter": "----",
     "dirs_to_traverse": ["."],
     "include_top_level_files": "all",

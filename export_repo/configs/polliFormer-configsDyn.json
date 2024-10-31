@@ -1,6 +1,6 @@
 {
-    "repo_root": "/home/caleb/repo/hFormer/hFormer/configs",
-    "export_name": "hFormer_configsDyn_export.txt",
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer/configs",
+    "export_name": "polliFormer_configsDyn_export.txt",
     "delimiter": "----",
     "dirs_to_traverse": ["model"],
     "include_top_level_files": ["config_v5.py"],

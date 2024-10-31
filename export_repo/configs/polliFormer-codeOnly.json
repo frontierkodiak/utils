@@ -1,6 +1,6 @@
 {
-    "repo_root": "/home/caleb/repo/hFormer/hFormer",
-    "export_name": "hFormer_codeOnly_export.txt",
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer_codeOnly_export.txt",
     "delimiter": "----",
     "dirs_to_traverse": ["aug", "h5data", "configs", "models", "loss", "utils", "components", "ibrida", "evaluation", "serving"],
     "include_top_level_files": "all",

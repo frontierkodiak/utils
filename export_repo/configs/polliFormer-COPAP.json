@@ -1,8 +1,8 @@
 {
-    "repo_root": "/home/caleb/repo/hFormer/hFormer",
-    "export_name": "hFormer_copap_export.txt",
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer_copap_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["aug", "h5data"],
+    "dirs_to_traverse": ["h5data"],
     "include_top_level_files": "none",
     "included_extensions": [".py", ".yaml"],
     "files_to_include": ["main_latest.py", "config_utils.py", "config_v5.py", "copap.md"],

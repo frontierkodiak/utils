@@ -1,0 +1,11 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer/models",
+    "export_name": "polliFormer_modelsDyn_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": [ "blocks", "attention"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml"],
+    "files_to_include": ["model_factory.py"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }
