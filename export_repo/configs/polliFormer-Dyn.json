@@ -1,11 +1,10 @@
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
-  "export_name": "polliFormer_dyn_export.txt",
+  "export_name": "polliFormer_codeOnly_export.txt",
   "delimiter": "----",
-  "dirs_to_traverse": ["h5data"],
-  "include_top_level_files": "none",
+  "dirs_to_traverse": ["aug", "h5data", "configs", "models", "loss", "utils", "components", "ibrida"],
+  "include_top_level_files": "all",
   "included_extensions": [".py", ".yaml"],
-  "files_to_include": ["main_latest.py", "config_utils.py", "config_v5.py", "logger.py", "test_h5datasets.py"],
   "files_to_exclude": ["main_v0.py", "main_v1.py", "completed_plans.md"],
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": false
