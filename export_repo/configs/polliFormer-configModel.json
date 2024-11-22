@@ -1,0 +1,15 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer",
+    "export_name": "polliFormer_configModel_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["configs"],
+    "dirs_for_tree": ["polliFormer", "configs"],
+    "include_top_level_files": ["config.py", "main.py"],
+    "included_extensions": [".py", ".yaml"],
+    "files_to_include": ["polliFormer/main.py", "polliFormer/config.py", "polliFormer/utils/config_utils.py","polliFormer/models/build.py",
+"polliFormer/models/model_factory.py", "polliFormer/models/mFormerV0.py", "polliFormer/models/attention/utils.py", "polliFormer/models/aggregation/utils.py",
+"polliFormer/models/heads/utils.py", "polliFormer/models/resolvers/utils.py", "polliFormer/loss/utils.py", "polliFormer/docs/config/inheritance.md",
+"polliFormer/docs/config/model.md", "polliFormer/docs/data/copap.md"],
+    "always_exclude_patterns": ["export.txt", "224.yaml"],
+    "exhaustive_dir_tree": false
+  }

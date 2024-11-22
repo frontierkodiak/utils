@@ -22,6 +22,7 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
 - `export_name`: Name or path for the export file. If a path, exports there; if a name, exports to `repo_root`.
 - `delimiter`: Separator string for entries in the export file.
 - `dirs_to_traverse`: List of directories within `repo_root` for full traversal and export.
+- `dirs_for_tree`: List of specific directories to include in the directory tree output. If empty, includes all non-hidden directories.
 - `files_to_include`: List of specific files to include in the export, regardless of their location in the repository.
 - `include_top_level_files`: Specifies top-level files for inclusion. Set to `"all"` for all files, or list specific files.
 - `included_extensions`: File extensions to include. Use `"all"` for all extensions.
@@ -59,6 +60,9 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
 - The `subdirs_to_exclude` option supports partial paths (e.g., "foo/bar" will exclude all "bar" directories under any "foo" directory).
 - Use `always_exclude_patterns` for files you want to exclude regardless of their location or other inclusion rules.
 - To include the export configuration in the output file, use the `--dump-config` flag when running the script.
+- Hidden directories (starting with '.') are automatically excluded from the directory tree.
+- Use `dirs_for_tree` to explicitly specify which directories should appear in the directory tree output. If not specified, all non-hidden directories will be included.
+
 
 ## Example Configurations
 
@@ -70,6 +74,7 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
   "export_name": "nextjs_project_export.txt",
   "delimiter": "----",
   "dirs_to_traverse": ["components", "pages", "styles", "public"],
+  "dirs_for_tree": ["components", "pages", "styles"],  // Only show main app directories
   "include_top_level_files": ["package.json", "next.config.js"],
   "included_extensions": [".js", ".jsx", ".ts", ".tsx", ".css"]
 }
@@ -83,6 +88,7 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
   "export_name": "python_project_export.txt",
   "delimiter": "----",
   "dirs_to_traverse": ["src", "tests", "docs"],
+  "dirs_for_tree": ["src", "docs"],  // Only show source and documentation
   "files_to_include": ["requirements.txt", "setup.py"],
   "include_top_level_files": "all",
   "included_extensions": [".py", ".md", ".yml"],

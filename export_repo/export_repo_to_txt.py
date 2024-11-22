@@ -20,12 +20,14 @@ class RepoExporter:
         self.dump_config = config.get('dump_config', False)
         self.exhaustive_dir_tree = config.get('exhaustive_dir_tree', False)
         self.blacklisted_dirs = ['__pycache__']  # Blacklist of subdirs to always omit
+        self.blacklisted_dirs.extend(['.git', '.venv', '.vscode'])  # Add common hidden dirs
         self.blacklisted_files = []  # Blacklist of files to always omit
         self.files_to_include = config.get('files_to_include', [])  # Additional files to include explicitly
         self.output_file = self.get_output_file_path()
         self.files_to_exclude.append(os.path.basename(self.output_file))  # Add output file to exclude list
         self.always_exclude_patterns = config.get('always_exclude_patterns', ['export.txt'])
         self.exported_files_count = {}
+        self.dirs_for_tree = config.get('dirs_for_tree', [])  # New: specific dirs to include in tree
         self.total_lines = 0
         
     def convert_ipynb_to_md(self, notebook_content):
@@ -111,26 +113,45 @@ class RepoExporter:
                             content = f.read()
                         self.write_to_file(content, relative_path)
 
+    def should_include_in_tree(self, dir_path):
+        """Determine if a directory should be included in the tree output."""
+        dir_name = os.path.basename(dir_path)
+        
+        # Never include hidden directories
+        if dir_name.startswith('.'):
+            return False
+            
+        # If specific dirs are specified, only include those
+        if self.dirs_for_tree:
+            relative_path = os.path.relpath(dir_path, self.repo_root)
+            return any(relative_path == d or relative_path.startswith(d + os.sep) 
+                      for d in self.dirs_for_tree)
+                      
+        # Otherwise include all non-hidden, non-blacklisted dirs
+        return dir_name not in self.blacklisted_dirs
+
     def get_directory_tree(self, directory, prefix='', current_depth=0):
-        """
-        Generate a string representation of the directory tree.
-        """
+        """Generate a string representation of the directory tree."""
         if self.depth != -1 and current_depth > self.depth:
             return f"{prefix}│   └── (omitted)\n"
 
         tree_str = ''
         items = sorted(os.listdir(directory))
-        for i, item in enumerate(items):
+        
+        # Filter items based on visibility rules
+        visible_items = [item for item in items 
+                        if os.path.isfile(os.path.join(directory, item)) 
+                        or self.should_include_in_tree(os.path.join(directory, item))]
+        
+        for i, item in enumerate(visible_items):
             path = os.path.join(directory, item)
-            connector = '├── ' if i < len(items) - 1 else '└── '
-            if os.path.isdir(path) and item in self.blacklisted_dirs:
-                tree_str += f"{prefix}{connector}{item}\n"
-                tree_str += f"{prefix}│   └── (omitted)\n"
-            else:
-                tree_str += f"{prefix}{connector}{item}\n"
-                if os.path.isdir(path):
-                    extension = '' if i < len(items) - 1 else '    '
-                    tree_str += self.get_directory_tree(path, prefix + extension + '│   ', current_depth + 1)
+            connector = '├── ' if i < len(visible_items) - 1 else '└── '
+            
+            tree_str += f"{prefix}{connector}{item}\n"
+            if os.path.isdir(path):
+                extension = '' if i < len(visible_items) - 1 else '    '
+                tree_str += self.get_directory_tree(path, prefix + extension + '│   ', current_depth + 1)
+                
         return tree_str
 
     def export_repo(self):
