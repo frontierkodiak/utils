@@ -140,7 +140,38 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
    source ~/.bashrc
    ```
 
-Now you can use the `export_repo` command from anywhere in your terminal on both macOS and PopOS. For example:
+### On Windows (PowerShell)
+
+1. Open PowerShell.
+
+2. First, check if you already have a PowerShell profile:
+   ```powershell
+   Test-Path $PROFILE
+   ```
+
+3. If it returns False, create one:
+   ```powershell
+   New-Item -Path $PROFILE -Type File -Force
+   ```
+
+4. Open your PowerShell profile in a text editor:
+   ```powershell
+   notepad $PROFILE
+   ```
+
+5. Add this function to your profile:
+   ```powershell
+   function export_repo {
+       & "C:\Users\front\Documents\GitHub\utils\.venv\Scripts\python.exe" "C:\Users\front\Documents\GitHub\utils\export_repo\export_repo_to_txt.py" $args
+   }
+   ```
+
+6. Save the file and reload your profile:
+   ```powershell
+   . $PROFILE
+   ```
+
+Now you can use the `export_repo` command from anywhere in your terminal on macOS, PopOS, or Windows PowerShell. For example:
 
 ```bash
 export_repo hFormer-codeOnly
@@ -148,4 +179,6 @@ export_repo hFormer-codeOnly
 export_repo /path/to/your/repo --dump-config
 ```
 
-Note: On PopOS, the `--pop` flag is automatically included in the alias to ensure the correct base path is used.
+Notes: 
+- On PopOS, the `--pop` flag is automatically included in the alias to ensure the correct base path is used
+- On Windows, make sure you're using PowerShell and not Command Prompt (cmd.exe) as this alias will only work in PowerShell

@@ -8,6 +8,7 @@ from nbconvert.preprocessors import ClearOutputPreprocessor
 
 class RepoExporter:
     def __init__(self, config):
+        config = PathConverter.normalize_config_paths(config)
         self.repo_root = config['repo_root']
         self.export_name = config['export_name']
         self.delimiter = config['delimiter']
@@ -40,11 +41,12 @@ class RepoExporter:
         markdown_exporter = MarkdownExporter()
         markdown_content, _ = markdown_exporter.from_notebook_node(notebook)
         return markdown_content
+    
     def get_output_file_path(self):
         if os.path.isabs(self.export_name):
-            return self.export_name
+            return PathConverter.to_system_path(self.export_name)
         else:
-            return os.path.join(self.repo_root, self.export_name)
+            return PathConverter.to_system_path(os.path.join(self.repo_root, self.export_name))
 
     def write_to_file(self, content, file_path=None, mode='a'):
         with open(self.output_file, mode, encoding='utf-8') as f:
@@ -70,7 +72,9 @@ class RepoExporter:
 
     def should_exclude_dir(self, dir_path):
         relative_path = os.path.relpath(dir_path, self.repo_root)
-        return any(relative_path.startswith(exclude.rstrip('*')) for exclude in self.subdirs_to_exclude)
+        relative_path = PathConverter.to_system_path(relative_path)
+        return any(relative_path.startswith(PathConverter.to_system_path(exclude.rstrip('*'))) 
+                  for exclude in self.subdirs_to_exclude)
 
     def traverse_directory(self, directory):
         # Ensure the directory path is absolute
@@ -204,15 +208,55 @@ class RepoExporter:
         for ext, count in self.exported_files_count.items():
             print(f"{ext}: {count}")
             
+class PathConverter:
+    @staticmethod
+    def to_system_path(path):
+        """Convert path to the current system's format."""
+        if platform.system() == "Windows":
+            # Convert forward slashes to backslashes and handle drive letter
+            if path.startswith("/"):
+                # Remove leading slash and convert to Windows path
+                path = path.lstrip("/")
+                if ":" not in path:  # If no drive letter, assume C:
+                    path = "C:\\" + path
+            return path.replace("/", "\\")
+        else:
+            # Convert backslashes to forward slashes for Unix-like systems
+            return path.replace("\\", "/")
+
+    @staticmethod
+    def normalize_config_paths(config):
+        """Normalize all paths in config to system-specific format."""
+        if 'repo_root' in config:
+            base_path = get_base_path()
+            if platform.system() == "Windows":
+                # Replace Unix-style base paths with Windows GitHub path
+                for unix_path in ["/home/caleb/repo", "/home/caleb/Documents/GitHub/", "/Users/caleb/Documents/GitHub"]:
+                    if config['repo_root'].startswith(unix_path):
+                        relative_path = config['repo_root'][len(unix_path):].lstrip("/")
+                        config['repo_root'] = os.path.join(base_path, relative_path)
+                        break
+            
+            config['repo_root'] = PathConverter.to_system_path(config['repo_root'])
+        
+        # Convert paths in lists
+        for key in ['dirs_to_traverse', 'subdirs_to_exclude', 'files_to_exclude']:
+            if key in config and isinstance(config[key], list):
+                config[key] = [PathConverter.to_system_path(p) for p in config[key]]
+        
+        return config
+            
 def get_base_path():
     """
     Determine the base path based on the host platform or command-line argument.
     """
     if '--pop' in sys.argv:
-        return '/home/caleb/Documents/GitHub/' # our pop-xps popOS system
+        return '/home/caleb/Documents/GitHub/'  # pop-xps popOS system
     elif platform.system() == "Darwin":  # macOS
         return "/Users/caleb/Documents/GitHub"
-    else:  # Linux or other (our dev server, or polliserve instances)
+    elif platform.system() == "Windows":  # Windows
+        return r"C:\Users\front\Documents\GitHub"
+    else:  # Linux or other (dev server, or polliserve instances)
         return "/home/caleb/repo"
 
 def load_config(config_filename):
@@ -220,18 +264,14 @@ def load_config(config_filename):
     Load configuration from a JSON file and adjust paths if necessary.
     """
     base_path = get_base_path()
-    
     config_path = os.path.join(base_path, "utils/export_repo/configs", config_filename)
+    config_path = PathConverter.to_system_path(config_path)
     
     with open(config_path, 'r', encoding='utf-8') as config_file:
         config = json.load(config_file)
     
-    # Adjust repo_root path if it exists in the config
-    if 'repo_root' in config:
-        if '--pop' in sys.argv:
-            config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", '/home/caleb/Documents/GitHub/')
-        elif platform.system() == "Darwin":
-            config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", "/Users/caleb/Documents/GitHub")
+    # Normalize all paths in config to system-specific format
+    config = PathConverter.normalize_config_paths(config)
     return config
 
 def get_default_config(repo_root):
