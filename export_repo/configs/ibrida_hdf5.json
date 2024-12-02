@@ -2,10 +2,10 @@
     "repo_root": "/home/caleb/repo/ibrida/ibrida/hdf5",
     "export_name": "ibrida_hdf5_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["utils"],
-    "files_to_include": ["configs/angio_test_blade.yaml", "configs/fixer/split0_1.yaml"],
+    "dirs_to_traverse": [],
+    "files_to_include": ["configs/angio_v0_pop.yaml", "configs/fixer/split0_1.yaml"],
     "include_top_level_files": "all",
-    "included_extensions": [".py", ".yaml", ".md"],
+    "included_extensions": [".py", ".yaml"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }

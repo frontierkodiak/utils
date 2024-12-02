@@ -263,10 +263,12 @@ def get_base_path():
     Determine the base path based on the host platform or command-line argument.
     """
     if '--pop' in sys.argv:
-        return '/home/caleb/Documents/GitHub/' # our pop-xps popOS system
+        return '/home/caleb/Documents/GitHub/'  # pop-xps popOS system
     elif platform.system() == "Darwin":  # macOS
         return "/Users/caleb/Documents/GitHub"
-    else:  # Linux or other (our dev server, or polliserve instances)
+    elif platform.system() == "Windows":  # Windows
+        return r"C:\Users\front\Documents\GitHub"
+    else:  # Linux or other (dev server, or polliserve instances)
         return "/home/caleb/repo"
 
 def load_config(config_filename):
@@ -274,18 +276,14 @@ def load_config(config_filename):
     Load configuration from a JSON file and adjust paths if necessary.
     """
     base_path = get_base_path()
-    
     config_path = os.path.join(base_path, "utils/export_repo/configs", config_filename)
+    config_path = PathConverter.to_system_path(config_path)
     
     with open(config_path, 'r', encoding='utf-8') as config_file:
         config = json.load(config_file)
     
-    # Adjust repo_root path if it exists in the config
-    if 'repo_root' in config:
-        if '--pop' in sys.argv:
-            config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", '/home/caleb/Documents/GitHub/')
-        elif platform.system() == "Darwin":
-            config['repo_root'] = config['repo_root'].replace("/home/caleb/repo", "/Users/caleb/Documents/GitHub")
+    # Normalize all paths in config to system-specific format
+    config = PathConverter.normalize_config_paths(config)
     return config
 
 def get_default_config(repo_root):

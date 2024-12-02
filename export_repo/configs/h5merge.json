@@ -1,0 +1,12 @@
+{
+    "repo_root": "/home/caleb/repo/ibrida/ibrida/hdf5/merge",
+    "export_name": "hdf5_merge_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": [],
+    "files_to_include": [],
+    "files_to_exclude": ["manual_verify.py", "split_adjustment.tmp.md"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".md"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }

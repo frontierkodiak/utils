@@ -8,8 +8,9 @@
     "included_extensions": [".py", ".yaml"],
     "files_to_include": ["polliFormer/main.py", "polliFormer/config.py", "polliFormer/utils/config_utils.py","polliFormer/models/build.py",
 "polliFormer/models/model_factory.py", "polliFormer/models/mFormerV0.py", "polliFormer/models/attention/utils.py", "polliFormer/models/aggregation/utils.py",
-"polliFormer/models/heads/utils.py", "polliFormer/models/resolvers/utils.py", "polliFormer/loss/utils.py", "polliFormer/docs/config/inheritance.md",
-"polliFormer/docs/config/model.md", "polliFormer/docs/data/copap.md"],
-    "always_exclude_patterns": ["export.txt", "224.yaml"],
+"polliFormer/models/heads/utils.py", "polliFormer/models/resolvers/utils.py", "polliFormer/loss/utils.py", "polliFormer/docs/config/configuration.md",
+"polliFormer/models/components/progressive_patch_embed.py", "polliFormer/docs/data/copap.md", "polliFormer/models/blocks/enhanced_mb_conv.py",
+"polliFormer/models/blocks/mhsa.py", "polliFormer/models/blocks/token_merging.py", "polliFormer/models/base_model.py"],
+    "always_exclude_patterns": ["export.txt", "224.yaml", ".bak.py"],
     "exhaustive_dir_tree": false
   }
