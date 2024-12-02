@@ -146,15 +146,30 @@ class RepoExporter:
                         print(f"Error reading file {file_path}: {str(e)}")
 
     def include_specific_files(self, root_dir):
-        for root, dirs, files in os.walk(root_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                relative_path = os.path.relpath(file_path, root_dir)
-                if any(relative_path.endswith(include_file) for include_file in self.files_to_include):
-                    if not self.should_exclude_file(file_path):
+        """Include specific files, supporting both relative and absolute paths."""
+        for file_path in self.files_to_include:
+            if os.path.isabs(file_path):
+                # Handle absolute paths directly
+                if os.path.exists(file_path) and not self.should_exclude_file(file_path):
+                    try:
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
-                        self.write_to_file(content, relative_path)
+                        self.write_to_file(content, file_path)
+                    except Exception as e:
+                        print(f"Error reading file {file_path}: {str(e)}")
+            else:
+                # Original behavior for relative paths
+                for root, _, files in os.walk(root_dir):
+                    for file in files:
+                        curr_path = os.path.join(root, file)
+                        relative_path = os.path.relpath(curr_path, root_dir)
+                        if relative_path == file_path and not self.should_exclude_file(curr_path):
+                            try:
+                                with open(curr_path, 'r', encoding='utf-8') as f:
+                                    content = f.read()
+                                self.write_to_file(content, relative_path)
+                            except Exception as e:
+                                print(f"Error reading file {curr_path}: {str(e)}")
 
     def should_include_in_tree(self, dir_path):
         """Determine if a directory should be included in the tree output."""
