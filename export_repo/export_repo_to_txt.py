@@ -6,8 +6,48 @@ import nbformat
 from nbconvert import MarkdownExporter
 from nbconvert.preprocessors import ClearOutputPreprocessor
 
+class PathConverter:
+    @staticmethod
+    def to_system_path(path):
+        """Convert path to the current system's format."""
+        if platform.system() == "Windows":
+            # Convert forward slashes to backslashes and handle drive letter
+            if path.startswith("/"):
+                # Remove leading slash and convert to Windows path
+                path = path.lstrip("/")
+                if ":" not in path:  # If no drive letter, assume C:
+                    path = "C:\\" + path
+            return path.replace("/", "\\")
+        else:
+            # Convert backslashes to forward slashes for Unix-like systems
+            return path.replace("\\", "/")
+
+    @staticmethod
+    def normalize_config_paths(config):
+        """Normalize all paths in config to system-specific format."""
+        if 'repo_root' in config:
+            base_path = get_base_path()
+            if platform.system() == "Windows":
+                # Replace Unix-style base paths with Windows GitHub path
+                for unix_path in ["/home/caleb/repo", "/home/caleb/Documents/GitHub/", "/Users/caleb/Documents/GitHub"]:
+                    if config['repo_root'].startswith(unix_path):
+                        relative_path = config['repo_root'][len(unix_path):].lstrip("/")
+                        config['repo_root'] = os.path.join(base_path, relative_path)
+                        break
+            
+            config['repo_root'] = PathConverter.to_system_path(config['repo_root'])
+        
+        # Convert paths in lists
+        for key in ['dirs_to_traverse', 'subdirs_to_exclude', 'files_to_exclude']:
+            if key in config and isinstance(config[key], list):
+                config[key] = [PathConverter.to_system_path(p) for p in config[key]]
+        
+        return config
+
 class RepoExporter:
     def __init__(self, config):
+        # Convert all paths in config to system-specific format
+        config = PathConverter.normalize_config_paths(config)
         self.repo_root = config['repo_root']
         self.export_name = config['export_name']
         self.delimiter = config['delimiter']
@@ -40,11 +80,12 @@ class RepoExporter:
         markdown_exporter = MarkdownExporter()
         markdown_content, _ = markdown_exporter.from_notebook_node(notebook)
         return markdown_content
+    
     def get_output_file_path(self):
         if os.path.isabs(self.export_name):
-            return self.export_name
+            return PathConverter.to_system_path(self.export_name)
         else:
-            return os.path.join(self.repo_root, self.export_name)
+            return PathConverter.to_system_path(os.path.join(self.repo_root, self.export_name))
 
     def write_to_file(self, content, file_path=None, mode='a'):
         with open(self.output_file, mode, encoding='utf-8') as f:
@@ -70,7 +111,9 @@ class RepoExporter:
 
     def should_exclude_dir(self, dir_path):
         relative_path = os.path.relpath(dir_path, self.repo_root)
-        return any(relative_path.startswith(exclude.rstrip('*')) for exclude in self.subdirs_to_exclude)
+        relative_path = PathConverter.to_system_path(relative_path)
+        return any(relative_path.startswith(PathConverter.to_system_path(exclude.rstrip('*'))) 
+                  for exclude in self.subdirs_to_exclude)
 
     def traverse_directory(self, directory):
         # Ensure the directory path is absolute
@@ -117,7 +160,11 @@ class RepoExporter:
         """Determine if a directory should be included in the tree output."""
         dir_name = os.path.basename(dir_path)
         
-        # Never include hidden directories
+        # Check blacklisted dirs first
+        if dir_name in self.blacklisted_dirs:
+            return False
+            
+        # Never include hidden directories (starting with .)
         if dir_name.startswith('.'):
             return False
             
@@ -125,10 +172,9 @@ class RepoExporter:
         if self.dirs_for_tree:
             relative_path = os.path.relpath(dir_path, self.repo_root)
             return any(relative_path == d or relative_path.startswith(d + os.sep) 
-                      for d in self.dirs_for_tree)
-                      
-        # Otherwise include all non-hidden, non-blacklisted dirs
-        return dir_name not in self.blacklisted_dirs
+                    for d in self.dirs_for_tree)
+                    
+        return True
 
     def get_directory_tree(self, directory, prefix='', current_depth=0):
         """Generate a string representation of the directory tree."""
@@ -139,9 +185,17 @@ class RepoExporter:
         items = sorted(os.listdir(directory))
         
         # Filter items based on visibility rules
-        visible_items = [item for item in items 
-                        if os.path.isfile(os.path.join(directory, item)) 
-                        or self.should_include_in_tree(os.path.join(directory, item))]
+        visible_items = []
+        for item in items:
+            path = os.path.join(directory, item)
+            # For files, exclude hidden files and those matching exclude patterns
+            if os.path.isfile(path):
+                if not item.startswith('.') and not self.should_exclude_file(path):
+                    visible_items.append(item)
+            # For directories, use should_include_in_tree
+            elif os.path.isdir(path):
+                if self.should_include_in_tree(path):
+                    visible_items.append(item)
         
         for i, item in enumerate(visible_items):
             path = os.path.join(directory, item)
