@@ -2,7 +2,7 @@
     "repo_root": "/home/caleb/repo/sam2",
     "export_name": "sam2_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["demo", "notebooks", "sam2", "tools", "checkpoints"],
+    "dirs_to_traverse": ["notebooks", "sam2", "tools"],
     "files_to_include": [],
     "files_to_exclude": ["CONTRIBUTING.md", "LICENSE", "LICENSE_cctorch", "CODE_OF_CONDUCT.md"],
     "include_top_level_files": "all",
