@@ -3,7 +3,7 @@
     "export_name": "hdf5_merge_export.txt",
     "delimiter": "----",
     "dirs_to_traverse": ["validation"],
-    "files_to_include": ["/home/caleb/repo/ibrida/ibrida/hdf5/merge_tmp/h5dump_first_train.txt"],
+    "files_to_include": ["/home/caleb/repo/ibrida/ibrida/hdf5/merge_tmp/h5dump_first_train.txt", "/home/caleb/stausee-report.txt"],
     "files_to_exclude": ["manual_verify.py", "split_adjustment.tmp.md"],
     "include_top_level_files": "all",
     "included_extensions": [".py", ".md"],

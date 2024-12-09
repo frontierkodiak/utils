@@ -1,11 +1,13 @@
 {
-    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "repo_root": "/home/caleb/repo/polliFormer",
     "export_name": "polliFormer_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["aug", "h5data", "configs/debug_h5", "models", "loss", "utils", "notes", "components"],
+    "dirs_to_traverse": ["polliFormer", "configs"],
+    "subdirs_to_exclude": ["polliFormer/tests", "polliFormer/serving", "polliFormer/evaluation"],
     "include_top_level_files": "all",
     "included_extensions": [".py", ".yaml", ".md"],
-    "files_to_exclude": ["main_v0.py", "main_v1.py", "completed_plans.md"],
-    "always_exclude_patterns": ["export.txt"],
+    "files_to_include": ["/home/caleb/repo/polliFormer/polliFormer/h5data/h5dump_first_train.txt", "/home/caleb/repo/polliFormer/.vscode/launch.json"],
+    "files_to_exclude": ["README.md", "TODO.md", "main_v1.py", "training.md"],
+    "always_exclude_patterns": ["export.txt", ".egg-info", "__pycache__", ".DS_Store"],
     "exhaustive_dir_tree": false
   }

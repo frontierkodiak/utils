@@ -174,21 +174,39 @@ class RepoExporter:
     def should_include_in_tree(self, dir_path):
         """Determine if a directory should be included in the tree output."""
         dir_name = os.path.basename(dir_path)
-        
+
         # Check blacklisted dirs first
         if dir_name in self.blacklisted_dirs:
             return False
-            
+
         # Never include hidden directories (starting with .)
         if dir_name.startswith('.'):
             return False
+
+        # If exhaustive_dir_tree is False, filter directories as they would be during traversal
+        if not self.exhaustive_dir_tree:
+            # Exclude directories that match subdirs_to_exclude
+            if self.should_exclude_dir(dir_path):
+                return False
             
+            # Also ensure this directory is within the paths we actually traverse
+            abs_dir_path = os.path.abspath(dir_path)
+            allowed = False
+            for d in self.dirs_to_traverse:
+                allowed_dir = os.path.abspath(os.path.join(self.repo_root, d))
+                # If this directory is a subdirectory of one of our allowed traversal directories
+                if os.path.commonprefix([abs_dir_path, allowed_dir]) == allowed_dir:
+                    allowed = True
+                    break
+            if not allowed:
+                return False
+
         # If specific dirs are specified, only include those
         if self.dirs_for_tree:
             relative_path = os.path.relpath(dir_path, self.repo_root)
             return any(relative_path == d or relative_path.startswith(d + os.sep) 
                     for d in self.dirs_for_tree)
-                    
+
         return True
 
     def get_directory_tree(self, directory, prefix='', current_depth=0):
