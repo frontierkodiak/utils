@@ -1,0 +1,294 @@
+Directory tree, stemming from root "ibrida":
+├── density.py
+└── density.sh
+
+---
+Full Path: density.sh
+
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <path_to_labels_file>"
+    exit 1
+fi
+
+labels_file="$1"
+
+# Extract task names from the metainfo section
+task_names=$(grep -oP '"name": "\K\d+' "$labels_file")
+
+# Count total number of samples
+total_samples=$(grep -c '"img_path"' "$labels_file")
+
+# Iterate over task names and count samples with labels
+for task in $task_names; do
+    task_label="L$task"
+    samples_with_label=$(grep -c "\"$task_label\":" "$labels_file")
+    percentage=$(awk -v swl="$samples_with_label" -v ts="$total_samples" 'BEGIN {printf "%.2f", (swl / ts) * 100}')
+    echo "Task $task_label: $samples_with_label out of $total_samples samples (${percentage}%)"
+done
+
+
+---
+Full Path: density.py
+
+import json
+import sys
+import argparse
+import statistics
+import csv
+from rich.table import Table
+from rich.console import Console
+
+def main(args):
+    with open(args.file_path, 'r') as f:
+        data = json.load(f)
+
+    metainfo = data['metainfo']['tasks']
+    data_list = data['data_list']
+
+    task_labels = {f"L{task['name']}": task['name'] for task in metainfo}
+    task_counts = {task_name: {} for task_name in task_labels}
+    total_samples = len(data_list)
+
+    for item in data_list:
+        labels = item['gt_label']
+        for label, label_id in labels.items():
+            if label in task_counts:
+                if label_id not in task_counts[label]:
+                    task_counts[label][label_id] = 0
+                task_counts[label][label_id] += 1
+
+    console = Console()
+
+    min_column_name = f"< {args.min}" if args.min is not None else "< Min"
+    max_column_name = f"> {args.max}" if args.max is not None else "> Max"
+
+    table = Table(title="Class Imbalance and Density Metrics")
+
+    table.add_column("Task", style="cyan", justify="center")
+    table.add_column("Samples", style="magenta", justify="center")
+    table.add_column("Missing (%)", style="red", justify="center")
+    table.add_column(min_column_name, style="green", justify="center")
+    table.add_column(max_column_name, style="yellow", justify="center")
+    table.add_column("Mean", style="blue", justify="center")
+    table.add_column("Median", style="blue", justify="center")
+    table.add_column("Min/Max", style="blue", justify="center")
+    table.add_column("Stdev", style="blue", justify="center")
+    table.add_column("n_classes", style="blue", justify="center")
+
+    all_stats = []
+
+    for task_label, class_counts in task_counts.items():
+        counts = list(class_counts.values())
+
+        num_below_min = sum(1 for value in counts if args.min is not None and value < args.min)
+        num_above_max = sum(1 for value in counts if args.max is not None and value > args.max)
+
+        # Calculate summary statistics
+        mean = statistics.mean(counts)
+        median = statistics.median(counts)
+        min_count = min(counts)
+        max_count = max(counts)
+        stdev = statistics.stdev(counts) if len(counts) > 1 else 0
+        n_classes = len(counts)
+
+        # Calculate percentage of samples with labels for the task
+        samples_with_labels = sum(counts)
+        percentage = (samples_with_labels / total_samples) * 100
+
+        # Create the stats dictionary
+        stats = {
+            "Task": task_label,
+            "Samples": samples_with_labels,
+            "Missing (%)": f"{100 - percentage:.2f}",
+            min_column_name: num_below_min,
+            max_column_name: num_above_max,
+            "Mean": f"{mean:.2f}",
+            "Median": f"{median:.2f}",
+            "Min/Max": f"{min_count}/{max_count}",
+            "Stdev": f"{stdev:.2f}",
+            "n_classes": n_classes
+        }
+        all_stats.append(stats)
+
+        # Add row to table
+        table.add_row(task_label, str(samples_with_labels), f"{100 - percentage:.2f}%",
+                      str(num_below_min), str(num_above_max),
+                      f"{mean:.2f}", f"{median:.2f}", f"{min_count}/{max_count}",
+                      f"{stdev:.2f}", str(n_classes))
+
+    console.print(table)
+
+    # Save to file if requested
+    if args.save:
+        output_path = f"{args.file_path.rsplit('.', 1)[0]}_density.csv"
+        fieldnames = [
+            "Task", "Samples", "Missing (%)", min_column_name, max_column_name,
+            "Mean", "Median", "Min/Max", "Stdev", "n_classes"
+        ]
+        with open(output_path, 'w', newline='') as out_file:
+            writer = csv.DictWriter(out_file, fieldnames=fieldnames)
+            writer.writeheader()
+            for stat in all_stats:
+                writer.writerow(stat)
+
+        console.print(f"Metrics saved to {output_path}", style="bold green")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Evaluate class imbalance and density metrics.")
+    parser.add_argument("file_path", type=str, help="Path to the labels file")
+    parser.add_argument("--min", type=int, help="Minimum threshold for class count")
+    parser.add_argument("--max", type=int, help="Maximum threshold for class count")
+    parser.add_argument("--save", action="store_true", help="Save metrics to a file")
+
+    args = parser.parse_args()
+    main(args)
+
+
+---
+Full Path: density.sh
+
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <path_to_labels_file>"
+    exit 1
+fi
+
+labels_file="$1"
+
+# Extract task names from the metainfo section
+task_names=$(grep -oP '"name": "\K\d+' "$labels_file")
+
+# Count total number of samples
+total_samples=$(grep -c '"img_path"' "$labels_file")
+
+# Iterate over task names and count samples with labels
+for task in $task_names; do
+    task_label="L$task"
+    samples_with_label=$(grep -c "\"$task_label\":" "$labels_file")
+    percentage=$(awk -v swl="$samples_with_label" -v ts="$total_samples" 'BEGIN {printf "%.2f", (swl / ts) * 100}')
+    echo "Task $task_label: $samples_with_label out of $total_samples samples (${percentage}%)"
+done
+
+
+---
+Full Path: density.py
+
+import json
+import sys
+import argparse
+import statistics
+import csv
+from rich.table import Table
+from rich.console import Console
+
+def main(args):
+    with open(args.file_path, 'r') as f:
+        data = json.load(f)
+
+    metainfo = data['metainfo']['tasks']
+    data_list = data['data_list']
+
+    task_labels = {f"L{task['name']}": task['name'] for task in metainfo}
+    task_counts = {task_name: {} for task_name in task_labels}
+    total_samples = len(data_list)
+
+    for item in data_list:
+        labels = item['gt_label']
+        for label, label_id in labels.items():
+            if label in task_counts:
+                if label_id not in task_counts[label]:
+                    task_counts[label][label_id] = 0
+                task_counts[label][label_id] += 1
+
+    console = Console()
+
+    min_column_name = f"< {args.min}" if args.min is not None else "< Min"
+    max_column_name = f"> {args.max}" if args.max is not None else "> Max"
+
+    table = Table(title="Class Imbalance and Density Metrics")
+
+    table.add_column("Task", style="cyan", justify="center")
+    table.add_column("Samples", style="magenta", justify="center")
+    table.add_column("Missing (%)", style="red", justify="center")
+    table.add_column(min_column_name, style="green", justify="center")
+    table.add_column(max_column_name, style="yellow", justify="center")
+    table.add_column("Mean", style="blue", justify="center")
+    table.add_column("Median", style="blue", justify="center")
+    table.add_column("Min/Max", style="blue", justify="center")
+    table.add_column("Stdev", style="blue", justify="center")
+    table.add_column("n_classes", style="blue", justify="center")
+
+    all_stats = []
+
+    for task_label, class_counts in task_counts.items():
+        counts = list(class_counts.values())
+
+        num_below_min = sum(1 for value in counts if args.min is not None and value < args.min)
+        num_above_max = sum(1 for value in counts if args.max is not None and value > args.max)
+
+        # Calculate summary statistics
+        mean = statistics.mean(counts)
+        median = statistics.median(counts)
+        min_count = min(counts)
+        max_count = max(counts)
+        stdev = statistics.stdev(counts) if len(counts) > 1 else 0
+        n_classes = len(counts)
+
+        # Calculate percentage of samples with labels for the task
+        samples_with_labels = sum(counts)
+        percentage = (samples_with_labels / total_samples) * 100
+
+        # Create the stats dictionary
+        stats = {
+            "Task": task_label,
+            "Samples": samples_with_labels,
+            "Missing (%)": f"{100 - percentage:.2f}",
+            min_column_name: num_below_min,
+            max_column_name: num_above_max,
+            "Mean": f"{mean:.2f}",
+            "Median": f"{median:.2f}",
+            "Min/Max": f"{min_count}/{max_count}",
+            "Stdev": f"{stdev:.2f}",
+            "n_classes": n_classes
+        }
+        all_stats.append(stats)
+
+        # Add row to table
+        table.add_row(task_label, str(samples_with_labels), f"{100 - percentage:.2f}%",
+                      str(num_below_min), str(num_above_max),
+                      f"{mean:.2f}", f"{median:.2f}", f"{min_count}/{max_count}",
+                      f"{stdev:.2f}", str(n_classes))
+
+    console.print(table)
+
+    # Save to file if requested
+    if args.save:
+        output_path = f"{args.file_path.rsplit('.', 1)[0]}_density.csv"
+        fieldnames = [
+            "Task", "Samples", "Missing (%)", min_column_name, max_column_name,
+            "Mean", "Median", "Min/Max", "Stdev", "n_classes"
+        ]
+        with open(output_path, 'w', newline='') as out_file:
+            writer = csv.DictWriter(out_file, fieldnames=fieldnames)
+            writer.writeheader()
+            for stat in all_stats:
+                writer.writerow(stat)
+
+        console.print(f"Metrics saved to {output_path}", style="bold green")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Evaluate class imbalance and density metrics.")
+    parser.add_argument("file_path", type=str, help="Path to the labels file")
+    parser.add_argument("--min", type=int, help="Minimum threshold for class count")
+    parser.add_argument("--max", type=int, help="Maximum threshold for class count")
+    parser.add_argument("--save", action="store_true", help="Save metrics to a file")
+
+    args = parser.parse_args()
+    main(args)
+
+
