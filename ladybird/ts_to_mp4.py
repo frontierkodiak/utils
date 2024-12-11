@@ -100,8 +100,68 @@ def write_concat_file(segments, output_path):
         for _, seg_path in segments:
             abs_path = os.path.abspath(seg_path)
             f.write(f"file '{abs_path}'\n")
+            
+def try_encode_with_fallback(input_args, output_path, filter_complex, force_hardware=False, force_software=False):
+    """Try hardware encoding first, fall back to software if it fails."""
+    
+    # Base command elements that don't change between encoders
+    base_cmd = [
+        "ffmpeg", "-y",
+        *input_args,
+        "-filter_complex", filter_complex
+    ]
+    
+    # Only try hardware if not forcing software
+    if not force_software:
+        nvenc_cmd = [
+            *base_cmd,
+            "-c:v", "h264_nvenc",
+            "-preset", "p7",
+            "-qp", "18",
+            output_path
+        ]
+        
+        try:
+            print("Attempting hardware-accelerated encoding with NVENC...")
+            subprocess.run(nvenc_cmd, check=True)
+            print("Hardware encoding successful!")
+            return True
+        except subprocess.CalledProcessError as e:
+            if force_hardware:
+                print(f"Hardware encoding failed and --force-hardware was specified: {str(e)}")
+                return False
+            print(f"Hardware encoding failed: {str(e)}")
+            print("Falling back to software encoding...")
+    
+    # Only try software if not forcing hardware
+    if not force_hardware:
+        software_cmd = [
+            *base_cmd,
+            "-c:v", "libx264",
+            "-preset", "slow",  # Quality/speed tradeoff
+            "-crf", "18",      # Quality level (lower = better, 18-28 is typical range)
+            output_path
+        ]
+        
+        try:
+            print("Attempting software encoding with libx264...")
+            subprocess.run(software_cmd, check=True)
+            print("Software encoding successful!")
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Software encoding failed: {str(e)}")
+            return False
+    
+    return False
 
 def main():
+    # Basic CLI argument parsing
+    import argparse
+    parser = argparse.ArgumentParser(description='Process NFL camera .ts files into merged MP4.')
+    parser.add_argument('--force-hardware', action='store_true', help='Only use hardware encoding')
+    parser.add_argument('--force-software', action='store_true', help='Only use software encoding')
+    args = parser.parse_args()
+
     BASE_DIR = "/home/caleb/ladybird_failed_copy"
     OUTPUT_DIR = os.path.join(BASE_DIR, "processed")
     print(f"Using base directory: {BASE_DIR}")
@@ -134,7 +194,6 @@ def main():
     print(f"Found a total of {len(all_segments)} segments.")
 
     # Step 3: Write out concat file for ffmpeg
-    concat_file = "file_list.txt"
     write_concat_file(all_segments, concat_file)
     print(f"Concat file written to {concat_file}.")
 
@@ -162,44 +221,55 @@ def main():
     # The combined output ("fullres.mp4") will be massive and extremely high-resolution.
     # This might be slow and memory-intensive.
 
-    fullres_cmd = [
-        "ffmpeg", "-y",
-        "-f", "concat", "-safe", "0", "-i", concat_file,
-        "-filter_complex",
+    # Setup for encoding
+    input_args = ["-f", "concat", "-safe", "0", "-i", concat_file]
+    filter_complex = (
         "[0:v:0]crop=iw-32:ih-32:0:0[tl];"
         "[0:v:1]crop=iw-32:ih-32:32:0[tr];"
         "[0:v:2]crop=iw-32:ih-32:0:32[bl];"
         "[0:v:3]crop=iw-32:ih-32:32:32[br];"
         "[tl][tr]hstack=2[top];"
         "[bl][br]hstack=2[bottom];"
-        "[top][bottom]vstack=2",
-        "-c:v", "libx264", "-crf", "18", "-preset", "slow", "fullres.mp4"
-    ]
-    print("Running ffmpeg to create fullres.mp4 (this may take a long time)...")
-    subprocess.run(fullres_cmd, check=True)
+        "[top][bottom]vstack=2"
+    )
 
-    # Create 4K downscaled version
-    downscale_4k_cmd = [
-        "ffmpeg", "-y",
-        "-i", "fullres.mp4",
-        "-vf", "scale=3840:-2",
-        "output_4k.mp4"
-    ]
-    print("Creating a 4K downscaled version (output_4k.mp4)...")
-    subprocess.run(downscale_4k_cmd, check=True)
+    print("Running ffmpeg to create fullres.mp4 (this may take a long time)...")
+    if not try_encode_with_fallback(
+        input_args, 
+        fullres_path, 
+        filter_complex,
+        force_hardware=args.force_hardware,
+        force_software=args.force_software
+    ):
+        print("Encoding failed. Check logs for details.")
+        return
+
+    # Create 4K downscaled version (using same encoder choice as fullres)
+    print(f"Creating a 4K downscaled version ({output_4k_path})...")
+    if not try_encode_with_fallback(
+        ["-i", fullres_path],
+        output_4k_path,
+        "scale=3840:-2",
+        force_hardware=args.force_hardware,
+        force_software=args.force_software
+    ):
+        print("4K downscaling failed. Check logs for details.")
+        return
 
     # Create 1080p downscaled version
-    downscale_1080p_cmd = [
-        "ffmpeg", "-y",
-        "-i", "fullres.mp4",
-        "-vf", "scale=1920:-2",
-        "output_1080p.mp4"
-    ]
-    print("Creating a 1080p downscaled version (output_1080p.mp4)...")
-    subprocess.run(downscale_1080p_cmd, check=True)
+    print(f"Creating a 1080p downscaled version ({output_1080p_path})...")
+    if not try_encode_with_fallback(
+        ["-i", fullres_path],
+        output_1080p_path,
+        "scale=1920:-2",
+        force_hardware=args.force_hardware,
+        force_software=args.force_software
+    ):
+        print("1080p downscaling failed. Check logs for details.")
+        return
 
     print("All steps completed successfully.")
-    print("You now have: fullres.mp4, output_4k.mp4, and output_1080p.mp4.")
+    print(f"Output files are in: {OUTPUT_DIR}")
 
 if __name__ == "__main__":
     main()
