@@ -67,9 +67,11 @@ class RepoExporter:
         self.files_to_exclude.append(os.path.basename(self.output_file))  # Add output file to exclude list
         self.always_exclude_patterns = config.get('always_exclude_patterns', ['export.txt'])
         self.exported_files_count = {}
-        self.dirs_for_tree = config.get('dirs_for_tree', [])  # New: specific dirs to include in tree
+        self.dirs_for_tree = config.get('dirs_for_tree', [])
         self.total_lines = 0
-        
+        self.line_counts_by_file = {}  # Store line counts by relative file path
+        self.line_counts_by_dir = {}   # Store aggregated line counts by directory
+
     def convert_ipynb_to_md(self, notebook_content):
         notebook = nbformat.reads(notebook_content, as_version=4)
         
@@ -94,6 +96,9 @@ class RepoExporter:
                 self.exported_files_count[extension] = self.exported_files_count.get(extension, 0) + 1
                 lines = content.count('\n') + 1
                 self.total_lines += lines
+                
+                # Store line count for this file
+                self.line_counts_by_file[file_path] = lines
                 
                 # Add a note for converted ipynb files
                 if extension == '.ipynb':
@@ -154,7 +159,8 @@ class RepoExporter:
                     try:
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
-                        self.write_to_file(content, file_path)
+                        relative_path = os.path.relpath(file_path, self.repo_root)
+                        self.write_to_file(content, relative_path)
                     except Exception as e:
                         print(f"Error reading file {file_path}: {str(e)}")
             else:
@@ -189,12 +195,11 @@ class RepoExporter:
             if self.should_exclude_dir(dir_path):
                 return False
             
-            # Also ensure this directory is within the paths we actually traverse
+            # Also ensure this directory is within one of our allowed traversal directories
             abs_dir_path = os.path.abspath(dir_path)
             allowed = False
             for d in self.dirs_to_traverse:
                 allowed_dir = os.path.abspath(os.path.join(self.repo_root, d))
-                # If this directory is a subdirectory of one of our allowed traversal directories
                 if os.path.commonprefix([abs_dir_path, allowed_dir]) == allowed_dir:
                     allowed = True
                     break
@@ -209,10 +214,37 @@ class RepoExporter:
 
         return True
 
-    def get_directory_tree(self, directory, prefix='', current_depth=0):
-        """Generate a string representation of the directory tree."""
+    def compute_directory_line_counts(self):
+        """
+        Compute the total line counts for each directory.
+        We'll sum the line counts of all files under each directory.
+        """
+        self.line_counts_by_dir = {}
+
+        # Initialize directories found from the exported files
+        for rel_file_path, lines in self.line_counts_by_file.items():
+            # Add line counts up the chain of directories
+            parts = rel_file_path.split(os.sep)
+            for i in range(1, len(parts)):
+                dir_path = os.sep.join(parts[:i])  # partial path representing directory
+                self.line_counts_by_dir[dir_path] = self.line_counts_by_dir.get(dir_path, 0) + lines
+
+    def get_line_count_for_path(self, rel_path):
+        """
+        Return the line count for a given file or directory relative path.
+        If it's a file, look up in line_counts_by_file.
+        If it's a directory, look up in line_counts_by_dir.
+        If not found, return 0.
+        """
+        if os.path.isfile(os.path.join(self.repo_root, rel_path)):
+            return self.line_counts_by_file.get(rel_path, 0)
+        else:
+            return self.line_counts_by_dir.get(rel_path, 0)
+
+    def get_directory_tree(self, directory, prefix='', current_depth=0, lines_word_used=False):
+        """Generate a string representation of the directory tree with line counts."""
         if self.depth != -1 and current_depth > self.depth:
-            return f"{prefix}│   └── (omitted)\n"
+            return f"{prefix}│   └── (omitted)\n", lines_word_used
 
         tree_str = ''
         items = sorted(os.listdir(directory))
@@ -221,11 +253,11 @@ class RepoExporter:
         visible_items = []
         for item in items:
             path = os.path.join(directory, item)
-            # For files, exclude hidden files and those matching exclude patterns
             if os.path.isfile(path):
-                if not item.startswith('.') and not self.should_exclude_file(path):
+                # Check if file was exported
+                rel_file_path = os.path.relpath(path, self.repo_root)
+                if rel_file_path in self.line_counts_by_file:  # only include if exported
                     visible_items.append(item)
-            # For directories, use should_include_in_tree
             elif os.path.isdir(path):
                 if self.should_include_in_tree(path):
                     visible_items.append(item)
@@ -233,13 +265,24 @@ class RepoExporter:
         for i, item in enumerate(visible_items):
             path = os.path.join(directory, item)
             connector = '├── ' if i < len(visible_items) - 1 else '└── '
+            rel_path = os.path.relpath(path, self.repo_root)
+            line_count = self.get_line_count_for_path(rel_path)
             
-            tree_str += f"{prefix}{connector}{item}\n"
+            # Determine how to print line counts
+            if not lines_word_used:
+                # Print lines_word once
+                line_str = f"({line_count} lines)" if line_count > 0 else "(0 lines)"
+                lines_word_used = True
+            else:
+                line_str = f"({line_count})"
+            
+            tree_str += f"{prefix}{connector}{item} {line_str}\n"
             if os.path.isdir(path):
                 extension = '' if i < len(visible_items) - 1 else '    '
-                tree_str += self.get_directory_tree(path, prefix + extension + '│   ', current_depth + 1)
-                
-        return tree_str
+                subtree_str, lines_word_used = self.get_directory_tree(path, prefix + extension + '│   ', current_depth + 1, lines_word_used)
+                tree_str += subtree_str
+
+        return tree_str, lines_word_used
 
     def export_repo(self):
         # Clear the output file before starting
@@ -250,15 +293,10 @@ class RepoExporter:
         if self.dump_config:
             self.write_to_file(f"Export Configuration:\n{json.dumps(vars(self), indent=2)}", mode='w')
 
-        # Generate and write the directory tree structure starting from the repo_root
-        tree_structure = f"Directory tree, stemming from root \"{self.repo_root}\":\n"
-        tree_structure += self.get_directory_tree(self.repo_root, current_depth=0)
-        self.write_to_file(tree_structure, mode='w' if not self.dump_config else 'a')
-
-        # Handle top-level files
+        # Export top-level files (if requested)
         if self.include_top_level_files == 'all':
             for item in os.listdir(self.repo_root):
-                if item in self.files_to_exclude:  # Skip files in files_to_exclude
+                if item in self.files_to_exclude:
                     continue
                 item_path = os.path.join(self.repo_root, item)
                 if os.path.isfile(item_path):
@@ -269,7 +307,7 @@ class RepoExporter:
                         self.write_to_file(content, os.path.relpath(item_path, self.repo_root))
         elif isinstance(self.include_top_level_files, list):
             for file_name in self.include_top_level_files:
-                if file_name in self.files_to_exclude:  # Skip files in files_to_exclude
+                if file_name in self.files_to_exclude:
                     continue
                 file_path = os.path.join(self.repo_root, file_name)
                 if os.path.exists(file_path):
@@ -281,8 +319,25 @@ class RepoExporter:
         for dir in self.dirs_to_traverse:
             self.traverse_directory(dir)
 
-        # Include specific files by traversing from the root directory
+        # Include specific files
         self.include_specific_files(self.repo_root)
+
+        # Compute directory line counts
+        self.compute_directory_line_counts()
+
+        # Finally, write the directory tree with line counts
+        directory_tree_str, _ = self.get_directory_tree(self.repo_root, current_depth=0, lines_word_used=False)
+        header = f"Directory tree, stemming from root \"{self.repo_root}\":\n"
+        # Overwrite the file with the directory tree at the top, then append exported files below
+        # Actually, the user might prefer directory tree at the top. If so, we can prepend it:
+        # Let's prepend it:
+        with open(self.output_file, 'r', encoding='utf-8') as original:
+            original_content = original.read()
+        with open(self.output_file, 'w', encoding='utf-8') as modified:
+            modified.write(header)
+            modified.write(directory_tree_str)
+            if original_content.strip():
+                modified.write(self.delimiter + "\n" + original_content)
 
         # At the end of the script, after all processing
         print(f"Exported to: {self.output_file}")
@@ -290,7 +345,7 @@ class RepoExporter:
         print("Number of exported files by extension:")
         for ext, count in self.exported_files_count.items():
             print(f"{ext}: {count}")
-            
+
 def get_base_path():
     """
     Determine the base path based on the host platform or command-line argument.

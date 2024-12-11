@@ -1,0 +1,15 @@
+{
+    "repo_root": "/home/caleb/repo/sam2/demo",
+    "export_name": "sam2_demo_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["frontend"],
+    "subdirs_to_exclude": ["frontend/node_modules", "frontend/dist", "frontend/public", "frontend/src/assets", "frontend/src/components/ui/icons", "frontend/src/components/ui/icons/icons",
+    "frontend/src/common/components/gallery", "frontend/src/common/codecs", "frontend/src/common/tracker", "__generated__"],
+    "files_to_include": ["/home/caleb/repo/sam2/docker-compose.yaml", "/home/caleb/repo/sam2/backend.Dockerfile", "/home/caleb/repo/sam2/demo/frontend/frontend.Dockerfile",
+    "/home/caleb/repo/sam2/demo/backend/server/app_conf.py", "/home/caleb/repo/sam2/demo/backend/server/app.py"],
+    "files_to_exclude": [],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".md", ".ts", ".tsx", ".json", ".html", ".css", ".js", ".yaml", ".yml", ".graphql", ".dockerignore"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }

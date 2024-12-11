@@ -1,0 +1,14 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer",
+    "export_name": "polliFormer_blade_angio_0_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": [],
+    "include_top_level_files": "none",
+    "included_extensions": [".py", ".yaml", ".md"],
+    "files_to_include": ["/home/caleb/repo/polliFormer/configs/experiments/tests/blade_angio_0.yaml", "/home/caleb/repo/polliFormer/configs/models/mFormer/mFormerV0_0_heteroHA_TS.yaml",
+    "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_0.yaml", "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0.yaml",
+"/home/caleb/repo/polliFormer/configs/models/mFormer/mFormerV0_0_heteroHA_TS.yaml", "/home/caleb/repo/polliFormer/configs/model/components/classification_heads/L1020304050_linear.yaml"],
+    "files_to_exclude": [],
+    "always_exclude_patterns": ["export.txt", ".egg-info", "__pycache__", ".DS_Store"],
+    "exhaustive_dir_tree": false
+  }
