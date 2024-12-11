@@ -103,14 +103,24 @@ def write_concat_file(segments, output_path):
 
 def main():
     BASE_DIR = "/home/caleb/ladybird_failed_copy"
+    OUTPUT_DIR = os.path.join(BASE_DIR, "processed")
     print(f"Using base directory: {BASE_DIR}")
+    print(f"Outputs will be saved to: {OUTPUT_DIR}")
 
-    # Clean up old output files if they exist.
-    # We do this to ensure we start fresh if a previous run was aborted.
-    safe_remove("file_list.txt")
-    safe_remove("fullres.mp4")
-    safe_remove("output_4k.mp4")
-    safe_remove("output_1080p.mp4")
+    # Create output directory if it doesn't exist
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    # Update output paths to use OUTPUT_DIR
+    concat_file = os.path.join(OUTPUT_DIR, "file_list.txt")
+    fullres_path = os.path.join(OUTPUT_DIR, "fullres.mp4")
+    output_4k_path = os.path.join(OUTPUT_DIR, "output_4k.mp4")
+    output_1080p_path = os.path.join(OUTPUT_DIR, "output_1080p.mp4")
+
+    # Clean up old output files if they exist
+    safe_remove(concat_file)
+    safe_remove(fullres_path)
+    safe_remove(output_4k_path)
+    safe_remove(output_1080p_path)
 
     # Step 1: Gather all segments from the directory structure
     all_segments = gather_ts_segments(BASE_DIR)
@@ -131,32 +141,38 @@ def main():
     # At this point, we have a large number of .ts files representing possibly ~1m50s or more.
     # Each .ts has 4 HEVC streams (tiles) representing patches of a huge frame.
     #
+    # Tile Layout & Overlap Structure:
+    # - Each frame is divided into a 2x2 grid of tiles
+    # - Adjacent tiles overlap by 64 pixels
+    # - To correct this, we crop 32px from each overlapping edge:
+    #   * top-left:     crop 32px from right and bottom edges
+    #   * top-right:    crop 32px from left and bottom edges
+    #   * bottom-left:  crop 32px from top and right edges
+    #   * bottom-right: crop 32px from top and left edges
+    #
     # We will now run ffmpeg to:
-    #   - Concatenate all .ts files into one continuous input stream.
-    #   - Use a filter_complex to stack the tiles into a full frame:
-    #       top-left: [0:v:0]
-    #       top-right: [0:v:1]
-    #       bottom-left: [0:v:2]
-    #       bottom-right: [0:v:3]
+    #   1. Concatenate all .ts files into one continuous input stream
+    #   2. Crop overlapping regions from each tile
+    #   3. Stack the tiles into a full frame:
+    #       top-left:     [0:v:0] - cropped right/bottom
+    #       top-right:    [0:v:1] - cropped left/bottom
+    #       bottom-left:  [0:v:2] - cropped top/right
+    #       bottom-right: [0:v:3] - cropped top/left
     #
     # The combined output ("fullres.mp4") will be massive and extremely high-resolution.
     # This might be slow and memory-intensive.
-    #
-    # Then, we produce two downscaled copies for more practical viewing:
-    # - output_4k.mp4 (downscaled to ~3840 wide)
-    # - output_1080p.mp4 (downscaled to ~1920 wide)
-    #
-    # The ffmpeg command for full resolution:
-    # ffmpeg -f concat -safe 0 -i file_list.txt \
-    #   -filter_complex "[0:v:0][0:v:1]hstack=2[top];[0:v:2][0:v:3]hstack=2[bottom];[top][bottom]vstack=2" \
-    #   -c:v libx264 -crf 18 -preset slow fullres.mp4
-    #
-    # Note: Consider adding -pix_fmt yuv420p if playback issues occur.
 
     fullres_cmd = [
         "ffmpeg", "-y",
         "-f", "concat", "-safe", "0", "-i", concat_file,
-        "-filter_complex", "[0:v:0][0:v:1]hstack=2[top];[0:v:2][0:v:3]hstack=2[bottom];[top][bottom]vstack=2",
+        "-filter_complex",
+        "[0:v:0]crop=iw-32:ih-32:0:0[tl];"
+        "[0:v:1]crop=iw-32:ih-32:32:0[tr];"
+        "[0:v:2]crop=iw-32:ih-32:0:32[bl];"
+        "[0:v:3]crop=iw-32:ih-32:32:32[br];"
+        "[tl][tr]hstack=2[top];"
+        "[bl][br]hstack=2[bottom];"
+        "[top][bottom]vstack=2",
         "-c:v", "libx264", "-crf", "18", "-preset", "slow", "fullres.mp4"
     ]
     print("Running ffmpeg to create fullres.mp4 (this may take a long time)...")
