@@ -1,0 +1,13 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer_h5Data_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["/h5data"],
+    "dirs_for_tree": ["polliFormer", "configs"],
+    "include_top_level_files": "none",
+    "included_extensions": [".py", ".yaml"],
+    "files_to_include": ["main.py", "config.py", "utils/config_utils.py", "polliFormer/docs/data/copap.md",
+    "ibrida/ancestral_levels.py", "utils/wandb.py"],
+    "always_exclude_patterns": ["export.txt", "224.yaml", ".bak.py"],
+    "exhaustive_dir_tree": false
+  }

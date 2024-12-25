@@ -1,6 +1,6 @@
 {
     "repo_root": "/home/caleb/repo/ibrida/ibrida/hdf5",
-    "export_name": "ibrida_hdf5_export.txt",
+    "export_name": "h5pull_export.txt",
     "delimiter": "----",
     "dirs_to_traverse": [],
     "files_to_include": ["configs/angio_v0_pop.yaml", "configs/fixer/split0_1.yaml"],

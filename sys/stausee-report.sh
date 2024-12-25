@@ -1,6 +1,15 @@
 #!/bin/bash
 
-OUTPUT_FILE="/home/caleb/stausee-report.txt"
+# /home/caleb/repo/utils/sys/stausee-report.sh
+
+# Create reports directory if it doesn't exist
+REPORT_DIR="/home/caleb/reports/stausee-pool"
+mkdir -p "$REPORT_DIR"
+chown caleb:caleb "$REPORT_DIR"
+
+# Generate filename with date
+DATE=$(date '+%Y-%m-%d')
+OUTPUT_FILE="$REPORT_DIR/stausee-report-$DATE.txt"
 
 echo "=== Stausee Pool Report $(date '+%Y-%m-%d %H:%M:%S') ===" > "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
@@ -37,5 +46,11 @@ done
 echo "" >> "$OUTPUT_FILE"
 echo "=== Pool I/O Statistics ===" >> "$OUTPUT_FILE"
 zpool iostat stausee-pool >> "$OUTPUT_FILE"
+
+# Set correct ownership
+chown caleb:caleb "$OUTPUT_FILE"
+
+# Keep only the last 365 days of reports
+find "$REPORT_DIR" -name "stausee-report-*.txt" -mtime +365 -delete
 
 echo "Report generated at $OUTPUT_FILE"

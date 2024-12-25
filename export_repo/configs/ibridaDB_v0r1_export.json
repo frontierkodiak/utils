@@ -1,0 +1,11 @@
+{
+    "repo_root": "/home/caleb/repo/ibridaDB/dbTools/export/v0",
+    "export_name": "ibridaDB_v0r1_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["common", "r1"],
+    "files_to_include": ["/home/caleb/repo/ibridaDB/docker/stausee/docker-compose.yml", "/home/caleb/repo/ibridaDB/docker/stausee/entrypoint.sh"],
+    "include_top_level_files": "all",
+    "included_extensions": [".sh", ".md", ".sql"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }
