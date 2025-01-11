@@ -1,0 +1,11 @@
+{
+    "repo_root": "/home/caleb/repo/ezmd",
+    "export_name": "ezmd_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["src", "tests"],
+    "subdirs_to_exclude": [".venv"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".env", ".toml", ".md"],
+    "always_exclude_patterns": ["uv.lock", "export.txt", ".log", ".venv", ".gitignore"],
+    "exhaustive_dir_tree": false
+  }

@@ -4,8 +4,9 @@
     "delimiter": "----",
     "dirs_to_traverse": ["common", "r1"],
     "files_to_include": ["/home/caleb/repo/ibridaDB/docker/stausee/docker-compose.yml", "/home/caleb/repo/ibridaDB/docker/stausee/entrypoint.sh"],
+    "files_to_exclude": ["export_per_species_snippet.sh"],
     "include_top_level_files": "all",
     "included_extensions": [".sh", ".md", ".sql"],
-    "always_exclude_patterns": ["export.txt"],
+    "always_exclude_patterns": ["export.txt", ".log"],
     "exhaustive_dir_tree": false
   }

@@ -115,6 +115,13 @@ class RepoExporter:
                 any(filename.endswith(pattern) for pattern in self.always_exclude_patterns))
 
     def should_exclude_dir(self, dir_path):
+        dir_name = os.path.basename(dir_path)
+        
+        # First check blacklisted dirs
+        if dir_name in self.blacklisted_dirs:
+            return True
+        
+        # Then check configured exclusions
         relative_path = os.path.relpath(dir_path, self.repo_root)
         relative_path = PathConverter.to_system_path(relative_path)
         return any(relative_path.startswith(PathConverter.to_system_path(exclude.rstrip('*'))) 
@@ -181,7 +188,7 @@ class RepoExporter:
         """Determine if a directory should be included in the tree output."""
         dir_name = os.path.basename(dir_path)
 
-        # Check blacklisted dirs first
+        # Check blacklisted dirs first - make this an immediate return
         if dir_name in self.blacklisted_dirs:
             return False
 
