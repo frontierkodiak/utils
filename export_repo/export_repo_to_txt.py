@@ -61,7 +61,7 @@ class RepoExporter:
         self.exhaustive_dir_tree = config.get('exhaustive_dir_tree', False)
         self.blacklisted_dirs = ['__pycache__']  # Blacklist of subdirs to always omit
         self.blacklisted_dirs.extend(['.git', '.venv', '.vscode'])  # Add common hidden dirs
-        self.blacklisted_files = []  # Blacklist of files to always omit
+        self.blacklisted_files = ['uv.lock']  # Blacklist of files to always omit
         self.files_to_include = config.get('files_to_include', [])  # Additional files to include explicitly
         self.output_file = self.get_output_file_path()
         self.files_to_exclude.append(os.path.basename(self.output_file))  # Add output file to exclude list
@@ -111,8 +111,17 @@ class RepoExporter:
     def should_exclude_file(self, file_path):
         relative_path = os.path.relpath(file_path, self.repo_root)
         filename = os.path.basename(file_path)
-        return (any(relative_path.endswith(exclude) for exclude in self.files_to_exclude) or
-                any(filename.endswith(pattern) for pattern in self.always_exclude_patterns))
+        
+        # First check blacklisted files
+        if filename in self.blacklisted_files:
+            return True
+        
+        # Then check always_exclude_patterns
+        if any(filename.endswith(pattern) for pattern in self.always_exclude_patterns):
+            return True
+        
+        # Finally check configured exclusions
+        return any(relative_path.endswith(exclude) for exclude in self.files_to_exclude)
 
     def should_exclude_dir(self, dir_path):
         dir_name = os.path.basename(dir_path)
@@ -303,10 +312,11 @@ class RepoExporter:
         # Export top-level files (if requested)
         if self.include_top_level_files == 'all':
             for item in os.listdir(self.repo_root):
-                if item in self.files_to_exclude:
-                    continue
                 item_path = os.path.join(self.repo_root, item)
                 if os.path.isfile(item_path):
+                    # Add exclusion check before processing the file
+                    if self.should_exclude_file(item_path):
+                        continue
                     item_extension = os.path.splitext(item)[1]
                     if self.included_extensions == 'all' or item_extension in self.included_extensions:
                         with open(item_path, 'r', encoding='utf-8') as f:
