@@ -1,0 +1,13 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer",
+    "export_name": "polliFormer_configModelMini_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["configs"],
+    "subdirs_to_exclude": [],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml"],
+    "files_to_include": ["/home/caleb/repo/polliFormer/polliFormer/config.py", "/home/caleb/repo/polliFormer/polliFormer/utils/config_utils.py"],
+    "files_to_exclude": [],
+    "always_exclude_patterns": ["export.txt", ".egg-info", "__pycache__", ".DS_Store"],
+    "exhaustive_dir_tree": false
+  }

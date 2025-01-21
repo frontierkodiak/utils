@@ -1,13 +1,12 @@
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
-    "export_name": "polliFormer_h5Data_export.txt",
+    "export_name": "polliFormer_data_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["/h5data"],
+    "dirs_to_traverse": ["h5data", "aug", "utils/metrics", "loss", "ibrida"],
     "dirs_for_tree": ["polliFormer", "configs"],
     "include_top_level_files": "none",
     "included_extensions": [".py", ".yaml"],
-    "files_to_include": ["main.py", "config.py", "utils/config_utils.py", "polliFormer/docs/data/copap.md",
-    "ibrida/ancestral_levels.py", "utils/wandb.py"],
+    "files_to_include": ["main.py", "config.py", "schedule.py", "lr_scheduler.py", "utils/config_utils.py", "utils/dataset_metadata.py", "docs/data/copap.md", "utils/wandb.py"],
     "always_exclude_patterns": ["export.txt", "224.yaml", ".bak.py"],
     "exhaustive_dir_tree": false
   }

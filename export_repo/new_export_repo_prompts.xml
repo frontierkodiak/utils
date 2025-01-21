@@ -1,3 +1,5 @@
+<codebase>
+<export_repo_to_txt.py>
 import platform
 import os
 import json
@@ -451,3 +453,297 @@ def main():
 
 if __name__ == "__main__":
     main()
+</export_repo_to_txt.py>
+<readme.md>
+# Export Repository to Text File
+
+## Overview
+
+This tool exports repository content to a text file, including directory structures and file contents. It provides flexible configuration options to control what is included in the export.
+
+## Usage
+
+```bash
+python export_repo_to_txt.py <config_file>.json [--dump-config]
+```
+
+or
+
+```bash
+python export_repo_to_txt.py <repo_root> [--dump-config]
+```
+
+## Configuration Parameters
+
+- `repo_root`: Path to the repository's root directory.
+- `export_name`: Name or path for the export file. If a path, exports there; if a name, exports to `repo_root`.
+- `delimiter`: Separator string for entries in the export file.
+- `dirs_to_traverse`: List of directories within `repo_root` for full traversal and export.
+- `dirs_for_tree`: List of specific directories to include in the directory tree output. If empty, includes all non-hidden directories.
+- `files_to_include`: List of specific files to include in the export, regardless of their location in the repository.
+- `include_top_level_files`: Specifies top-level files for inclusion. Set to `"all"` for all files, or list specific files.
+- `included_extensions`: File extensions to include. Use `"all"` for all extensions.
+- `subdirs_to_exclude`: List of subdirectory names or paths to exclude from traversal.
+- `files_to_exclude`: List of file names to exclude from the export.
+- `always_exclude_patterns`: List of filename patterns to always exclude (e.g., ["export.txt"]).
+- `depth`: Depth of directory traversal. `-1` for full traversal (default).
+- `exhaustive_dir_tree`: If `true`, exports full directory tree regardless of other settings.
+- `dump_config`: If `true`, dumps the export configuration JSON at the top of the output file.
+
+## Example Configuration
+
+```json
+{
+  "repo_root": "/home/user/myrepo",
+  "export_name": "repo_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["src", "docs"],
+  "files_to_include": ["README.md", "config.json"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py", ".md", ".json"],
+  "subdirs_to_exclude": ["tests", "build"],
+  "files_to_exclude": ["secrets.yaml"],
+  "always_exclude_patterns": ["export.txt", "*.log"],
+  "depth": -1,
+  "exhaustive_dir_tree": false,
+  "dump_config": false
+}
+```
+
+## Notes
+
+- The tool will automatically exclude the output file from the export.
+- If no config file is provided, default settings will be used.
+- The `subdirs_to_exclude` option supports partial paths (e.g., "foo/bar" will exclude all "bar" directories under any "foo" directory).
+- Use `always_exclude_patterns` for files you want to exclude regardless of their location or other inclusion rules.
+- To include the export configuration in the output file, use the `--dump-config` flag when running the script.
+- Hidden directories (starting with '.') are automatically excluded from the directory tree.
+- Use `dirs_for_tree` to explicitly specify which directories should appear in the directory tree output. If not specified, all non-hidden directories will be included.
+
+
+## Example Configurations
+
+### NextJS Project
+
+```json
+{
+  "repo_root": "/home/user/nextjs-project",
+  "export_name": "nextjs_project_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["components", "pages", "styles", "public"],
+  "dirs_for_tree": ["components", "pages", "styles"],  // Only show main app directories
+  "include_top_level_files": ["package.json", "next.config.js"],
+  "included_extensions": [".js", ".jsx", ".ts", ".tsx", ".css"]
+}
+```
+
+### Python Project
+
+```json
+{
+  "repo_root": "/home/user/python-project",
+  "export_name": "python_project_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["src", "tests", "docs"],
+  "dirs_for_tree": ["src", "docs"],  // Only show source and documentation
+  "files_to_include": ["requirements.txt", "setup.py"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py", ".md", ".yml"],
+  "subdirs_to_exclude": ["__pycache__", ".venv"]
+}
+```
+
+## Setting up the `export_repo` alias
+
+### On macOS
+
+1. Open your terminal.
+
+2. Open your shell configuration file (for zsh, it's usually `~/.zshrc`):
+   ```bash
+   nano ~/.zshrc
+   ```
+
+3. Add the following line at the end of the file:
+   ```bash
+   alias export_repo='/Users/caleb/Documents/GitHub/utils/.venv/bin/python /Users/caleb/Documents/GitHub/utils/export_repo/export_repo_to_txt.py'
+   ```
+
+4. Save the file and exit the editor (in nano, press Ctrl+X, then Y, then Enter).
+
+5. Reload your shell configuration:
+   ```bash
+   source ~/.zshrc
+   ```
+
+### On PopOS (Linux)
+
+1. Open your terminal.
+
+2. Open your shell configuration file (for bash, it's usually `~/.bashrc`):
+   ```bash
+   nano ~/.bashrc
+   ```
+
+3. Add the following line at the end of the file:
+   ```bash
+   alias export_repo='/home/caleb/Documents/GitHub/utils/.venv/bin/python /home/caleb/Documents/GitHub/utils/export_repo/export_repo_to_txt.py --pop'
+   ```
+
+4. Save the file and exit the editor (in nano, press Ctrl+X, then Y, then Enter).
+
+5. Reload your shell configuration:
+   ```bash
+   source ~/.bashrc
+   ```
+
+### On Windows (PowerShell)
+
+1. Open PowerShell.
+
+2. First, check if you already have a PowerShell profile:
+   ```powershell
+   Test-Path $PROFILE
+   ```
+
+3. If it returns False, create one:
+   ```powershell
+   New-Item -Path $PROFILE -Type File -Force
+   ```
+
+4. Open your PowerShell profile in a text editor:
+   ```powershell
+   notepad $PROFILE
+   ```
+
+5. Add this function to your profile:
+   ```powershell
+   function export_repo {
+       & "C:\Users\front\Documents\GitHub\utils\.venv\Scripts\python.exe" "C:\Users\front\Documents\GitHub\utils\export_repo\export_repo_to_txt.py" $args
+   }
+   ```
+
+6. Save the file and reload your profile:
+   ```powershell
+   . $PROFILE
+   ```
+
+Now you can use the `export_repo` command from anywhere in your terminal on macOS, PopOS, or Windows PowerShell. For example:
+
+```bash
+export_repo hFormer-codeOnly
+# or 
+export_repo /path/to/your/repo --dump-config
+```
+
+Notes: 
+- On PopOS, the `--pop` flag is automatically included in the alias to ensure the correct base path is used
+- On Windows, make sure you're using PowerShell and not Command Prompt (cmd.exe) as this alias will only work in PowerShell
+</readme.md>
+<dirtree>
+Directory tree, stemming from root "/home/caleb/repo/utils/export_repo":
+├── configs (455 lines)
+│   ├── autocrop.json (10)
+│   ├── bulk_dl.json (14)
+│   ├── cosm-c360-tools.json (12)
+│   ├── export_repo.json (10)
+│   ├── ezmd.json (11)
+│   ├── h5merge-mini.json (12)
+│   ├── h5merge.json (12)
+│   ├── h5pull.json (11)
+│   ├── hFormer0-serve.json (10)
+│   ├── ibrida.json (12)
+│   ├── ibridaDB_v0r1_export.json (12)
+│   ├── ibridaDB_v0rX.json (12)
+│   ├── ibridaV2_generator.json (15)
+│   ├── ladybird_data.json (13)
+│   ├── metaformer.json (11)
+│   ├── metaformer1.json (12)
+│   ├── metaformer2.json (11)
+│   ├── model-explorer.json (13)
+│   ├── nextjs.json (8)
+│   ├── polliFormer-COPAP.json (12)
+│   ├── polliFormer-Dyn.json (12)
+│   ├── polliFormer-blade-angio-0.json (14)
+│   ├── polliFormer-buildData.json (15)
+│   ├── polliFormer-codeOnly.json (11)
+│   ├── polliFormer-configModel.json (14)
+│   ├── polliFormer-h5Data.json (13)
+│   ├── polliFormer-models-codeOnly.json (11)
+│   ├── polliFormer-models.json (11)
+│   ├── polliFormer-modelsDyn.json (11)
+│   ├── polliFormer-modelsPruned-codeOnly.json (11)
+│   ├── polliFormer-modelsPrunedInv-codeOnly.json (11)
+│   ├── polliFormer-serve.json (10)
+│   ├── polliFormer-tests.json (12)
+│   ├── polliFormer.json (13)
+│   ├── polliOS-codeOnly.json (13)
+│   ├── polliOS.json (13)
+│   ├── sam2.json (12)
+│   └── sam2_demo.json (15)
+└── export_repo_to_txt.py (453)
+</dirtree
+</codebase>
+
+<bug>
+When exporting the ezmd repo with the following config:
+```
+{
+    "repo_root": "/home/caleb/repo/ezmd",
+    "export_name": "ezmd_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["src", "tests"],
+    "subdirs_to_exclude": ["dev"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".env", ".toml", ".md"],
+    "always_exclude_patterns": ["uv.lock", "export.txt", ".log", ".venv", ".gitignore"],
+    "exhaustive_dir_tree": false
+  }
+```
+The file '/home/caleb/repo/ezmd/dev/prompts.txt' is incorrectly included in the export. That file should not be included in the export, and should have been caught by several different rules.
+</bug>
+<discussion>
+So, given this dirtree in the target repo:
+
+```
+Directory tree, stemming from root "ezmd":
+├── .gitignore (172 lines)
+├── .python-version (2)
+├── README.md (1)
+├── dev (73)
+│   └── prompts.txt (73)
+├── pyproject.toml (12)
+├── src (0)
+└── tests (0)
+```
+And the disinclusion of the 'dev' subdir from the dirs_to_traverse list, the inclusion of 'dev' in the subdirs_to_exclude list, and the disinclusion of '.txt' in the "included_extensions" list, there are zero reasons why the prompts.txt file should be included in the export, and several reasons why prompts.txt should have been excluded.
+</discussion>
+<context>
+This is a hodgepodge personal tool that I use to gather context to prompt LLMs. Because I have added additional rules as-needed to get a particular outcome without considering the soundness of the overall ruleset or logical flows, the system is a patchwork, and I'm not surprised that we're encountering this conflict. To reduce the number of headaches that this tool causes me in the future, we should probably design the ruleset de-novo to simplify the logical chains and make the tool easier to use. The reformulated tool should achieve full coverage of the existing feature set, but should have fewer configurable parameters, each with a well-defined scope. My typical usage pattern for this tool is to define a general set of inclusion rules, and then to prune with finer-grained exclusion rules (like exclude_subdir, exclude_file), and to sometimes pull in files outside the scope of the root dir by providing explicit paths.
+
+I am mostly satisfied with the formatting of the export txtfiles generated by this tool (including the dirtree and the file-by-file dumps), but we should make the outputs a bit more LLM-friendly by structuring the outputs with XML tags (instead of the delimiters that we currently use, which are tailored for human eyes). We should wrap the entire output file with a <codebase></codebase> tag. Then, use XML delimeters to separate into <directory_tree> and the <files> sections. Finally, separate each file in the file-by-file dumps (i.e. the codebase_files section) with XML tags-- use the filename as the tag. Let's also use XML tags to group the file-by-file dumps by their directory hierarchy, ex. in this codebase <export_repo.py> would be nested under <export_repo>, which would itself be nested under <files>. Remember that both top-level sections, <files> and <directory_tree> would be nested under the <codebase> tag-- <codebase> wraps the entire export file so that we can paste the output directly into our LLM prompt (I use highly-structured prompts, where each component of the prompt is XML-structured-- you can see an example of this in this very message.)
+
+Note that we may add an interactive mode in the future; the usage pattern here would be to have a general config per-repo but to allow the user to quickly compose tailored exports for different tasks within a TUI.. in most cases, this would be quicker and more maintainable than writing a new config file each time, which can quickly grow to an overwhelming scale. If we implement this feature, we'd use a sidecar file to cache the 10-20 most recently used 'tailored' prompts (globally, and for each of the base per-repo configs) for quick reuse. We would also add a tool version tracking system to the configs/sidecar files to help us deal with breaking changes in the core logic and rulesets. So design the new ruleset and architectures with this future requirement in mind-- not sure if we'll do this today, but it's been on my todo list for a while. 
+
+I've had a few folks on twitter ask to use my tool, but it's grown into such a mess over time that I haven't published it. If I'm satisfied with what we come up with today, I may finally publish this tool-- and I'll throw you some credit! So let's take all the time we need to think deeply and come up with something great.
+</context>
+<task_0>
+Fully trace the ruleset application flow for this ezmd export config. Identify the root cause of the logical flaw that led to the incorrect inclusion of ezmd/dev/prompts.txt in the export.
+</task_0>
+<task_1>
+Exhaustively map the ruleset hierarchy. Identify conflicting rules. Identify rules with overlapping scopes (there are many).
+</task_1>
+<task_2>
+Propose a 'smarter' ruleset that we can use in a reimplementation of this tool. The user should be able to achieve the same level of granularity/control over the export, but the median export config json should be substantially simpler. The user shouldn't need to consult the README every time they need to draft a new export config-- the parameters should have clearly-defined scopes, with descriptive names and a self-evident relational structure.
+
+Think through every aspect of the new system. We'll focus on the core logical structure for now-- let's dial in a production-grade ruleset that optimizes for consistency, simplicity, smart defaults, and granularity.
+</task_2>
+<task_3>
+Review the proposed interactive export_repo tool that I described earlier-- just so we don't forgot the rough guidelines I described in the context section, please summarize and structure the first-draft feature set that I described. While this new feature isn't our focus in this message, I want to keep track of these initial thoughts I had in case we decide to move forward with this feature tonight.
+
+Provide some follow-up questions to clarify the high-level requirements that I'd be looking for in this feature. When we're ready to work on this feature, I'll respond to these and we can iteratively architect a well-considered interactive mode; in the long run I think this might be the most common means by which users interact with our tool. I've been particularly inspired by the 'Repo Prompt' tool that has recently launched (as a dev preview) on TestFlight-- twitter seems to love it, and so I'm inspired to revisit this idea.
+</task_3>
+<think_slowly_and_deeply>
+Take as much time as you need to think about these tasks. This is a pretty fun problem-- identifying the scope and deducing the logical chains in our old tool's rulesets, identifying the key filtering requirements, and then taking the opportunity to conceptualize an optimized ruleset algorithm. Since we're essentially starting from fresh, this is a rare opportunity to design an algorithm from scratch (albeit within the constraints that we need to preserve the ability to configure exports at a granularity at least as fine as the old tool). This is about as close to a pure logics puzzle as it gets-- so let's take our time and think into deep conceptual space, and we can bring things back to our actual software implementation later.
+</<think_slowly_and_deeply>
+---

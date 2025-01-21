@@ -1,9 +1,9 @@
 {
-    "repo_root": "/home/caleb/repo/ezmd",
-    "export_name": "ezmd_export.txt",
+    "repo_root": "/home/caleb/repo/ezprompt",
+    "export_name": "ezprompt_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["ezmd"],
-    "subdirs_to_exclude": ["dev"],
+    "dirs_to_traverse": ["ezprompt"],
+    "subdirs_to_exclude": [".dev"],
     "include_top_level_files": "all",
     "included_extensions": [".py", ".env", ".toml", ".md"],
     "always_exclude_patterns": ["uv.lock", "export.txt", ".log", ".venv", ".gitignore"],

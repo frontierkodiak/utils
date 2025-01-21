@@ -1,11 +1,11 @@
 {
-    "repo_root": "/home/caleb/repo/polliFormer/polliFormer/models",
-    "export_name": "polliFormer_models_export.txt",
+    "repo_root": "/home/caleb/repo/polliFormer",
+    "export_name": "polliFormer-models_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["aggregation", "attention", "blocks", "components", "heads", "normalization", "resolvers", "utils"],
-    "include_top_level_files": "all",
-    "included_extensions": [".py", ".yaml", ".md"],
-    "files_to_exclude": ["ViT_meta.py"],
+    "dirs_to_traverse": ["polliFormer/models", "configs/models", "configs/model"],
+    "include_top_level_files": "none",
+    "included_extensions": [".yaml"],
+    "files_to_exclude": ["export.py", "mFormerV1.py"],
     "always_exclude_patterns": ["export.txt"],
-    "exhaustive_dir_tree": false
+    "exhaustive_dir_tree": true
   }

@@ -2,10 +2,11 @@
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_copap_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["h5data"],
+    "dirs_to_traverse": ["h5data", "aug"],
     "include_top_level_files": "none",
     "included_extensions": [".py", ".yaml"],
-    "files_to_include": ["main_latest.py", "config_utils.py", "config_v5.py", "copap.md"],
+    "files_to_include": ["main.py", "/home/caleb/repo/polliFormer/polliFormer/utils/config_utils.py",
+     "config.py", "/home/caleb/repo/polliFormer/polliFormer/docs/data/copap.md"],
     "files_to_exclude": ["main_v0.py", "main_v1.py", "completed_plans.md"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
