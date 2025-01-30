@@ -11,7 +11,7 @@ This script gathers important ZFS pool and dataset information and writes it to 
    ```
 2. **Add alias to .bashrc**: 
    ```bash
-   echo 'alias stausee-report="/home/caleb/repo/utils/sys/stausee-report.sh"' >> /home/caleb/.bashrc
+   echo 'alias stausee-report="sudo /home/caleb/repo/utils/sys/stausee-report.sh"' >> /home/caleb/.bashrc
    ```
 3. **Source your bashrc** to load the alias: 
    ```bash
@@ -21,9 +21,13 @@ This script gathers important ZFS pool and dataset information and writes it to 
    ```bash
    stausee-report
    ```
-5. **To set up as a cronjob (running every 2 days at 2 AM)**:
+5. **To set up as a cronjob (running every 2 days at 2 AM)**, edit root's crontab:
    ```bash
-   (crontab -l 2>/dev/null; echo "0 2 */2 * * /home/caleb/repo/utils/sys/stausee-report.sh") | crontab -
+   sudo crontab -e
+   ```
+   Add the line:
+   ```
+   0 2 */2 * * /home/caleb/repo/utils/sys/stausee-report.sh
    ```
 
 ### Output
@@ -48,24 +52,26 @@ Reports are retained for 365 days.
 This script checks all drives and saves detailed SMART information, including PARTUUIDs for correlation with ZFS pool devices.
 
 ### Usage
-1. **Create the script**:
-   ```bash
-   sudo mkdir -p /home/caleb/repo/utils/sys
-   sudo nano /home/caleb/repo/utils/sys/smart-report.sh
-   # Paste the script content
-   ```
-2. **Make it executable**:
+1. **Make it executable**:
    ```bash
    chmod +x /home/caleb/repo/utils/sys/smart-report.sh
    ```
-3. **Add the alias**:
+2. **Add alias to .bashrc**: 
    ```bash
-   echo 'alias smart-report="/home/caleb/repo/utils/sys/smart-report.sh"' >> ~/.bashrc
+   echo 'alias smart-report="sudo /home/caleb/repo/utils/sys/smart-report.sh"' >> ~/.bashrc
    source ~/.bashrc
    ```
-4. **To set up as a cronjob (running every 2 days at 2 AM)**:
+3. **Run the script** anytime with:
    ```bash
-   (crontab -l 2>/dev/null; echo "0 2 */2 * * sudo /home/caleb/repo/utils/sys/smart-report.sh") | crontab -
+   smart-report
+   ```
+4. **To set up as a cronjob (running every 2 days at 2 AM)**, edit root's crontab:
+   ```bash
+   sudo crontab -e
+   ```
+   Add the line:
+   ```
+   0 2 */2 * * /home/caleb/repo/utils/sys/smart-report.sh
    ```
 
 ### Output

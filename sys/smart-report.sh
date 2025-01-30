@@ -1,10 +1,9 @@
 #!/bin/bash
 
-# /home/caleb/repo/utils/sys/smart-report.sh
-
-# Check if running with sudo
+# Verify running as root
 if [ "$EUID" -ne 0 ]; then 
-    exec sudo "$0" "$@"
+    echo "Error: This script must be run as root"
+    exit 1
 fi
 
 # Create reports directory if it doesn't exist
@@ -28,7 +27,7 @@ check_drive() {
     
     # Get PARTUUID
     echo "--- PARTUUID ---" >> "$OUTPUT_FILE"
-    local partuuid=$(lsblk -no PARTUUID "${drive}1")
+    local partuuid=$(lsblk -no PARTUUID "${drive}1" 2>/dev/null)
     echo "PARTUUID: $partuuid" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
     
@@ -74,5 +73,3 @@ chown caleb:caleb "$OUTPUT_FILE"
 
 # Keep only the last 365 days of reports
 find "$REPORT_DIR" -name "smart-report-*.txt" -mtime +365 -delete
-
-echo "Report generated at $OUTPUT_FILE"

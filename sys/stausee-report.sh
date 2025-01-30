@@ -1,6 +1,10 @@
 #!/bin/bash
 
-# /home/caleb/repo/utils/sys/stausee-report.sh
+# Verify running as root
+if [ "$EUID" -ne 0 ]; then 
+    echo "Error: This script must be run as root"
+    exit 1
+fi
 
 # Create reports directory if it doesn't exist
 REPORT_DIR="/home/caleb/reports/stausee-pool"
@@ -10,6 +14,9 @@ chown caleb:caleb "$REPORT_DIR"
 # Generate filename with date
 DATE=$(date '+%Y-%m-%d')
 OUTPUT_FILE="$REPORT_DIR/stausee-report-$DATE.txt"
+
+# Ensure the pool is imported
+zpool import stausee-pool 2>/dev/null
 
 echo "=== Stausee Pool Report $(date '+%Y-%m-%d %H:%M:%S') ===" > "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
@@ -52,5 +59,3 @@ chown caleb:caleb "$OUTPUT_FILE"
 
 # Keep only the last 365 days of reports
 find "$REPORT_DIR" -name "stausee-report-*.txt" -mtime +365 -delete
-
-echo "Report generated at $OUTPUT_FILE"

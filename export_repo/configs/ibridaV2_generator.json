@@ -2,12 +2,13 @@
     "repo_root": "/home/caleb/repo/ibrida/ibridaV2/generator",
     "export_name": "ibridaV2_generator.txt",
     "delimiter": "----",
-    "dirs_to_traverse": [],
-    "files_to_include": ["/home/caleb/repo/ibrida/ibridaV2/types/ancestral_levels.py"
+    "dirs_to_traverse": ["merge"],
+    "files_to_include": ["/home/caleb/repo/ibrida/ibridaV2/types/ancestral_levels.py", "/home/caleb/repo/ibrida/ibridaV2/generator/configs/prod/pta_v0r1_hybrid.json",
+    "/home/caleb/repo/ibrida/ibridaV2/generator/configs/prod/pta_non_rg_v0r1_hybrid.json"
     ],
     "files_to_exclude": ["export_per_species_snippet.sh", "/home/caleb/repo/ibrida/ibridaV2/generator/my_inspection.txt"],
     "include_top_level_files": "all",
-    "included_extensions": [".py", ".json"],
+    "included_extensions": [".py", ".json", ".md"],
     "always_exclude_patterns": ["export.txt", ".log"],
     "exhaustive_dir_tree": false
   }

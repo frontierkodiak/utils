@@ -4,7 +4,7 @@
     "delimiter": "----",
     "dirs_to_traverse": ["polliFormer/models", "configs/models", "configs/model"],
     "include_top_level_files": "none",
-    "included_extensions": [".yaml"],
+    "included_extensions": [".py"],
     "files_to_exclude": ["export.py", "mFormerV1.py"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true

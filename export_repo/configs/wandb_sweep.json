@@ -1,0 +1,12 @@
+{
+  "repo_root": "/home/caleb/repo/wandb_docs/content/guides/models/sweeps",
+  "export_name": "wandb_sweep_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["define-sweep-configuration"],
+  "include_top_level_files": "all",
+  "included_extensions": [".md"],
+  "files_to_exclude": ["logger.py"],
+  "subdirs_to_exclude": ["configs/legacy"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}

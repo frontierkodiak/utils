@@ -3,10 +3,11 @@
     "export_name": "ibridaDB_v0r1_export.txt",
     "delimiter": "----",
     "dirs_to_traverse": ["common", "r1"],
-    "files_to_include": ["/home/caleb/repo/ibridaDB/docker/stausee/docker-compose.yml", "/home/caleb/repo/ibridaDB/docker/stausee/entrypoint.sh"],
-    "files_to_exclude": ["export_per_species_snippet.sh"],
+    "files_to_include": ["/home/caleb/repo/ibridaDB/docker/stausee/docker-compose.yml", "/home/caleb/repo/ibridaDB/docker/stausee/entrypoint.sh",
+      "/home/caleb/repo/ibridaDB/dbTools/export/v0/scrap/schemas.md"],
+    "files_to_exclude": ["export_per_species_snippet.sh", "wrapper_amphibia.sh", "wrapper_reptilia.sh", "wrapper_aves.sh", "wrapper.sh", "wrapper_mammalia.sh", "wrapper_dicots.sh", "wrapper_pta.sh", "wrapper_angiospermae.sh"],
     "include_top_level_files": "all",
-    "included_extensions": [".sh", ".md", ".sql"],
-    "always_exclude_patterns": ["export.txt", ".log"],
+    "included_extensions": [".sh", ".sql"],
+    "always_exclude_patterns": ["export.txt", ".log", "wrapper_*"],
     "exhaustive_dir_tree": false
   }
