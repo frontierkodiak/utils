@@ -1,7 +1,7 @@
 Directory tree, stemming from root "ibrida":
-├── density.py
-└── density.sh
-
+├── density.py (114 lines)
+└── density.sh (23)
+---
 ---
 Full Path: density.sh
 
