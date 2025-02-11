@@ -2,11 +2,11 @@
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_train_export.txt",
   "delimiter": "----",
-  "dirs_to_traverse": ["loss", "components", "utils/metrics"],
+  "dirs_to_traverse": ["utils", "loss"],
   "include_top_level_files": "all",
   "included_extensions": [".py"],
-  "files_to_include": ["/home/caleb/repo/polliFormer/polliFormer/utils/wandb.py"],
   "files_to_exclude": ["logger.py"],
+  "files_to_include": ["models/build.py", "models/mFormerV0.py", "h5data/h5dataloader.py", "h5data/vectorized_dataset_processor.py"],
   "subdirs_to_exclude": ["configs/legacy"],
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true

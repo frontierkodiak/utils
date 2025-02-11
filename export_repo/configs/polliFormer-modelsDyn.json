@@ -1,11 +1,16 @@
 {
-    "repo_root": "/home/caleb/repo/polliFormer/polliFormer/models",
-    "export_name": "polliFormer_modelsDyn_export.txt",
-    "delimiter": "----",
-    "dirs_to_traverse": [ "blocks", "attention"],
-    "include_top_level_files": "all",
-    "included_extensions": [".py", ".yaml"],
-    "files_to_include": ["model_factory.py"],
-    "always_exclude_patterns": ["export.txt"],
-    "exhaustive_dir_tree": false
-  }
+  "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+  "export_name": "polliFormer_modelsDyn_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["models"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py"],
+  "files_to_include": ["/home/caleb/repo/polliFormer/polliFormer/utils/config_utils.py", "/home/caleb/repo/polliFormer/polliFormer/utils/autobatch.py",
+  "/home/caleb/repo/polliFormer/polliFormer/h5data/vectorized_dataset_processor.py", "h5data/h5dataloader.py", "h5data/prefetching_hybrid_dataset.py", "aug/cpu/selective_mixup.py",
+"/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_sm.yaml", "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_md.yaml",
+"/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_lg.yaml", "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_xl.yaml"],
+  "files_to_exclude": [],
+  "subdirs_to_exclude": ["configs/legacy"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}

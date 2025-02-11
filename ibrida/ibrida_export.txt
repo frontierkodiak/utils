@@ -1,10 +1,11 @@
-Directory tree, stemming from root "ibrida":
-├── density.py (114 lines)
-└── density.sh (23)
----
----
-Full Path: density.sh
+<codebase_context>
 
+<dirtree: ibrida>
+|-- density.py (114 lines)
+\-- density.sh (23)
+</dirtree: ibrida>
+
+<file: density.sh>
 #!/bin/bash
 
 if [ $# -ne 1 ]; then
@@ -27,11 +28,9 @@ for task in $task_names; do
     percentage=$(awk -v swl="$samples_with_label" -v ts="$total_samples" 'BEGIN {printf "%.2f", (swl / ts) * 100}')
     echo "Task $task_label: $samples_with_label out of $total_samples samples (${percentage}%)"
 done
+</file: density.sh>
 
-
----
-Full Path: density.py
-
+<file: density.py>
 import json
 import sys
 import argparse
@@ -145,11 +144,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(args)
+</file: density.py>
 
-
----
-Full Path: density.sh
-
+<file: density.sh>
 #!/bin/bash
 
 if [ $# -ne 1 ]; then
@@ -172,11 +169,9 @@ for task in $task_names; do
     percentage=$(awk -v swl="$samples_with_label" -v ts="$total_samples" 'BEGIN {printf "%.2f", (swl / ts) * 100}')
     echo "Task $task_label: $samples_with_label out of $total_samples samples (${percentage}%)"
 done
+</file: density.sh>
 
-
----
-Full Path: density.py
-
+<file: density.py>
 import json
 import sys
 import argparse
@@ -290,5 +285,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(args)
+</file: density.py>
 
-
+</codebase_context>

@@ -2,10 +2,11 @@
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_Dyn_export.txt",
   "delimiter": "----",
-  "dirs_to_traverse": ["loss", "utils"],
+  "dirs_to_traverse": ["h5data", "utils/metrics"],
   "include_top_level_files": "all",
   "included_extensions": [".py"],
-  "files_to_exclude": ["main_v0.py", "main_v1.py", "completed_plans.md"],
+  "files_to_include": ["/home/caleb/repo/polliFormer/polliFormer/utils/config_utils.py"],
+  "files_to_exclude": [],
   "subdirs_to_exclude": ["configs/legacy"],
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true

@@ -1,0 +1,10 @@
+{
+    "repo_root": "/home/caleb/repo/ibridaDB/dbTools/ingest/v0",
+    "export_name": "ibridaDB_v0r1_ingest.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["common", "r1", "utils"],
+    "include_top_level_files": "all",
+    "included_extensions": [".sh", ".sql"],
+    "always_exclude_patterns": ["export.txt", ".log", "wrapper_*"],
+    "exhaustive_dir_tree": false
+  }

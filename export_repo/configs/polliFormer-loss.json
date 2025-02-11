@@ -1,12 +1,12 @@
 {
-    "repo_root": "/home/caleb/repo/polliFormer",
-    "export_name": "polliFormer_export.txt",
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer_loss_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["polliFormer"],
-    "subdirs_to_exclude": ["polliFormer/evaluation", "polliFormer/logs", "polliFormer/serving", "polliFormer/tests", "polliFormer/utils/inference"],
+    "dirs_to_traverse": ["loss"],
     "include_top_level_files": "none",
     "included_extensions": [".py"],
     "files_to_exclude": ["README.md", "TODO.md", "mFormerV1.py", "mFormerV1.md", "training.md", "mFormerV1.py", "export.py"],
     "always_exclude_patterns": ["export.txt", ".egg-info", "__pycache__", ".DS_Store"],
-    "exhaustive_dir_tree": true
+    "exhaustive_dir_tree": true,
+    "dump_config": true
   }
