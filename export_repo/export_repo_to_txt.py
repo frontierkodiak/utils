@@ -8,6 +8,20 @@ from nbconvert.preprocessors import ClearOutputPreprocessor
 import xml.etree.ElementTree as ET
 from xml.dom import minidom # For pretty printing XML
 
+# Base paths for different operating systems
+BASE_PATHS = {
+    "Darwin": "/Users/carbon/repo",  # macOS
+    "Windows": r"C:\Users\front\Documents\GitHub",
+    "Linux": "/home/caleb/repo"  # Linux default
+}
+
+# Known Unix-style paths to convert
+UNIX_PATHS_TO_CONVERT = [
+    "/home/caleb/repo",
+    "/home/caleb/Documents/GitHub/",
+    "/Users/caleb/Documents/GitHub"
+]
+
 class PathConverter:
     @staticmethod
     def to_system_path(path: str) -> str:
@@ -57,7 +71,7 @@ class PathConverter:
 
             if platform.system() == "Windows":
                 # Replace known Unix-style base paths with Windows GitHub path
-                for unix_path in ["/home/caleb/repo", "/home/caleb/Documents/GitHub/", "/Users/caleb/Documents/GitHub"]:
+                for unix_path in UNIX_PATHS_TO_CONVERT:
                     if config['repo_root'].startswith(unix_path):
                         relative_path = config['repo_root'][len(unix_path):].lstrip("/")
                         config['repo_root'] = os.path.join(base_path, relative_path)
@@ -735,11 +749,11 @@ def get_base_path() -> str:
     if '--pop' in sys.argv:
         return PathConverter.to_system_path('/home/caleb/Documents/GitHub/')
     elif platform.system() == "Darwin":
-        return PathConverter.to_system_path("/Users/caleb/Documents/GitHub")
+        return PathConverter.to_system_path(BASE_PATHS["Darwin"])
     elif platform.system() == "Windows":
-        return PathConverter.to_system_path(r"C:\Users\front\Documents\GitHub")
+        return PathConverter.to_system_path(BASE_PATHS["Windows"])
     else: # Linux default
-        return PathConverter.to_system_path("/home/caleb/repo")
+        return PathConverter.to_system_path(BASE_PATHS["Linux"])
 
 def load_config(config_filename: str) -> dict:
     """Load configuration from a JSON file."""
