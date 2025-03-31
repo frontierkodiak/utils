@@ -22,6 +22,25 @@ UNIX_PATHS_TO_CONVERT = [
     "/Users/caleb/Documents/GitHub"
 ]
 
+def convert_absolute_path(path: str) -> str:
+    """
+    Convert an absolute path from one system's format to another.
+    Handles known path patterns and converts them appropriately.
+    """
+    if not isinstance(path, str) or not os.path.isabs(path):
+        return path
+
+    # Get the appropriate base path for the current system
+    target_base = get_base_path()
+
+    # Try to convert from known Unix paths
+    for unix_path in UNIX_PATHS_TO_CONVERT:
+        if path.startswith(unix_path):
+            relative_path = path[len(unix_path):].lstrip("/")
+            return os.path.join(target_base, relative_path)
+
+    return path
+
 class PathConverter:
     @staticmethod
     def to_system_path(path: str) -> str:
@@ -29,28 +48,19 @@ class PathConverter:
         Convert the given path to the current system's native format.
         On Windows, forward slashes become backslashes, etc.
         """
-        if not isinstance(path, str): # Ensure path is a string
-             return path # Or handle error appropriately
+        if not isinstance(path, str):
+             return path
 
         if platform.system() == "Windows":
-            # Convert forward slashes to backslashes and handle drive letter
             if path.startswith("/"):
-                 # Simple check for Unix-like absolute paths (e.g. /home/user)
-                 # More robust checking might be needed for edge cases like /c/Users...
                 is_likely_unix_abs = len(path) > 1 and path[1] != ':'
                 if is_likely_unix_abs:
                     path = path.lstrip("/")
-                    if ":" not in path:  # If no drive letter, assume C:? Might be risky. Let's require absolute paths for external dirs on Windows to have drive letters or be UNC.
-                       # For repo_root relative paths, this should be okay.
-                       # Let's assume for now it's relative to C if no drive letter found after stripping /
-                       # This part is tricky and might need refinement based on common user paths.
-                       # A safer bet might be to require explicit drive letters in configs for Windows.
-                       # For now, let's stick to the C: assumption if needed.
+                    if ":" not in path:
                        if not os.path.splitdrive(path)[0]:
-                           path = "C:\\" + path # This was original logic, keep it
+                           path = "C:\\" + path
             return path.replace("/", "\\")
         else:
-            # Convert backslashes to forward slashes for Unix-like systems
             return path.replace("\\", "/")
 
     @staticmethod
@@ -60,33 +70,12 @@ class PathConverter:
         Also normalizes paths within lists.
         """
         if 'repo_root' in config and config['repo_root']:
-            base_path = get_base_path()
-            # Try to resolve repo_root relative to base_path if it's not absolute
-            # This logic might need refinement based on how repo_root is specified
-            potential_repo_root = PathConverter.to_system_path(config['repo_root'])
-            if not os.path.isabs(potential_repo_root):
-                 # Assuming repo_root might be relative to the script or a known base
-                 # Let's stick to the existing logic of resolving against known GitHub paths
-                 pass # Keep existing logic below
-
-            if platform.system() == "Windows":
-                # Replace known Unix-style base paths with Windows GitHub path
-                for unix_path in UNIX_PATHS_TO_CONVERT:
-                    if config['repo_root'].startswith(unix_path):
-                        relative_path = config['repo_root'][len(unix_path):].lstrip("/")
-                        config['repo_root'] = os.path.join(base_path, relative_path)
-                        break
-            elif platform.system() == "Darwin":
-                 # Replace known Linux-style base paths with macOS GitHub path
-                 for linux_path in ["/home/caleb/repo"]:
-                     if config['repo_root'].startswith(linux_path):
-                         relative_path = config['repo_root'][len(linux_path):].lstrip("/")
-                         config['repo_root'] = os.path.join(base_path, relative_path)
-                         break
-            # Add similar logic for Linux if needed (e.g., replacing Windows/Mac paths)
-
+            # First convert the absolute path to the current system's format
+            config['repo_root'] = convert_absolute_path(config['repo_root'])
+            # Then normalize the path format (slashes)
             config['repo_root'] = PathConverter.to_system_path(config['repo_root'])
-            config['repo_root'] = os.path.abspath(config['repo_root']) # Ensure repo_root is absolute
+            # Finally ensure it's absolute
+            config['repo_root'] = os.path.abspath(config['repo_root'])
 
         # Convert path lists
         path_keys = ['dirs_to_traverse', 'subdirs_to_exclude', 'files_to_exclude',
@@ -95,36 +84,27 @@ class PathConverter:
             if key in config and isinstance(config[key], list):
                 normalized_paths = []
                 for p in config[key]:
-                    # Don't normalize absolute paths meant for external inclusion if they look like URLs or special formats
                     if isinstance(p, str) and not p.startswith(('http:', 'https:')):
-                         # If it's an absolute path, just normalize its format
-                         if os.path.isabs(p):
-                              normalized_paths.append(PathConverter.to_system_path(p))
-                         # If it's relative, assume it's relative to repo_root (except for additional_dirs?)
-                         # Let's assume all list paths are relative to repo_root unless explicitly absolute
-                         # For additional_dirs_to_traverse, they MUST be absolute.
-                         elif key != 'additional_dirs_to_traverse':
-                             # Normalize relative path format, but keep it relative
-                             normalized_paths.append(PathConverter.to_system_path(p))
-                         else:
-                              # This case (relative path in additional_dirs_to_traverse) is an error or needs definition
-                              # For now, let's just normalize format, but it likely won't work as expected.
-                              # We should enforce absolute paths for additional_dirs_to_traverse later.
-                              print(f"Warning: Path '{p}' in 'additional_dirs_to_traverse' is relative. It should be absolute. Normalizing format only.")
-                              normalized_paths.append(PathConverter.to_system_path(p))
+                        # Convert absolute paths first
+                        if os.path.isabs(p):
+                            p = convert_absolute_path(p)
+                        # Then normalize the format
+                        normalized_paths.append(PathConverter.to_system_path(p))
                     else:
-                         normalized_paths.append(p) # Keep non-strings or URLs as is
+                        normalized_paths.append(p)
                 config[key] = normalized_paths
-
 
         # Ensure additional_dirs_to_traverse contains absolute paths
         if 'additional_dirs_to_traverse' in config:
             abs_additional_dirs = []
             for p in config.get('additional_dirs_to_traverse', []):
-                 if isinstance(p, str) and os.path.isabs(p):
-                      abs_additional_dirs.append(p)
-                 elif isinstance(p, str):
-                      print(f"Error: Path '{p}' in 'additional_dirs_to_traverse' is not absolute. Skipping.")
+                if isinstance(p, str):
+                    if os.path.isabs(p):
+                        # Convert absolute paths to current system format
+                        p = convert_absolute_path(p)
+                        abs_additional_dirs.append(p)
+                    else:
+                        print(f"Error: Path '{p}' in 'additional_dirs_to_traverse' is not absolute. Skipping.")
             config['additional_dirs_to_traverse'] = abs_additional_dirs
 
         return config
@@ -757,6 +737,10 @@ def get_base_path() -> str:
 
 def load_config(config_filename: str) -> dict:
     """Load configuration from a JSON file."""
+    # Append .json if not present
+    if not config_filename.lower().endswith('.json'):
+        config_filename += '.json'
+
     # Assume config file is relative to the configs dir under the script's base util dir
     script_dir = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(script_dir, "configs", config_filename)
@@ -782,8 +766,6 @@ def load_config(config_filename: str) -> dict:
     try:
         with open(config_path, 'r', encoding='utf-8') as config_file:
             config = json.load(config_file)
-        # Normalize paths within the loaded config *before* returning
-        # config = PathConverter.normalize_config_paths(config) # Moved normalization to init
         return config
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON from {config_path}: {e}")
