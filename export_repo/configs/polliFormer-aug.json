@@ -1,0 +1,11 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer-aug_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["aug"],
+    "include_top_level_files": "none",
+    "included_extensions": [".py"],
+    "files_to_exclude": ["export.py"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

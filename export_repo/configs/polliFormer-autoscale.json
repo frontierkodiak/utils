@@ -1,0 +1,20 @@
+{
+  "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+  "export_name": "polliFormer_autoscale_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["loss","components", "ops_schedule", "utils/logging", "utils/metrics"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py"],
+  "files_to_include": [ "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_hybrid_ft_sm_14.yaml",
+  "/home/caleb/repo/polliFormer/polliFormer/h5data/grouped_batch_sampler.py",
+  "/home/caleb/repo/polliFormer/polliFormer/h5data/h5_dataloader.py",
+    "/home/caleb/repo/polliFormer/polliFormer/utils/schedule_utils.py",
+"utils/param_filters.py", "utils/distributed.py", "utils/checkpoint.py",
+  "/home/caleb/repo/polliFormer/style_guide/metrics.md", "/home/caleb/repo/polliFormer/style_guide/model_metadata.md",
+    "/home/caleb/repo/polliFormer/style_guide/schedule_parameters.md",
+    "/home/caleb/repo/polliFormer/work/active/schedule_reform_PRD.md"],
+  "files_to_exclude": ["console_ui.py", "backblaze.py"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}

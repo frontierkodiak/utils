@@ -1,0 +1,13 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer_debugCOPAP_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["h5data"],
+    "include_top_level_files": "none",
+    "included_extensions": [".py"],
+    "files_to_include": ["main.py", "/home/caleb/repo/polliFormer/polliFormer/utils/config_utils.py",
+     "config.py", "/home/caleb/repo/polliFormer/polliFormer/docs/data/copap.md"],
+    "files_to_exclude": ["dataset_processor.py"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }

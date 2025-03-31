@@ -1,0 +1,15 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer-autoresume_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": [],
+    "dirs_to_exclude": [],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml"],
+    "files_to_exclude": ["export.py", "console_ui.py"],
+    "files_to_include": ["utils/autobatch.py", "utils/wandb.py", "utils/checkpoint.py", "utils/model_utils.py", "utils/config_utils.py",
+    "utils/distributed.py", "utils/metrics/tracker.py", "utils/backblaze.py",
+        "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_hybrid_ft_sm.yaml"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

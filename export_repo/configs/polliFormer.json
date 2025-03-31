@@ -1,9 +1,10 @@
 {
-    "repo_root": "/home/caleb/repo/polliFormer",
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["polliFormer"],
-    "subdirs_to_exclude": ["polliFormer/evaluation", "polliFormer/logs", "polliFormer/serving", "polliFormer/tests", "polliFormer/utils/inference"],
+    "dirs_to_traverse": ["aug", "evaluation", "h5data", "ibrida", "loss", "lr_schedulers", "models", "ops_schedule", "utils",
+        "serving", "tests", "tools"
+    ],
     "include_top_level_files": "none",
     "included_extensions": [".py"],
     "files_to_exclude": ["README.md", "TODO.md", "mFormerV1.py", "mFormerV1.md", "training.md", "mFormerV1.py", "export.py"],

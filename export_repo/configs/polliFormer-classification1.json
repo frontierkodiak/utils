@@ -1,0 +1,21 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer_classification1_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["loss", "models/heads"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py"],
+    "files_to_include": [
+        "h5data/build.py",
+        "h5data/vectorized_dataset_processor.py",
+        "h5data/prefetching_hybrid_dataset.py",
+        "utils/dataset_metadata.py",
+    "models/mFormerV0.py", "models/build.py", "models/model_factory.py", "models/base_model.py",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_0_conditional.yaml",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_0_hsoftmax.yaml",
+    "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_sm.yaml"],
+    "files_to_exclude": ["console_ui.py", "backblaze.py", "optimizer.py", "config.py"],
+    "subdirs_to_exclude": ["utils/inference"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

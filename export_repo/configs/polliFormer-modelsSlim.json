@@ -1,0 +1,18 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer-modelsSlim_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": [],
+    "include_top_level_files": "none",
+    "included_extensions": [".py", ".yaml"],
+    "files_to_include": ["models/mFormerV0.py", "models/build.py", "models/blocks/mb_conv.py", "models/blocks/relative_mhsa.py", "models/blocks/drop_path.py",
+"/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_sm.yaml",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_hybrid_ft_sm_2.yaml",
+    "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_md.yaml", "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_lg.yaml",
+    "utils/checkpoint.py", "utils/model_utils.py",
+    "/home/caleb/repo/polliFormer/dev/papers/Diao et al. - 2022 - MetaFormer A Unified Meta Framework for Fine-Grai.md",
+    "/home/caleb/repo/polliFormer/dev/notes/model/mFormerV1/PRD.md"],
+    "files_to_exclude": ["export.py", "enhanced_mb_conv.py", "console_ui.py"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

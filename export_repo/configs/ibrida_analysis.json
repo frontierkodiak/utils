@@ -1,13 +1,13 @@
 {
     "repo_root": "/home/caleb/repo/ibrida/src/ibrida",
-    "export_name": "ibrida_export.txt",
+    "export_name": "ibrida_analysis_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["generator", "types"],
+    "dirs_to_traverse": ["generator", "types", "analysis"],
     "files_to_include": ["/home/caleb/repo/ibrida/pyproject.toml", "/home/caleb/repo/ibrida/README.md",
     "/home/caleb/repo/ibrida/extra/generator/configs/prod/pta_non_rg_v0r1_hybrid.json"],
     "files_to_exclude": [],
     "include_top_level_files": ["pyproject.toml", "README.md"],
-    "included_extensions": [".py"],
+    "included_extensions": [".py", ".ipynb"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }

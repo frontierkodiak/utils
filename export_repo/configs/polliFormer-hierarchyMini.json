@@ -1,0 +1,16 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer_classificationMini_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["loss", "models/heads"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".md"],
+    "files_to_include": [
+    "models/mFormerV0.py", "models/build.py", "models/model_factory.py", "models/base_model.py",
+    "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_sm.yaml",
+    "/home/caleb/repo/polliFormer/docs/advanced_topics/hierarchical_approaches.md"],
+    "files_to_exclude": ["console_ui.py", "backblaze.py", "optimizer.py", "validation.py"],
+    "subdirs_to_exclude": ["utils/inference"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

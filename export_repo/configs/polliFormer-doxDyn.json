@@ -1,0 +1,16 @@
+{
+  "repo_root": "/home/caleb/repo/polliFormer",
+  "export_name": "polliFormer_doxDyn_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["docs", "style_guide", "polliFormer/ops_schedule", "polliFormer/loss", "polliFormer/utils"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py"],
+  "files_to_include": ["polliFormer/main.py", "polliFormer/config.py",
+    "h5data/build.py","h5data/h5dataloader.py", "h5data/h5_dataloader.py", "h5data/base_prefetching_dataset.py", "h5data/prefetching_hybrid_dataset.py",
+  "utils/schedule_utils.py",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_hybrid_ft_sm_15.yaml"],
+  "files_to_exclude": ["console_ui.py", "backblaze.py", "hpc_utils.py", "dataset_metadata.py", "autobatch.py"],
+  "subdirs_to_exclude": ["polliFormer/utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": false
+}

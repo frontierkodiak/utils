@@ -1,0 +1,11 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer-utils_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["utils"],
+    "include_top_level_files": "none",
+    "included_extensions": [".py", ".yaml"],
+    "files_to_exclude": ["export.py"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

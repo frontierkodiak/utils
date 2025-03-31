@@ -1,0 +1,18 @@
+{
+  "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+  "export_name": "polliFormer_loss3_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["loss", "models/heads"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py", ".md"],
+  "files_to_include": [
+    "models/build.py",
+    "models/mFormerV0.py",
+    "h5data/vectorized_dataset_processor.py",
+    "/home/caleb/repo/polliFormer/work/active/Mar17_25/1_taxonomy_label_smoothing_plan.md"
+  ],
+  "files_to_exclude": ["console_ui.py", "backblaze.py"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}

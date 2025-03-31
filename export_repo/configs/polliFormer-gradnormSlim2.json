@@ -1,0 +1,14 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer_gradnormSlim2_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["loss"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py"],
+    "files_to_include": [
+    "models/mFormerV0.py", "models/heads/utils.py"],
+    "files_to_exclude": ["console_ui.py", "backblaze.py", "optimizer.py", "config.py", "lr_scheduler.py"],
+    "subdirs_to_exclude": ["utils/inference"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }

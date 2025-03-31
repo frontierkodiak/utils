@@ -1,0 +1,14 @@
+{
+  "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+  "export_name": "polliFormer_loggingSlim_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": [],
+  "include_top_level_files": "none",
+  "included_extensions": [".py"],
+  "files_to_include": ["main.py", "ops_schedule.py",
+  "utils/wandb.py", "utils/logging_utils.py", "utils/metrics/tracker.py"],
+  "files_to_exclude": ["console_ui.py", "backblaze.py", "taxAlign.py"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}

@@ -1,0 +1,16 @@
+{
+  "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+  "export_name": "polliFormer_paramFilters_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["loss","components", "utils/logging"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py"],
+  "files_to_include": [ "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_hybrid_ft_sm_14.yaml", 
+"utils/param_filters.py", "utils/distributed.py", "utils/checkpoint.py", "utils/model_utils.py",
+"models/mFormerV0.py", "models/build.py", "models/blocks/mb_conv.py", "models/blocks/relative_mhsa.py", "models/blocks/drop_path.py",
+  "/home/caleb/repo/polliFormer/style_guide/metrics.md"],
+  "files_to_exclude": ["console_ui.py", "backblaze.py"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}

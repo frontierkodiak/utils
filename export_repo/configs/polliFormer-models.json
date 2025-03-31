@@ -1,11 +1,15 @@
 {
-    "repo_root": "/home/caleb/repo/polliFormer",
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer-models_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["polliFormer/models", "configs/model"],
-    "include_top_level_files": "none",
-    "included_extensions": [".py"],
-    "files_to_exclude": ["export.py"],
+    "dirs_to_traverse": ["models"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml"],
+    "files_to_include": ["/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_hybrid.yaml", "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_sm.yaml",
+    "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_md.yaml", "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_lg.yaml",
+    "/home/caleb/repo/polliFormer/dev/notes/model/mFormerV0/reference_MetaFG_meta_implementation.xml", "/home/caleb/repo/polliFormer/dev/notes/model/mFormerV0/reference_methods.md",
+    "/home/caleb/repo/polliFormer/polliFormer/utils/checkpoint.py", "/home/caleb/repo/polliFormer/polliFormer/utils/model_utils.py"],
+    "files_to_exclude": ["export.py", "enhanced_mb_conv.py", "console_ui.py"],
     "always_exclude_patterns": ["export.txt"],
-    "exhaustive_dir_tree": false
+    "exhaustive_dir_tree": true
   }

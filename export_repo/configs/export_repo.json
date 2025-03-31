@@ -4,6 +4,9 @@
     "delimiter": "----",
     "dirs_to_traverse": ["configs"],
     "include_top_level_files": "all",
+    "files_to_include": [
+    "/home/caleb/repo/utils/README.md"
+    ],
     "included_extensions": [".py", ".json"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false

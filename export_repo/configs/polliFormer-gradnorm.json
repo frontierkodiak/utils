@@ -1,23 +1,22 @@
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
-  "export_name": "polliFormer_loss_export.txt",
+  "export_name": "polliFormer_gradnorm_export.txt",
   "delimiter": "----",
-  "dirs_to_traverse": ["loss", "models"],
+  "dirs_to_traverse": ["loss", "ops_schedule", "lr_schedulers"],
   "include_top_level_files": "all",
   "included_extensions": [".py", ".md"],
   "files_to_include": [
+    "optimizers/build.py",
+    "optimizers/multi_optimizer.py",
+    "utils/param_filters.py", "utils/unified_filtering.py",
     "utils/schedule_utils.py",
-    "utils/logging/wandb.py",
-    "utils/metrics/tracker.py",
-    "utils/metrics/metrics.py",
-    "utils/metrics/step_metrics_logger.py",
+    "models/mFormerV0.py",
     "/home/caleb/repo/polliFormer/style_guide/metrics.md",
+    "/home/caleb/repo/polliFormer/style_guide/model_metadata.md",
     "/home/caleb/repo/polliFormer/style_guide/schedule_parameters.md",
     "/home/caleb/repo/polliFormer/docs/training/scheduling.md",
-    "/home/caleb/repo/polliFormer/style_guide/model_metadata.md",
-    "/home/caleb/repo/polliFormer/docs/training/metrics.md",
-    "/home/caleb/repo/polliFormer/docs/evaluation/validation.md",
-    "/home/caleb/repo/polliFormer/docs/evaluation/metrics.md"
+    "/home/caleb/repo/polliFormer/docs/training/metrics.md"
+
   ],
   "files_to_exclude": ["console_ui.py", "backblaze.py"],
   "subdirs_to_exclude": ["utils/inference"],

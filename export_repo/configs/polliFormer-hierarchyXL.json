@@ -1,0 +1,19 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer_classificationXL_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
+    "ops_schedule", "optimizers", "lr_schedulers"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".md"],
+    "files_to_include": [
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_0_conditional_run5.yaml"],
+    "additional_dirs_to_traverse": [
+      "/home/caleb/repo/polliFormer/docs",
+      "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0"
+    ],
+    "files_to_exclude": ["console_ui.py"],
+    "subdirs_to_exclude": ["utils/inference"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

@@ -1,0 +1,18 @@
+{
+    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "export_name": "polliFormer_meta_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["ops_schedule", "utils/metrics", "utils/logging"],
+    "files_to_include": ["h5data/build.py", "h5data/vectorized_dataset_processor.py",
+        "h5data/h5dataloader.py", "h5data/base_prefetching_dataset.py", "h5data/prefetching_hybrid_dataset.py",
+        "utils/meta_utils.py", "utils/schedule_utils.py", "utils/distributed.py",
+        "models/mFormerV0.py",
+        "/home/caleb/repo/polliFormer/style_guide/metrics.md",
+        "/home/caleb/repo/polliFormer/style_guide/model_metadata.md",
+        "/home/caleb/repo/polliFormer/style_guide/schedule_parameters.md"],
+    "files_to_exclude": ["console_ui.py", "backblaze.py", "autobatch.py"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".yaml", ".sh"],
+    "always_exclude_patterns": ["export.txt", "224.yaml", ".bak.py"],
+    "exhaustive_dir_tree": false
+  }

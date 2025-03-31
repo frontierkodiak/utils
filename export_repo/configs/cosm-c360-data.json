@@ -1,0 +1,12 @@
+{
+    "repo_root": "/home/caleb/repo/cosm-c360-tools",
+    "export_name": "cosm-c360-data_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["/datasets/dataZoo/clients/ladybird/batch_0/raw/"],
+    "files_to_include": ["/datasets/dataZoo/clients/ladybird/batch_0/raw/LADYBIRD.xml", "/datasets/dataZoo/clients/ladybird/batch_0/raw/0H/0M/0S/meta.json"],
+    "files_to_exclude": ["ts_to_mp4.py", "TODO.md"],
+    "include_top_level_files": "none",
+    "included_extensions": [".py", ".md", ".toml"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }

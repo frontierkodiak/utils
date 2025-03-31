@@ -1,0 +1,12 @@
+{
+    "repo_root": "/home/caleb/repo/autocropper/src/autocropper",
+    "export_name": "autocropper_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["utils", "evaluation", "models", "/home/caleb/repo/ibrida/deprecated/ibridaV1/s3/postprocess/autocrop"],
+    "files_to_include": ["/home/caleb/repo/autocropper/pyproject.toml", "/home/caleb/repo/autocropper/README.md"],
+    "files_to_exclude": [],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".md"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }
