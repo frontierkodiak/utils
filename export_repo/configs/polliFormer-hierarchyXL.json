@@ -5,9 +5,12 @@
     "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
     "ops_schedule", "optimizers", "lr_schedulers"],
     "include_top_level_files": "all",
-    "included_extensions": [".py", ".md"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml"],
     "files_to_include": [
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_0_conditional_run5.yaml"],
+      "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_0_conditional_run10.yaml",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_0_conditional_run11.yaml",
+    "/home/caleb/repo/polliFormer/tools/filter_logs.py"
+    ],
     "additional_dirs_to_traverse": [
       "/home/caleb/repo/polliFormer/docs",
       "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0"

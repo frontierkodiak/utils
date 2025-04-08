@@ -3,11 +3,11 @@
     "export_name": "ibrida_export.txt",
     "delimiter": "----",
     "dirs_to_traverse": ["generator", "types"],
-    "files_to_include": ["/home/caleb/repo/ibrida/pyproject.toml", "/home/caleb/repo/ibrida/README.md",
-    "/home/caleb/repo/ibrida/extra/generator/configs/prod/pta_non_rg_v0r1_hybrid.json"],
+    "files_to_include": ["/home/caleb/repo/ibrida/pyproject.toml", "/home/caleb/repo/ibrida/README.md"],
     "files_to_exclude": [],
     "include_top_level_files": ["pyproject.toml", "README.md"],
-    "included_extensions": [".py"],
+    "included_extensions": [".py", ".json"],
     "always_exclude_patterns": ["export.txt"],
+    "additional_dirs_to_traverse": ["/home/caleb/repo/ibrida/extra/generator/configs"],
     "exhaustive_dir_tree": true
   }
