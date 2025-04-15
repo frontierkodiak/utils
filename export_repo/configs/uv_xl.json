@@ -1,0 +1,33 @@
+{
+  "repo_root": "/home/caleb/repo/uv",
+  "output_dir": "/home/caleb/repo/utils/export_repo/context",
+  "export_name": "uv_xl_export.xml",
+  "include_top_level_files": ["README.md"],
+  "dirs_to_traverse": [
+    "docs"
+  ],
+  "files_to_include": [],
+  "dirs_for_tree": ["docs"],
+  "included_extensions": [".md"],
+  "subdirs_to_exclude": [],
+  "files_to_exclude": [
+    "STYLE.md",
+    "docs/index.md",
+    "docs/getting-started/index.md",
+    "docs/concepts/index.md",
+    "docs/concepts/projects/index.md",
+    "docs/configuration/index.md",
+    "docs/guides/index.md",
+    "docs/guides/integration/index.md",
+    "docs/pip/index.md",
+    "docs/reference/index.md",
+    "docs/reference/policies/index.md",
+    "docs/reference/troubleshooting/index.md",
+    "docs/reference/resolver-internals.md",
+    "docs/reference/benchmarks.md"
+  ],
+  "always_exclude_patterns": ["export.xml", "uv_mini_export.xml", "uv_med_export.xml", "uv_xl_export.xml"],
+  "depth": -1,
+  "exhaustive_dir_tree": true,
+  "dump_config": false
+} 

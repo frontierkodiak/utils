@@ -1,0 +1,14 @@
+{
+    "repo_root": "/home/caleb/repo/uv",
+    "export_name": "uv_docs_raw_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["docs"],
+    "include_top_level_files": "none",
+    "files_to_include": [
+    "/home/caleb/repo/uv/README.md",
+    "/home/caleb/repo/uv/STYLE.md"
+    ],
+    "included_extensions": [".md"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

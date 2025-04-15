@@ -140,8 +140,10 @@ class RepoExporter:
 
         # Runtime attributes
         self.config_filename = config_filename
-        self.output_file = self.get_output_file_path()
-        self.files_to_exclude.append(os.path.basename(self.output_file)) # Exclude self
+        self.output_dir = config.get('output_dir', None)  # New line
+        if self.output_dir:  # New block
+            self.output_dir = PathConverter.to_system_path(os.path.abspath(self.output_dir))
+        self.output_file = self.get_output_file_path()  # This line should come AFTER output_dir is set
 
         # --- Content Buffering ---
         # Store tuples: (display_path, absolute_path, content, is_ipynb_converted)
@@ -154,15 +156,24 @@ class RepoExporter:
 
     def get_output_file_path(self) -> str:
         """
-        Return the absolute path for the export file, handling relative/absolute export_name.
+        Return the absolute path for the export file, handling relative/absolute export_name
+        and optional output_dir.
         """
         path = PathConverter.to_system_path(self.export_name)
         if os.path.isabs(path):
+            # If export_name is absolute, use it directly (ignore output_dir)
+            print(f"Warning: 'export_name' ({self.export_name}) is absolute. Ignoring 'output_dir'.")
             return path
+        elif self.output_dir:
+            # If output_dir is set, join it with the relative export_name
+            if not os.path.exists(self.output_dir):  # Create output dir if needed
+                print(f"Creating output directory: {self.output_dir}")
+                os.makedirs(self.output_dir, exist_ok=True)
+            return os.path.abspath(os.path.join(self.output_dir, path))
         else:
-            # Ensure repo_root is valid before joining
+            # Fallback to original behavior: relative to repo_root
             if not self.repo_root or not os.path.isdir(self.repo_root):
-                 raise ValueError(f"Repo root '{self.repo_root}' is invalid or not specified.")
+                raise ValueError(f"Repo root '{self.repo_root}' is invalid or not specified, and no 'output_dir' was provided.")
             return os.path.abspath(os.path.join(self.repo_root, path))
 
     def convert_ipynb_to_md(self, notebook_content: str) -> str:
