@@ -1,0 +1,14 @@
+{
+  "repo_root": "/home/caleb/repo/ConvNeXt",
+  "export_name": "convnext_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["models"],
+  "include_top_level_files": "all",
+  "included_extensions": [".py", ".md", ".txt"],
+  "subdirs_to_exclude": ["__pycache__", ".git", ".venv", ".vscode"],
+  "files_to_exclude": [],
+  "always_exclude_patterns": ["*.pyc", "*.pyo", "*.pyd", "*.so", "*.dylib", "*.dll", "*.log", "*.swp", "*.swo", "*.DS_Store"],
+  "depth": -1,
+  "exhaustive_dir_tree": true,
+  "dump_config": false
+}

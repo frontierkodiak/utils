@@ -1,0 +1,21 @@
+{
+  "repo_root": "/home/caleb/repo/flash-attention/",
+  "export_name": "flash-attn_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["flash_attn/modules", "flash_attn/layers"],
+  "include_top_level_files": "none",
+  "included_extensions": [".py", ".md", ".txt"],
+  "subdirs_to_exclude": ["__pycache__", ".git", ".venv", ".vscode"],
+  "files_to_exclude": [],
+  "files_to_include": ["/home/caleb/repo/flash-attention/README.md",
+    "/home/caleb/repo/flash-attention/usage.md",
+    "/home/caleb/repo/flash-attention/flash_attn/flash_attn_interface.py",
+    "/home/caleb/repo/flash-attention/flash_attn/models/vit.py",
+    "flash_attn/utils/distributed.py",
+    "/home/caleb/repo/flash-attention/tests/test_rotary.py",
+    "/home/caleb/repo/flash-attention/tests/layers/test_rotary.py"],
+  "always_exclude_patterns": ["*.pyc", "*.pyo", "*.pyd", "*.so", "*.dylib", "*.dll", "*.log", "*.swp", "*.swo", "*.DS_Store"],
+  "depth": -1,
+  "exhaustive_dir_tree": true,
+  "dump_config": false
+}

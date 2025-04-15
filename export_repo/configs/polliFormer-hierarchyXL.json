@@ -7,13 +7,14 @@
     "include_top_level_files": "all",
     "included_extensions": [".py", ".md", ".txt", ".yaml"],
     "files_to_include": [
-      "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_0_conditional_run10.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_0_conditional_run11.yaml",
-    "/home/caleb/repo/polliFormer/tools/filter_logs.py"
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_mFormerV1_sm_run2.yaml",
+    "/home/caleb/repo/polliFormer/polliFormer/tools/inspect_checkpoints.py"
     ],
     "additional_dirs_to_traverse": [
       "/home/caleb/repo/polliFormer/docs",
-      "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0"
+      "/home/caleb/repo/polliFormer/configs/model/archs",
+      "/home/caleb/repo/polliFormer/extra/mFormerV1_ckpt_inspections",
+      "/home/caleb/repo/polliFormer/tools"
     ],
     "files_to_exclude": ["console_ui.py"],
     "subdirs_to_exclude": ["utils/inference"],
