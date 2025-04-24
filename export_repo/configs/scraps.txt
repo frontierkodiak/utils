@@ -1,0 +1,9 @@
+    "/home/caleb/repo/uv/docs/concepts/projects/dependencies.md",
+    "/home/caleb/repo/uv/docs/configuration/authentication.md",
+    "/home/caleb/repo/uv/docs/configuration/environment.md",
+    "/home/caleb/repo/uv/docs/guides/projects.md",
+    "/home/caleb/repo/uv/docs/guides/scripts.md",
+    "/home/caleb/repo/uv/docs/guides/tools.md",
+    "/home/caleb/repo/uv/docs/guides/integration/docker.md",
+    "/home/caleb/repo/uv/docs/guides/integration/torch.md",
+    "/home/caleb/repo/uv/docs/guides/integration/github.md"

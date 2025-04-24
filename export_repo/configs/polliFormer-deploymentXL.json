@@ -3,26 +3,21 @@
     "export_name": "polliFormer_deploymentXL_export.txt",
     "delimiter": "----",
     "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
-    "ops_schedule", "optimizers", "lr_schedulers"],
-    "include_top_level_files": "all",
-    "included_extensions": [".py", ".md", ".txt", ".yaml"],
+    "ops_schedule", "optimizers", "lr_schedulers", "tools"],
+    "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh"],
     "files_to_include": [
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_mFormerV1_sm_run2.yaml",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run4.yaml",
     "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_aves_mFormerV1_md_run2.yaml",
-    "/home/caleb/repo/polliFormer/polliFormer/tools/inspect_checkpoints.py",
-    "/home/caleb/repo/ibrida/extra/generator/configs/prod/amphibia_v0r1_full_hybrid_384.json",
-    "/home/caleb/repo/ibrida/extra/generator/configs/prod/amphibia_v0r1_mini_hybrid_384.json",
-    "/home/caleb/repo/ibrida/extra/generator/configs/prod/angiospermae_v0r1_full_hybrid_384.json",
-    "/home/caleb/repo/ibrida/extra/generator/configs/prod/aves_v0r1_full_hybrid_384.json",
-    "/home/caleb/repo/ibrida/extra/generator/configs/prod/mammalia_v0r1_full_hybrid_384.json",
-    "/home/caleb/repo/ibrida/extra/generator/configs/prod/reptilia_v0r1_full_hybrid_384.json"
+    "/home/caleb/repo/polliFormer/tools/docker/Dockerfile",
+    "/home/caleb/repo/polliFormer/polliFormer/requirements.txt",
+    "/home/caleb/repo/polliFormer/work/active/assets/dataset_sizes.json"
     ],
     "additional_dirs_to_traverse": [
       "/home/caleb/repo/polliFormer/docs",
       "/home/caleb/repo/polliFormer/configs/model/archs",
-      "/home/caleb/repo/polliFormer/extra/mFormerV1_ckpt_inspections",
       "/home/caleb/repo/polliFormer/tools",
-      "/home/caleb/repo/ibrida/src/ibrida/utils"
+      "/home/caleb/repo/polliFormer/dev/deployment/hyperbolic"
     ],
     "files_to_exclude": ["console_ui.py"],
     "subdirs_to_exclude": ["utils/inference"],
