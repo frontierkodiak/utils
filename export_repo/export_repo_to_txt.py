@@ -1,3 +1,4 @@
+# --- START OF FILE export_repo_to_txt.py ---
 import platform
 import os
 import json
@@ -5,8 +6,16 @@ import sys
 import nbformat
 from nbconvert import MarkdownExporter
 from nbconvert.preprocessors import ClearOutputPreprocessor
-import xml.etree.ElementTree as ET
-from xml.dom import minidom # For pretty printing XML
+import xml.sax.saxutils as saxutils # For escaping attribute values safely
+import math
+
+# Attempt to import tiktoken, provide guidance if missing
+try:
+    import tiktoken
+except ImportError:
+    print("Tiktoken library not found. Token counts will not be generated.")
+    print("Please install it: pip install tiktoken")
+    tiktoken = None
 
 # Base paths for different operating systems
 BASE_PATHS = {
@@ -39,7 +48,27 @@ def convert_absolute_path(path: str) -> str:
             relative_path = path[len(unix_path):].lstrip("/")
             return os.path.join(target_base, relative_path)
 
+    # If path starts with C:\Users\front\Documents\GitHub and we are on macOS/Linux, convert it
+    windows_base = r"C:\Users\front\Documents\GitHub"
+    if path.startswith(windows_base) and platform.system() != "Windows":
+        relative_path = path[len(windows_base):].lstrip("\\")
+        return os.path.join(target_base, relative_path.replace("\\", "/"))
+
+    # If path starts with /Users/carbon/repo and we are on Windows/Linux, convert it
+    macos_base = "/Users/carbon/repo"
+    if path.startswith(macos_base) and platform.system() != "Darwin":
+        relative_path = path[len(macos_base):].lstrip("/")
+        return os.path.join(target_base, relative_path)
+
+    # If path starts with /home/caleb/repo and we are on Windows/macOS, convert it
+    linux_base = "/home/caleb/repo"
+    if path.startswith(linux_base) and platform.system() not in ["Linux", "Pop!_OS"]: # Assuming Pop!_OS reports as Linux
+        relative_path = path[len(linux_base):].lstrip("/")
+        return os.path.join(target_base, relative_path)
+
+    # If no specific conversion matched, assume it's already in a usable format or doesn't need conversion
     return path
+
 
 class PathConverter:
     @staticmethod
@@ -47,37 +76,53 @@ class PathConverter:
         """
         Convert the given path to the current system's native format.
         On Windows, forward slashes become backslashes, etc.
+        Uses os.path.normpath for robustness.
         """
         if not isinstance(path, str):
              return path
 
+        # Normalize separators first
         if platform.system() == "Windows":
-            if path.startswith("/"):
-                is_likely_unix_abs = len(path) > 1 and path[1] != ':'
-                if is_likely_unix_abs:
-                    path = path.lstrip("/")
-                    if ":" not in path:
-                       if not os.path.splitdrive(path)[0]:
-                           path = "C:\\" + path
-            return path.replace("/", "\\")
+            # Prioritize converting known Unix roots if they somehow slipped through
+            if path.startswith('/'):
+                 is_likely_unix_abs = len(path) > 1 and path[1] != ':'
+                 if is_likely_unix_abs:
+                     # Attempt conversion based on known patterns first might be needed here too
+                     # For simplicity, assuming initial conversion handled most cases.
+                     # Just normalize for now.
+                     pass # The normpath should handle this if it's like /c/Users/...
+
+            normalized_path = path.replace("/", "\\")
         else:
-            return path.replace("\\", "/")
+            normalized_path = path.replace("\\", "/")
+
+        # Use os.path.normpath to clean up separators, handle ., .. etc.
+        # This can change the path semantics slightly if not careful (e.g., removing trailing slash)
+        # but generally makes paths more canonical.
+        try:
+            # normpath can fail on invalid Windows paths like 'C:file.txt'
+            final_path = os.path.normpath(normalized_path)
+        except ValueError:
+             # Handle cases where normpath might fail on Windows
+             print(f"Warning: os.path.normpath failed for path: {normalized_path}. Using original.")
+             final_path = normalized_path
+
+        return final_path
 
     @staticmethod
     def normalize_config_paths(config: dict) -> dict:
         """
         Normalize all relevant paths in the config to the current system's format.
-        Also normalizes paths within lists.
+        Also normalizes paths within lists. Ensures repo_root is absolute.
         """
         if 'repo_root' in config and config['repo_root']:
-            # First convert the absolute path to the current system's format
+            # 1. Convert known absolute paths from other systems
             config['repo_root'] = convert_absolute_path(config['repo_root'])
-            # Then normalize the path format (slashes)
+            # 2. Convert slashes/backslashes to native format and normalize
             config['repo_root'] = PathConverter.to_system_path(config['repo_root'])
-            # Finally ensure it's absolute
+            # 3. Ensure it's absolute
             config['repo_root'] = os.path.abspath(config['repo_root'])
 
-        # Convert path lists
         path_keys = ['dirs_to_traverse', 'subdirs_to_exclude', 'files_to_exclude',
                      'files_to_include', 'additional_dirs_to_traverse', 'dirs_for_tree']
         for key in path_keys:
@@ -85,29 +130,45 @@ class PathConverter:
                 normalized_paths = []
                 for p in config[key]:
                     if isinstance(p, str) and not p.startswith(('http:', 'https:')):
-                        # Convert absolute paths first
+                        path_to_normalize = p
+                        # Convert absolute paths first if possible
                         if os.path.isabs(p):
-                            p = convert_absolute_path(p)
-                        # Then normalize the format
-                        normalized_paths.append(PathConverter.to_system_path(p))
+                           path_to_normalize = convert_absolute_path(p)
+                        # Normalize format (slashes) and structure
+                        normalized_paths.append(PathConverter.to_system_path(path_to_normalize))
                     else:
-                        normalized_paths.append(p)
+                        normalized_paths.append(p) # Keep non-strings or URLs as is
                 config[key] = normalized_paths
+
+        # Handle output_dir similarly
+        if 'output_dir' in config and config['output_dir']:
+             config['output_dir'] = convert_absolute_path(config['output_dir'])
+             config['output_dir'] = PathConverter.to_system_path(config['output_dir'])
+             # Ensure output_dir is absolute *after* potential joining later
+             # We don't make it absolute here because it might be relative to repo_root
 
         # Ensure additional_dirs_to_traverse contains absolute paths
         if 'additional_dirs_to_traverse' in config:
             abs_additional_dirs = []
             for p in config.get('additional_dirs_to_traverse', []):
                 if isinstance(p, str):
-                    if os.path.isabs(p):
-                        # Convert absolute paths to current system format
-                        p = convert_absolute_path(p)
-                        abs_additional_dirs.append(p)
-                    else:
-                        print(f"Error: Path '{p}' in 'additional_dirs_to_traverse' is not absolute. Skipping.")
+                    abs_p = p
+                    if not os.path.isabs(abs_p):
+                        # Assume relative to repo_root if not absolute
+                        print(f"Warning: Path '{p}' in 'additional_dirs_to_traverse' is relative. Assuming relative to repo_root: {config.get('repo_root', 'MISSING')}")
+                        if config.get('repo_root'):
+                             abs_p = os.path.join(config['repo_root'], p)
+                        else:
+                             print(f"Error: Cannot resolve relative path '{p}' because repo_root is not defined. Skipping.")
+                             continue
+
+                    abs_p = convert_absolute_path(abs_p) # Convert cross-system absolute
+                    abs_p = PathConverter.to_system_path(abs_p) # Normalize format
+                    abs_additional_dirs.append(os.path.abspath(abs_p)) # Ensure absolute
             config['additional_dirs_to_traverse'] = abs_additional_dirs
 
         return config
+
 
 class RepoExporter:
     def __init__(self, config: dict, config_filename: str = None):
@@ -120,61 +181,95 @@ class RepoExporter:
 
         self.repo_root = config['repo_root']
         self.export_name = config['export_name']
-        # self.delimiter = config['delimiter'] # No longer needed for XML
         self.dirs_to_traverse = config.get('dirs_to_traverse', [])
-        self.include_top_level_files = config.get('include_top_level_files', 'none') # Default to none if missing
-        self.included_extensions = config.get('included_extensions', []) # Default empty list
+        self.include_top_level_files = config.get('include_top_level_files', 'none')
+        self.included_extensions = config.get('included_extensions', [])
         self.subdirs_to_exclude = config.get('subdirs_to_exclude', [])
         self.files_to_exclude = config.get('files_to_exclude', [])
         self.depth = config.get('depth', -1)
         self.dump_config = config.get('dump_config', False)
         self.exhaustive_dir_tree = config.get('exhaustive_dir_tree', False)
         self.files_to_include = config.get('files_to_include', [])
-        self.additional_dirs_to_traverse = config.get('additional_dirs_to_traverse', []) # New field
+        self.additional_dirs_to_traverse = config.get('additional_dirs_to_traverse', [])
         self.always_exclude_patterns = config.get('always_exclude_patterns', ['export.txt'])
         self.dirs_for_tree = config.get('dirs_for_tree', [])
 
         # Hardcoded blacklists
-        self.blacklisted_dirs = ['__pycache__', '.git', '.venv', '.vscode']
-        self.blacklisted_files = ['uv.lock', 'LICENSE']
+        self.blacklisted_dirs = ['__pycache__', '.git', '.venv', '.vscode', 'node_modules', 'build', 'dist']
+        self.blacklisted_files = ['uv.lock', 'LICENSE', '.DS_Store', '*.pyc', '*.swp', '*.swo'] # Added common ignores
 
         # Runtime attributes
         self.config_filename = config_filename
-        self.output_dir = config.get('output_dir', None)  # New line
-        if self.output_dir:  # New block
-            self.output_dir = PathConverter.to_system_path(os.path.abspath(self.output_dir))
-        self.output_file = self.get_output_file_path()  # This line should come AFTER output_dir is set
+        self.output_dir = config.get('output_dir', None)
+        if self.output_dir:
+            # Ensure output_dir is absolute. If it wasn't absolute in config, assume relative to CWD.
+            if not os.path.isabs(self.output_dir):
+                self.output_dir = os.path.abspath(os.path.join(os.getcwd(), self.output_dir))
+            else:
+                 self.output_dir = os.path.abspath(self.output_dir) # Handles normalization if already absolute
 
-        # --- Content Buffering ---
+        self.output_file = self.get_output_file_path()
+
+        # Add output file itself to exclusion patterns dynamically
+        output_filename = os.path.basename(self.output_file)
+        if output_filename not in self.always_exclude_patterns:
+             self.always_exclude_patterns.append(output_filename)
+
+        # Tiktoken Initializer
+        self.tokenizer = None
+        if tiktoken:
+            try:
+                self.tokenizer = tiktoken.get_encoding("o200k_base")
+            except Exception as e:
+                print(f"Warning: Failed to initialize tiktoken tokenizer 'o200k_base'. Token counts unavailable. Error: {e}")
+                self.tokenizer = None
+
+        # --- Content Buffering & Stats ---
         # Store tuples: (display_path, absolute_path, content, is_ipynb_converted)
-        # display_path is relative for files under repo_root, absolute otherwise
         self.buffered_files = []
         self.exported_files_count = {}
         self.total_lines = 0
+        self.total_tokens = 0
         self.line_counts_by_file = {} # Uses display_path as key
+        self.token_counts_by_file = {} # Uses display_path as key
         self.line_counts_by_dir = {}  # Uses display_path segments as keys
+        self.token_counts_by_dir = {} # Uses display_path segments as keys
+
 
     def get_output_file_path(self) -> str:
         """
         Return the absolute path for the export file, handling relative/absolute export_name
         and optional output_dir.
         """
+        # Normalize export_name path separators first
         path = PathConverter.to_system_path(self.export_name)
+
         if os.path.isabs(path):
-            # If export_name is absolute, use it directly (ignore output_dir)
-            print(f"Warning: 'export_name' ({self.export_name}) is absolute. Ignoring 'output_dir'.")
-            return path
+            print(f"Warning: 'export_name' ({self.export_name}) is absolute. Ignoring 'output_dir' if set.")
+            output_path = os.path.abspath(path) # Ensure it's truly absolute and normalized
         elif self.output_dir:
-            # If output_dir is set, join it with the relative export_name
-            if not os.path.exists(self.output_dir):  # Create output dir if needed
+            if not os.path.exists(self.output_dir):
                 print(f"Creating output directory: {self.output_dir}")
-                os.makedirs(self.output_dir, exist_ok=True)
-            return os.path.abspath(os.path.join(self.output_dir, path))
+                try:
+                    os.makedirs(self.output_dir, exist_ok=True)
+                except OSError as e:
+                    raise ValueError(f"Failed to create output directory '{self.output_dir}': {e}")
+            output_path = os.path.abspath(os.path.join(self.output_dir, path))
         else:
-            # Fallback to original behavior: relative to repo_root
             if not self.repo_root or not os.path.isdir(self.repo_root):
-                raise ValueError(f"Repo root '{self.repo_root}' is invalid or not specified, and no 'output_dir' was provided.")
-            return os.path.abspath(os.path.join(self.repo_root, path))
+                raise ValueError(f"Repo root '{self.repo_root}' is invalid or not specified, and no 'output_dir' was provided for relative export_name.")
+            output_path = os.path.abspath(os.path.join(self.repo_root, path))
+
+        # Ensure the directory for the output file exists
+        output_file_dir = os.path.dirname(output_path)
+        if not os.path.exists(output_file_dir):
+             print(f"Creating directory for output file: {output_file_dir}")
+             try:
+                 os.makedirs(output_file_dir, exist_ok=True)
+             except OSError as e:
+                 raise ValueError(f"Failed to create directory for output file '{output_path}': {e}")
+
+        return output_path
 
     def convert_ipynb_to_md(self, notebook_content: str) -> str:
         """
@@ -189,34 +284,48 @@ class RepoExporter:
             return markdown_content
         except Exception as e:
             print(f"Error converting ipynb: {e}")
-            return f"<!-- Error converting notebook: {e} -->\n{notebook_content}" # Return original content with error comment
+            return f"<!-- Error converting notebook: {e} -->\n{notebook_content}"
 
     def buffer_file_content(self, absolute_path: str):
         """
-        Reads, processes (ipynb), and stores file content in memory buffer.
-        Updates line counts and statistics.
+        Reads, processes (ipynb), calculates stats, and stores file content in memory buffer.
+        Updates line/token counts and statistics.
         Determines the display path (relative or absolute).
         """
         if not os.path.isfile(absolute_path):
             print(f"Warning: Skipping non-file path provided to buffer_file_content: {absolute_path}")
             return
 
-        # Determine display path (relative if under repo_root, else absolute)
+        # Determine display path (relative if under repo_root, else absolute normalized)
         display_path = absolute_path
-        if absolute_path.startswith(self.repo_root + os.sep):
-            display_path = os.path.relpath(absolute_path, self.repo_root)
-        display_path = PathConverter.to_system_path(display_path) # Normalize for consistency
+        try:
+            # Use normpath to handle potential differences in how paths are constructed (e.g. //)
+            norm_repo_root = os.path.normpath(self.repo_root)
+            norm_abs_path = os.path.normpath(absolute_path)
 
-        # --- Apply Filters ---
+            # Check prefix using normalized paths
+            if norm_abs_path.startswith(norm_repo_root + os.sep):
+                 display_path = os.path.relpath(norm_abs_path, norm_repo_root)
+            # Ensure display_path uses consistent separators
+            display_path = PathConverter.to_system_path(display_path)
+        except ValueError as e:
+             # Handle potential errors if paths are malformed (e.g., on Windows with mixed separators)
+             print(f"Warning: Could not determine relative path for {absolute_path} against {self.repo_root}. Using absolute path. Error: {e}")
+             display_path = PathConverter.to_system_path(absolute_path)
+
+
         if self.should_exclude_file(absolute_path, display_path):
-             # print(f"Debug: Excluding file based on rules: {display_path}") # Debugging line
              return
 
-        file_extension = os.path.splitext(absolute_path)[1]
-        if self.included_extensions != 'all' and file_extension not in self.included_extensions:
-             # print(f"Debug: Excluding file based on extension: {display_path}") # Debugging line
+        file_extension = os.path.splitext(absolute_path)[1].lower() # Use lower for case-insensitivity
+        # Normalize included extensions if it's a list
+        normalized_included_extensions = self.included_extensions
+        if isinstance(normalized_included_extensions, list):
+            normalized_included_extensions = [ext.lower() for ext in normalized_included_extensions]
+
+
+        if normalized_included_extensions != 'all' and file_extension not in normalized_included_extensions:
              return
-        # --- End Filters ---
 
         try:
             with open(absolute_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -227,79 +336,88 @@ class RepoExporter:
                 content = self.convert_ipynb_to_md(content)
                 is_ipynb_converted = True
 
-            # Check if already buffered (can happen with files_to_include)
             if any(bf[1] == absolute_path for bf in self.buffered_files):
                  return # Already processed
 
             # Update stats
-            extension = os.path.splitext(absolute_path)[1] or "._no_extension_"
-            self.exported_files_count[extension] = self.exported_files_count.get(extension, 0) + 1
             line_count = content.count('\n') + 1
+            token_count = 0
+            if self.tokenizer:
+                try:
+                    token_count = len(self.tokenizer.encode(content))
+                except Exception as e:
+                    print(f"Warning: Tiktoken failed to encode content for {display_path}. Error: {e}")
+
+            ext_key = file_extension or "._no_extension_" # Handle files without extension
+            self.exported_files_count[ext_key] = self.exported_files_count.get(ext_key, 0) + 1
             self.total_lines += line_count
+            self.total_tokens += token_count
             self.line_counts_by_file[display_path] = line_count
+            self.token_counts_by_file[display_path] = token_count # Store token count
 
             # Store
             self.buffered_files.append((display_path, absolute_path, content, is_ipynb_converted))
-            # print(f"Debug: Buffering file: {display_path}") # Debugging line
 
         except Exception as e:
-            print(f"Error reading file {absolute_path}: {e}")
+            print(f"Error reading or processing file {absolute_path}: {e}")
+
 
     def should_exclude_file(self, absolute_path: str, display_path: str) -> bool:
-        """
-        Check if a file should be excluded based on various rules.
-        Uses absolute_path for existence checks, display_path for pattern matching if relative.
-        """
+        """Check if a file should be excluded based on various rules."""
         filename = os.path.basename(absolute_path)
 
         # 1. Hardcoded blacklist (basename)
         if filename in self.blacklisted_files:
             return True
 
-        # 2. Always exclude patterns (basename suffix)
-        if any(filename.endswith(pattern) for pattern in self.always_exclude_patterns):
-            return True
-
-        # 3. files_to_exclude (relative path suffix match *if* display_path is relative)
-        # This rule is tricky for external files. Let's apply it only if the display_path looks relative.
-        is_relative = not os.path.isabs(display_path)
-        if is_relative and any(display_path.endswith(exclude) for exclude in self.files_to_exclude):
+        # 2. Always exclude patterns (basename or suffix matching)
+        if any(filename == pattern or filename.endswith(pattern.lstrip('*')) for pattern in self.always_exclude_patterns):
              return True
 
-        # 4. Output file check (basename) - redundant? Added to files_to_exclude in init.
-        if filename == os.path.basename(self.output_file):
+        # 3. files_to_exclude (match against display_path)
+        # This checks if the display_path *ends with* one of the exclusion paths.
+        # Normalize separators for comparison.
+        norm_display_path = PathConverter.to_system_path(display_path)
+        if any(norm_display_path == PathConverter.to_system_path(exclude) or
+               norm_display_path.endswith(os.sep + PathConverter.to_system_path(exclude))
+               for exclude in self.files_to_exclude):
              return True
 
         return False
 
     def should_exclude_dir(self, absolute_dir_path: str) -> bool:
-        """
-        Check if a directory should be excluded during traversal.
-        Relies on paths relative to repo_root for subdirs_to_exclude.
-        """
+        """Check if a directory should be excluded during traversal."""
         dir_name = os.path.basename(absolute_dir_path)
 
-        # 1. Hardcoded blacklist (basename)
         if dir_name in self.blacklisted_dirs:
             return True
 
-        # 2. subdirs_to_exclude (relative path prefix match *if* under repo_root)
-        # This won't reliably exclude external dirs based on relative patterns.
-        if absolute_dir_path.startswith(self.repo_root + os.sep):
-            relative_path = os.path.relpath(absolute_dir_path, self.repo_root)
-            relative_path = PathConverter.to_system_path(relative_path) # Normalize for comparison
-            if any(relative_path.startswith(PathConverter.to_system_path(exclude.rstrip('*' + os.sep)))
-                   for exclude in self.subdirs_to_exclude):
-                return True
+        # subdirs_to_exclude check (relative path prefix match *if* under repo_root)
+        try:
+            norm_repo_root = os.path.normpath(self.repo_root)
+            norm_abs_dir_path = os.path.normpath(absolute_dir_path)
+
+            if norm_abs_dir_path.startswith(norm_repo_root + os.sep):
+                 relative_path = os.path.relpath(norm_abs_dir_path, norm_repo_root)
+                 relative_path = PathConverter.to_system_path(relative_path) # Normalize for comparison
+
+                 for exclude in self.subdirs_to_exclude:
+                     norm_exclude = PathConverter.to_system_path(exclude.rstrip(os.sep))
+                     # Check exact match or if it's a parent directory
+                     if relative_path == norm_exclude or relative_path.startswith(norm_exclude + os.sep):
+                         return True
+        except ValueError as e:
+            print(f"Warning: Error calculating relative path for exclusion check: {absolute_dir_path} vs {self.repo_root}. Error: {e}")
+            # Decide behavior: exclude or include? Let's be conservative and not exclude if unsure.
+            return False
 
         return False
 
     def traverse_directory(self, relative_start_dir: str):
-        """
-        Walk through a directory *relative* to repo_root, buffering eligible files.
-        """
-        abs_start_dir = os.path.join(self.repo_root, relative_start_dir)
-        abs_start_dir = os.path.abspath(abs_start_dir) # Ensure absolute
+        """Walk through a directory *relative* to repo_root, buffering eligible files."""
+        # Ensure relative_start_dir uses native separators for join
+        relative_start_dir_norm = PathConverter.to_system_path(relative_start_dir)
+        abs_start_dir = os.path.abspath(os.path.join(self.repo_root, relative_start_dir_norm))
 
         if not os.path.isdir(abs_start_dir):
             print(f"Warning: Directory '{relative_start_dir}' ({abs_start_dir}) does not exist relative to repo root. Skipping.")
@@ -309,27 +427,26 @@ class RepoExporter:
         initial_depth = abs_start_dir.count(os.sep)
 
         for root, dirs, files in os.walk(abs_start_dir, topdown=True):
-            # Depth limiting
-            current_depth = root.count(os.sep) - initial_depth
-            if self.depth != -1 and current_depth >= self.depth:
-                dirs[:] = [] # Don't recurse further
-                continue # Skip files at this level too if depth limit is strict
+            current_abs_depth = root.count(os.sep)
+            relative_depth = current_abs_depth - initial_depth
+
+            # Depth limiting (relative to start of traversal)
+            if self.depth != -1 and relative_depth >= self.depth:
+                dirs[:] = [] # Don't recurse further in this branch
+                continue # Skip files at this depth too
 
             # Directory exclusion
-            # Must check based on absolute path for reliability
-            dirs[:] = [d for d in dirs if not self.should_exclude_dir(os.path.join(root, d))]
+            original_dirs = list(dirs) # Copy before modifying dirs[:]
+            dirs[:] = [d for d in original_dirs if not self.should_exclude_dir(os.path.join(root, d))]
 
             # Buffer eligible files
             for file in files:
                 abs_file_path = os.path.join(root, file)
                 self.buffer_file_content(abs_file_path)
 
-
     def traverse_external_directory(self, abs_start_dir: str):
-        """
-        Walk through an *absolute* external directory path, buffering eligible files.
-        """
-        abs_start_dir = os.path.abspath(PathConverter.to_system_path(abs_start_dir)) # Ensure absolute and normalized
+        """Walk through an *absolute* external directory path, buffering eligible files."""
+        abs_start_dir = os.path.abspath(PathConverter.to_system_path(abs_start_dir))
 
         if not os.path.isdir(abs_start_dir):
             print(f"Warning: External directory '{abs_start_dir}' does not exist or is not a directory. Skipping.")
@@ -339,185 +456,181 @@ class RepoExporter:
         initial_depth = abs_start_dir.count(os.sep)
 
         for root, dirs, files in os.walk(abs_start_dir, topdown=True):
+            current_abs_depth = root.count(os.sep)
+            relative_depth = current_abs_depth - initial_depth
+
             # Depth limiting
-            current_depth = root.count(os.sep) - initial_depth
-            if self.depth != -1 and current_depth >= self.depth:
+            if self.depth != -1 and relative_depth >= self.depth:
                 dirs[:] = []
                 continue
 
-            # Directory exclusion (using same logic, limited for external paths)
-            dirs[:] = [d for d in dirs if not self.should_exclude_dir(os.path.join(root, d))]
+            # Directory exclusion (using same logic, checks basename and relative-to-repo if applicable)
+            original_dirs = list(dirs)
+            dirs[:] = [d for d in original_dirs if not self.should_exclude_dir(os.path.join(root, d))]
 
             # Buffer eligible files
             for file in files:
                 abs_file_path = os.path.join(root, file)
-                self.buffer_file_content(abs_file_path)
-
+                self.buffer_file_content(abs_file_path) # This handles display path correctly
 
     def include_specific_files(self):
-        """
-        Process the `files_to_include` list, buffering eligible files.
-        Supports absolute paths and paths relative to repo_root.
-        """
+        """Process the `files_to_include` list, buffering eligible files."""
         if not self.files_to_include:
             return
 
         print("Processing specific files to include...")
         for file_path_config in self.files_to_include:
-             # Handle potential normalization issues if path wasn't normalized correctly
-             file_path_config = PathConverter.to_system_path(file_path_config)
+             # Normalize path from config first
+             normalized_file_path = PathConverter.to_system_path(file_path_config)
 
-             if os.path.isabs(file_path_config):
-                 # Absolute path directly
-                 abs_path = os.path.abspath(file_path_config)
+             if os.path.isabs(normalized_file_path):
+                 abs_path = os.path.abspath(normalized_file_path) # Ensure canonical absolute path
                  if os.path.isfile(abs_path):
                      self.buffer_file_content(abs_path)
                  else:
                      print(f"Warning: Specified absolute file to include not found or not a file: {abs_path}")
              else:
-                 # Relative path (assume relative to repo_root)
-                 abs_path = os.path.abspath(os.path.join(self.repo_root, file_path_config))
+                 # Assume relative path is relative to repo_root
+                 abs_path = os.path.abspath(os.path.join(self.repo_root, normalized_file_path))
                  if os.path.isfile(abs_path):
                      self.buffer_file_content(abs_path)
                  else:
-                     # Maybe it was intended as relative but is outside? The old walk logic was flawed.
-                     # Let's just check if it exists relative to repo_root.
-                     print(f"Warning: Specified relative file to include not found relative to repo root: {file_path_config} (resolved to {abs_path})")
+                     print(f"Warning: Specified relative file to include not found relative to repo root: {normalized_file_path} (resolved to {abs_path})")
 
 
     def should_include_in_tree(self, abs_dir_path: str) -> bool:
-        """
-        Determine if a directory should appear in the directory tree output.
-        Only considers directories under repo_root for now.
-        """
-        # Only include dirs under repo_root in the tree for now
-        if not abs_dir_path.startswith(self.repo_root + os.sep) and abs_dir_path != self.repo_root:
-             return False
+        """Determine if a directory should appear in the directory tree output."""
+        if not abs_dir_path.startswith(self.repo_root):
+             return False # Only show dirs within repo_root in the tree
 
         dir_name = os.path.basename(abs_dir_path)
 
-        # Basic exclusions
-        if dir_name in self.blacklisted_dirs or dir_name.startswith('.'):
+        if dir_name.startswith('.'): # Exclude hidden dirs unless explicitly included elsewhere?
+             # Let's allow hidden dirs if they contain included files or are part of traversal/tree lists
+             # Need to refine this check
+             pass # Revisit simple hidden dir exclusion later if needed
+
+        if dir_name in self.blacklisted_dirs:
             return False
 
-        # Apply filtering only if not exhaustive
+        # Apply subdirs_to_exclude filter unless exhaustive
         if not self.exhaustive_dir_tree:
             if self.should_exclude_dir(abs_dir_path):
-                return False
+                 return False
 
-            # Check if it's under a traversed path OR is a top-level dir containing included files
-            is_under_traversed = False
-            if self.dirs_to_traverse:
-                 for d in self.dirs_to_traverse:
-                      allowed_dir = os.path.abspath(os.path.join(self.repo_root, d))
-                      if abs_dir_path == allowed_dir or abs_dir_path.startswith(allowed_dir + os.sep):
-                           is_under_traversed = True
-                           break
-            else:
-                 # If dirs_to_traverse is empty, maybe default to including all non-excluded? Or only top-level?
-                 # Let's assume if dirs_to_traverse is empty, only top-level things explicitly included count.
-                 # This behavior needs refinement. For now, let's require it to be under a traversed path if specified.
-                 # If dirs_to_traverse is empty, maybe allow if files were included from it?
-                 # Let's default to False if dirs_to_traverse is specified and it's not under one.
-                 if self.dirs_to_traverse and not is_under_traversed:
-                      # Check if top level files were included from this dir (only applies if abs_dir_path is repo_root)
-                      if abs_dir_path == self.repo_root and self.include_top_level_files != 'none':
-                           pass # Allow root if top level files are included
-                      else:
-                           return False
-
-
-        # Specific tree filtering
+        # Check against dirs_for_tree if specified
         if self.dirs_for_tree:
-            relative_path = os.path.relpath(abs_dir_path, self.repo_root)
-            relative_path = PathConverter.to_system_path(relative_path)
-            if not any(relative_path == d or relative_path.startswith(d + os.sep)
-                       for d in self.dirs_for_tree):
-                 # Check if it IS one of the dirs_for_tree exactly
-                 if relative_path not in self.dirs_for_tree and relative_path != '.': # Allow root if '.' is not excluded
-                      return False
+            try:
+                relative_path = os.path.relpath(abs_dir_path, self.repo_root)
+                relative_path_norm = PathConverter.to_system_path(relative_path)
+
+                # Check if this dir is exactly listed OR is a child of a listed dir
+                is_explicitly_or_implicitly_in_tree = False
+                for tree_dir in self.dirs_for_tree:
+                    norm_tree_dir = PathConverter.to_system_path(tree_dir)
+                    if relative_path_norm == norm_tree_dir or relative_path_norm.startswith(norm_tree_dir + os.sep):
+                        is_explicitly_or_implicitly_in_tree = True
+                        break
+                if not is_explicitly_or_implicitly_in_tree and relative_path != '.': # Allow root implicitly
+                    return False
+            except ValueError:
+                 return False # Cannot determine relative path
+
+        # Final check: Does this directory contain any exported files OR non-empty subdirs?
+        try:
+            rel_dir_path = os.path.relpath(abs_dir_path, self.repo_root)
+            rel_dir_path_norm = PathConverter.to_system_path(rel_dir_path)
+            if rel_dir_path_norm == '.': rel_dir_path_norm = '' # Root representation
+
+            # Check files directly within this directory
+            has_direct_exported_files = any(
+                os.path.dirname(PathConverter.to_system_path(display_path)) == rel_dir_path_norm
+                for display_path in self.line_counts_by_file.keys() if not os.path.isabs(display_path)
+            )
+            if has_direct_exported_files:
+                 return True # Include if it has direct files
+
+            # Check aggregated stats for the directory (includes content from subdirs)
+            _, token_count = self.get_stats_for_path(rel_dir_path_norm) # Use helper to get aggregated counts
+            if token_count > 0: # Check token count as primary indicator of content
+                 return True
+
+            # If no direct files and no aggregated content, exclude
+            return False
+
+        except ValueError:
+             return False # Error getting relative path
 
 
-        # Final check: Does this directory contain any exported files or subdirs that do?
-        rel_dir_path = os.path.relpath(abs_dir_path, self.repo_root)
-        rel_dir_path = PathConverter.to_system_path(rel_dir_path)
-        if rel_dir_path == '.': rel_dir_path = '' # Root representation
-
-        has_exported_content = False
-        for display_path in self.line_counts_by_file.keys():
-             if display_path.startswith(rel_dir_path + os.sep) or (rel_dir_path == '' and os.sep not in display_path):
-                  has_exported_content = True
-                  break
-        if not has_exported_content:
-             # Check subdirs recursively? This could be slow. Let's rely on line_counts_by_dir.
-             if rel_dir_path not in self.line_counts_by_dir or self.line_counts_by_dir[rel_dir_path] == 0:
-                  # If the dir itself has no lines counted, check if any *sub*dirs listed have counts
-                  # This is getting complex. Let's simplify: A dir appears if it wasn't excluded AND
-                  # it contains an exported file OR it's an ancestor of a dir that contains an exported file.
-                  # The line count aggregation should capture this.
-                  # A dir MUST have a line count > 0 in self.line_counts_by_dir OR contain a file with count > 0
-                  # directly within it.
-                  direct_file_count = sum(count for path, count in self.line_counts_by_file.items()
-                                          if os.path.dirname(path) == rel_dir_path or (rel_dir_path == '' and os.sep not in path))
-
-                  if self.line_counts_by_dir.get(rel_dir_path, 0) == 0 and direct_file_count == 0:
-                       return False # No content ultimately included from here
-
-        return True
-
-
-    def compute_directory_line_counts(self):
+    def compute_directory_stats(self):
         """
-        Compute aggregated line counts for directories based on buffered files.
+        Compute aggregated line and token counts for directories based on buffered files.
         Uses display_path keys.
         """
         self.line_counts_by_dir = {}
-        # print("Computing line counts from buffered files:") # Debug
-        # for display_path, _, _, _ in self.buffered_files: # Debug
-        #      print(f"- {display_path}: {self.line_counts_by_file.get(display_path, 0)}") # Debug
+        self.token_counts_by_dir = {}
 
+        # Iterate through files with counts
         for display_path, lines in self.line_counts_by_file.items():
-            # Only compute for relative paths within the repo root for the tree
+            tokens = self.token_counts_by_file.get(display_path, 0)
+
+            # Only aggregate for relative paths within the repo root
             if os.path.isabs(display_path):
                  continue
 
             parts = display_path.split(os.sep)
-            # Aggregate counts up the directory chain
-            for i in range(1, len(parts)):
+            # Aggregate counts up the directory chain (to parent dirs)
+            for i in range(1, len(parts)): # Stop before the filename itself
                 dir_path_key = os.sep.join(parts[:i])
                 self.line_counts_by_dir[dir_path_key] = self.line_counts_by_dir.get(dir_path_key, 0) + lines
+                self.token_counts_by_dir[dir_path_key] = self.token_counts_by_dir.get(dir_path_key, 0) + tokens
 
-        # print("Computed directory line counts:", self.line_counts_by_dir) # Debug
+        # Add root counts (sum of all relative files) - handles files directly in root
+        root_lines = sum(l for dp, l in self.line_counts_by_file.items() if not os.path.isabs(dp))
+        root_tokens = sum(t for dp, t in self.token_counts_by_file.items() if not os.path.isabs(dp))
+        self.line_counts_by_dir[''] = root_lines # Use empty string for root aggregate? Or '.'? Let's use ''
+        self.token_counts_by_dir[''] = root_tokens
 
 
-    def get_line_count_for_path(self, display_path: str) -> int:
+    def get_stats_for_path(self, display_path: str) -> tuple[int, int]:
         """
-        Return the line count for a file (from line_counts_by_file)
-        or directory (from line_counts_by_dir) using its display_path.
+        Return the (line_count, token_count) for a file (from _by_file)
+        or directory (from _by_dir) using its display_path relative to repo_root.
         """
-        # Check if it's likely a directory path based on the structure or presence in line_counts_by_dir
-        # This is heuristic. A file could have the same name as a directory key.
-        # Let's prioritize file count if it exists, otherwise dir count.
-        count = self.line_counts_by_file.get(display_path, 0)
-        if count > 0:
-            return count
-        return self.line_counts_by_dir.get(display_path, 0)
+        # Prioritize file stats if path exists in file dicts
+        if display_path in self.line_counts_by_file:
+            return (self.line_counts_by_file.get(display_path, 0),
+                    self.token_counts_by_file.get(display_path, 0))
 
+        # Otherwise, return directory stats (use '' for root dir)
+        dir_key = display_path if display_path != '.' else ''
+        return (self.line_counts_by_dir.get(dir_key, 0),
+                self.token_counts_by_dir.get(dir_key, 0))
 
-    def get_directory_tree(self, abs_directory: str, prefix: str = '', current_depth: int = 0, lines_word_used: bool = False):
+    def _format_count(self, count: int) -> str:
+        """Formats counts >= 1000 with 'k' suffix, rounded to one decimal."""
+        if count >= 1000:
+            return f"{math.floor(count / 100) / 10:.1f}k"
+        else:
+            return str(count)
+
+    def get_directory_tree(self, abs_directory: str, prefix: str = '', current_depth: int = 0, stats_units_printed: bool = False):
         """
-        Generate the ASCII directory tree string, showing only included items.
+        Generate the ASCII directory tree string, showing only included items
+        with line and token counts.
         Operates on paths relative to repo_root for display.
         """
-        # Tree generation limited by self.depth relative to repo_root start
         if self.depth != -1 and current_depth > self.depth:
-            return f"{prefix}   (...max depth reached...)\n", lines_word_used
+            # Only add (...) if there might have been more content deeper
+            # This is hard to know for sure without listing one level deeper
+            # Let's omit the (...) for simplicity unless we actually truncated visible items
+            return "", stats_units_printed
 
         tree_str = ''
         try:
             items = sorted(os.listdir(abs_directory))
         except FileNotFoundError:
-            return "", lines_word_used # Directory doesn't exist
+            return "", stats_units_printed # Directory doesn't exist
 
         visible_items = []
         for item in items:
@@ -526,55 +639,89 @@ class RepoExporter:
                 if self.should_include_in_tree(item_abs_path):
                      visible_items.append(item)
             elif os.path.isfile(item_abs_path):
-                 # Check if this file was actually buffered (meaning it passed all filters)
-                 item_display_path = os.path.relpath(item_abs_path, self.repo_root)
-                 item_display_path = PathConverter.to_system_path(item_display_path)
-                 if item_display_path in self.line_counts_by_file:
-                     visible_items.append(item)
+                 try:
+                     item_display_path = os.path.relpath(item_abs_path, self.repo_root)
+                     item_display_path_norm = PathConverter.to_system_path(item_display_path)
+                     # Check if the file was actually buffered (i.e., passed filters and included)
+                     if item_display_path_norm in self.line_counts_by_file:
+                         visible_items.append(item)
+                 except ValueError:
+                      # Cannot make relative path (e.g., different drive on Windows)
+                      # Only include if it was buffered (which implies it was included some other way)
+                      if any(bf[1] == item_abs_path for bf in self.buffered_files):
+                            # How to represent this in the tree? Maybe skip external files in tree?
+                            # For now, let's only add items relative to repo_root.
+                            pass
 
         for i, item in enumerate(visible_items):
             item_abs_path = os.path.join(abs_directory, item)
-            item_rel_path = os.path.relpath(item_abs_path, self.repo_root) # Path relative to repo root for display
-            item_rel_path = PathConverter.to_system_path(item_rel_path)
+            try:
+                item_rel_path = os.path.relpath(item_abs_path, self.repo_root)
+                item_rel_path_norm = PathConverter.to_system_path(item_rel_path)
+            except ValueError:
+                 continue # Skip if cannot make relative (shouldn't happen if already filtered)
 
-            line_count = self.get_line_count_for_path(item_rel_path)
+            line_count, token_count = self.get_stats_for_path(item_rel_path_norm)
 
-            # Use ASCII connectors
             connector = '|-- ' if i < len(visible_items) - 1 else '\\-- '
 
-            # Add line count info
-            line_str = ""
-            if line_count > 0:
-                 if not lines_word_used:
-                     line_str = f" ({line_count} lines)"
-                     lines_word_used = True
-                 else:
-                     line_str = f" ({line_count})"
-            elif os.path.isdir(item_abs_path): # Show (0) for dirs known to be empty
-                 line_str = " (0)"
+            # Format stats string
+            stats_str = ""
+            # Check if item has content OR is a directory (even if empty)
+            is_dir = os.path.isdir(item_abs_path)
+            if line_count > 0 or token_count > 0 or is_dir:
+                line_str = self._format_count(line_count)
+                token_str = self._format_count(token_count)
+                if not stats_units_printed and (line_count > 0 or token_count > 0):
+                     stats_str = f" ({line_str} lines/{token_str} tokens)"
+                     stats_units_printed = True # Set flag after first use
+                else:
+                     stats_str = f" ({line_str}/{token_str})"
 
+            tree_str += f"{prefix}{connector}{item}{stats_str}\n"
 
-            tree_str += f"{prefix}{connector}{item}{line_str}\n"
-
-            if os.path.isdir(item_abs_path):
+            if is_dir:
                 sub_prefix = prefix + ("|   " if i < len(visible_items) - 1 else "    ")
-                subtree_str, lines_word_used = self.get_directory_tree(item_abs_path, sub_prefix, current_depth + 1, lines_word_used)
+                # Recurse, passing the current state of stats_units_printed
+                subtree_str, stats_units_printed = self.get_directory_tree(
+                    item_abs_path, sub_prefix, current_depth + 1, stats_units_printed
+                )
                 tree_str += subtree_str
 
-        return tree_str, lines_word_used
+        # If depth limit was hit AND we omitted visible items, add indicator
+        # This check is tricky. Let's skip the indicator for now.
 
-    def _build_files_xml_recursive(self, parent_element, path_prefix, files_in_dir):
-        """Helper to recursively build nested XML for files."""
+        return tree_str, stats_units_printed
+
+
+    def _build_files_string_recursive(self, path_prefix: str, files_in_dir: list, indent_level: int) -> str:
+        """
+        Helper to recursively build the <files> section string with nested <dir> and <file> tags.
+        Embeds raw file content.
+        """
+        indent = "  " * indent_level
+        parts = []
+
         # Separate files and directories at the current level
-        current_level_files = {}
-        subdirs = {}
-        prefix_len = len(path_prefix) if path_prefix else -1
+        current_level_files = {} # display_path -> (abs_path, content, is_ipynb)
+        subdirs = {} # subdir_key (relative path) -> list of file tuples
+
+        # Normalize prefix for comparison
+        norm_prefix = PathConverter.to_system_path(path_prefix)
+        prefix_len = len(norm_prefix) if norm_prefix else -1
 
         for display_path, abs_path, content, is_ipynb in files_in_dir:
-             # Check if file is directly in this directory or in a subdirectory
-             if os.sep in display_path[prefix_len+1:]:
+             # Ensure display_path uses system separators for splitting logic
+             norm_display_path = PathConverter.to_system_path(display_path)
+
+             # Determine path relative to the current prefix
+             relative_to_prefix = norm_display_path[prefix_len+1:] if prefix_len >= -1 else norm_display_path
+
+             if os.sep in relative_to_prefix:
                  # Subdirectory file
-                 subdir_name = display_path[prefix_len+1:].split(os.sep)[0]
+                 subdir_name = relative_to_prefix.split(os.sep)[0]
+                 # Construct key using the *original* (potentially non-normalized) prefix + separator + subdir_name
+                 # This preserves the intended structure from display_path
                  subdir_key = os.path.join(path_prefix, subdir_name) if path_prefix else subdir_name
                  if subdir_key not in subdirs:
                      subdirs[subdir_key] = []
@@ -585,23 +732,30 @@ class RepoExporter:
 
         # Add files at the current level
         for display_path, (abs_path, content, is_ipynb) in sorted(current_level_files.items()):
-             file_elem = ET.SubElement(parent_element, "file", path=display_path)
-             if is_ipynb:
-                 file_elem.set("converted_from_ipynb", "true")
-             file_elem.text = content # Consider CDATA if content has XML special chars
+             # Escape path attribute value ONLY
+             escaped_path_attr = saxutils.quoteattr(display_path)
+             ipynb_attr = ' converted_from_ipynb="true"' if is_ipynb else ''
+             parts.append(f'{indent}<file path={escaped_path_attr}{ipynb_attr}>')
+             # --- Embed raw content directly ---
+             parts.append(content)
+             # ---                            ---
+             parts.append(f'{indent}</file>')
 
         # Recurse into subdirectories
         for subdir_key, files_list in sorted(subdirs.items()):
-             subdir_name = os.path.basename(subdir_key)
-             # Use 'dir' tag for directories within repo_root, maybe 'external_dir' otherwise?
-             # For simplicity, let's just use 'dir' for now.
-             dir_elem = ET.SubElement(parent_element, "dir", path=subdir_key)
-             self._build_files_xml_recursive(dir_elem, subdir_key, files_list)
+             # Escape subdir path attribute value ONLY
+             escaped_subdir_path_attr = saxutils.quoteattr(subdir_key)
+             parts.append(f'{indent}<dir path={escaped_subdir_path_attr}>')
+             # Recursively build content for this subdir
+             parts.append(self._build_files_string_recursive(subdir_key, files_list, indent_level + 1))
+             parts.append(f'{indent}</dir>')
+
+        return "\n".join(parts)
 
 
     def export_repo(self):
         """
-        Main export routine: Gathers files, computes counts, generates XML output.
+        Main export routine: Gathers files, computes stats, generates output string.
         """
         print(f"Starting export for repo: {self.repo_root}")
 
@@ -613,7 +767,6 @@ class RepoExporter:
                  for item in items:
                      abs_item_path = os.path.join(self.repo_root, item)
                      if os.path.isfile(abs_item_path):
-                         # Check if specific files listed or 'all'
                          is_included_top_level = (
                              self.include_top_level_files == 'all' or
                              (isinstance(self.include_top_level_files, list) and item in self.include_top_level_files)
@@ -638,96 +791,115 @@ class RepoExporter:
                 self.traverse_external_directory(abs_dir)
 
         # 4. Include specific files
-        self.include_specific_files() # This now uses buffer_file_content
+        self.include_specific_files()
 
         # --- Post-Gathering Steps ---
         print("File gathering complete. Computing stats and generating output...")
 
-        # 5. Compute directory line counts (based on buffered files)
-        self.compute_directory_line_counts()
+        # 5. Compute aggregated directory stats
+        self.compute_directory_stats()
 
-        # 6. Build the directory tree string (only for repo_root content)
-        directory_tree_str, _ = self.get_directory_tree(self.repo_root, current_depth=0, lines_word_used=False)
+        # --- Build Output String Manually ---
+        output_parts = []
+        output_parts.append("<codebase_context>")
 
-        # 7. Generate XML Output
-        root_xml = ET.Element("codebase_context")
-
-        # Config (Optional)
+        # Config (Optional) - Still dump as JSON string inside tag
         if self.dump_config:
             config_tag_label = self.config_filename if self.config_filename else "dynamic-config"
-            config_elem = ET.SubElement(root_xml, "config", source=config_tag_label)
+            escaped_label = saxutils.escape(config_tag_label) # Escape label just in case
+            output_parts.append(f'  <config source="{escaped_label}">')
             try:
-                 # Create a serializable version of the config
-                 config_data = {k: v for k, v in self.__dict__.items() if not k.startswith('_') and k not in ['buffered_files']}
-                 config_elem.text = json.dumps(config_data, indent=2)
+                 config_data = {k: v for k, v in self.__dict__.items() if not k.startswith('_') and k not in ['buffered_files', 'tokenizer']} # Exclude non-serializable
+                 # Convert Path objects to strings for JSON serialization
+                 serializable_config = {}
+                 for k, v in config_data.items():
+                      if isinstance(v, Path):
+                           serializable_config[k] = str(v)
+                      else:
+                           serializable_config[k] = v
+                 config_json = json.dumps(serializable_config, indent=2)
+                 # Escape JSON content for XML text node (optional but safer)
+                 output_parts.append(saxutils.escape(config_json))
             except Exception as e:
-                 config_elem.text = f"Error serializing config: {e}"
+                 output_parts.append(f"<!-- Error serializing config: {e} -->")
+            output_parts.append('  </config>')
 
 
         # Directory Tree
-        dirtree_elem = ET.SubElement(root_xml, "dirtree", root=self.repo_root)
-        dirtree_elem.text = directory_tree_str
+        print("Generating directory tree...")
+        escaped_repo_root_attr = saxutils.quoteattr(self.repo_root)
+        output_parts.append(f'  <dirtree root={escaped_repo_root_attr}>')
+        directory_tree_str, _ = self.get_directory_tree(self.repo_root, prefix='|', stats_units_printed=False) # Start prefix with '|'
+        # Add repo root node itself with total stats
+        root_lines, root_tokens = self.get_stats_for_path('') # Get aggregated root stats
+        root_line_str = self._format_count(root_lines)
+        root_token_str = self._format_count(root_tokens)
+        # Determine if units were printed in the subtree
+        # Hacky way: check if "lines" appears in the generated tree string
+        units_already_printed = " lines/" in directory_tree_str
+        if not units_already_printed and (root_lines > 0 or root_tokens > 0):
+             root_stats_str = f" ({root_line_str} lines/{root_token_str} tokens)"
+        else:
+             root_stats_str = f" ({root_line_str}/{root_token_str})"
+
+        output_parts.append(f'{os.path.basename(self.repo_root) or self.repo_root}{root_stats_str}') # Show root stats
+        output_parts.append(directory_tree_str.rstrip()) # Add the rest of the tree, remove trailing newline
+        output_parts.append('  </dirtree>')
 
         # Files (Nested Structure)
-        files_root_elem = ET.SubElement(root_xml, "files")
+        print("Generating files section...")
+        output_parts.append("  <files>")
 
-        # Separate files by origin for potential grouping
+        # Separate files by origin
         repo_files = []
         external_files = []
+        norm_repo_root = os.path.normpath(self.repo_root)
         for bf in self.buffered_files:
-             display_path, abs_path, _, _ = bf
-             if abs_path.startswith(self.repo_root + os.sep) or abs_path == self.repo_root: # Should handle files in root itself
+             _, abs_path, _, _ = bf
+             norm_abs_path = os.path.normpath(abs_path)
+             # Check if the file's directory is the repo root or a subdirectory of it
+             if norm_abs_path.startswith(norm_repo_root):
                  repo_files.append(bf)
              else:
                  external_files.append(bf)
 
-        # Add repo files nested under repo_root structure
-        self._build_files_xml_recursive(files_root_elem, "", repo_files)
+        # Add repo files nested structure
+        output_parts.append(self._build_files_string_recursive("", sorted(repo_files), indent_level=2))
 
-        # Add external files (maybe under a separate tag or just top-level in <files>?)
+        # Add external files (under a separate tag)
         if external_files:
-             # Option 1: Flat list for external
-             # for display_path, abs_path, content, is_ipynb in sorted(external_files):
-             #     file_elem = ET.SubElement(files_root_elem, "external_file", path=display_path) # Use display_path (which is absolute here)
-             #     if is_ipynb:
-             #         file_elem.set("converted_from_ipynb", "true")
-             #     file_elem.text = content
+             output_parts.append('    <external_files>')
+             # Sort external files by their absolute path for consistent ordering
+             sorted_external = sorted(external_files, key=lambda x: x[1])
+             for display_path, abs_path, content, is_ipynb in sorted_external:
+                  escaped_path_attr = saxutils.quoteattr(display_path) # display_path is absolute here
+                  ipynb_attr = ' converted_from_ipynb="true"' if is_ipynb else ''
+                  output_parts.append(f'      <file path={escaped_path_attr}{ipynb_attr}>')
+                  output_parts.append(content)
+                  output_parts.append(f'      </file>')
+             output_parts.append('    </external_files>')
 
-             # Option 2: Group by external root (more complex, requires tracking origin root)
-             # Let's stick to flat list for external files for simplicity now.
-             ext_group = ET.SubElement(files_root_elem, "external_files")
-             for display_path, abs_path, content, is_ipynb in sorted(external_files, key=lambda x: x[0]):
-                  file_elem = ET.SubElement(ext_group, "file", path=display_path) # display_path is absolute here
-                  if is_ipynb:
-                       file_elem.set("converted_from_ipynb", "true")
-                  file_elem.text = content
+        output_parts.append("  </files>")
+        output_parts.append("</codebase_context>")
 
-
-        # Pretty print XML
-        try:
-            rough_string = ET.tostring(root_xml, 'utf-8')
-            reparsed = minidom.parseString(rough_string)
-            pretty_xml_str = reparsed.toprettyxml(indent="  ", encoding='utf-8')
-            xml_content_to_write = pretty_xml_str.decode('utf-8')
-        except Exception as e:
-             print(f"Warning: Could not pretty-print XML, writing raw. Error: {e}")
-             xml_content_to_write = ET.tostring(root_xml, encoding='unicode')
-
-
-        # Write to file
+        # --- Write Output ---
+        final_output_string = "\n".join(output_parts)
         try:
             with open(self.output_file, 'w', encoding='utf-8') as f:
-                f.write(xml_content_to_write)
+                f.write(final_output_string)
             print(f"\nExported to: {self.output_file}")
         except Exception as e:
             print(f"\nError writing output file {self.output_file}: {e}")
 
-
-        # Final Summary
+        # --- Final Summary ---
         print(f"Total number of lines exported: {self.total_lines}")
+        if self.tokenizer:
+            print(f"Total number of tokens exported (estimated, o200k_base): {self.total_tokens} ({self._format_count(self.total_tokens)})")
         print("Exported file counts by extension:")
         if self.exported_files_count:
-             for ext, count in sorted(self.exported_files_count.items()):
+             # Sort extensions for consistent output
+             sorted_extensions = sorted(self.exported_files_count.items())
+             for ext, count in sorted_extensions:
                  print(f"  {ext}: {count}")
         else:
              print("  (No files exported)")
@@ -737,11 +909,13 @@ class RepoExporter:
 
 def get_base_path() -> str:
     """Determine the base path for resolving relative repo_root paths."""
+    system = platform.system()
     if '--pop' in sys.argv:
+        # Specific Pop!_OS path structure if flag is present
         return PathConverter.to_system_path('/home/caleb/Documents/GitHub/')
-    elif platform.system() == "Darwin":
+    elif system == "Darwin":
         return PathConverter.to_system_path(BASE_PATHS["Darwin"])
-    elif platform.system() == "Windows":
+    elif system == "Windows":
         return PathConverter.to_system_path(BASE_PATHS["Windows"])
     else: # Linux default
         return PathConverter.to_system_path(BASE_PATHS["Linux"])
@@ -750,107 +924,147 @@ def load_config(config_filename: str) -> dict:
     """Load configuration from a JSON file."""
     # Append .json if not present
     if not config_filename.lower().endswith('.json'):
-        config_filename += '.json'
+        config_filename_json = config_filename + '.json'
+    else:
+        config_filename_json = config_filename
 
-    # Assume config file is relative to the configs dir under the script's base util dir
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(script_dir, "configs", config_filename)
-    config_path = PathConverter.to_system_path(config_path)
+    potential_paths = []
 
-    # Fallback: check relative to base_path if not found near script
-    if not os.path.exists(config_path):
-         base_path = get_base_path()
-         # This assumes a structure like base_path/utils/export_repo/configs
-         utils_path = os.path.join(base_path, "utils") if base_path.endswith("GitHub") else base_path
-         config_path_alt = os.path.join(utils_path, "export_repo", "configs", config_filename)
-         config_path_alt = PathConverter.to_system_path(config_path_alt)
-         if os.path.exists(config_path_alt):
-              config_path = config_path_alt
-         else:
-              # Last try: relative to current working directory
-              config_path_cwd = PathConverter.to_system_path(config_filename)
-              if os.path.exists(config_path_cwd):
-                    config_path = config_path_cwd
-              else:
-                   raise FileNotFoundError(f"Config file not found: {config_filename} (checked near script, in base path structure, and CWD)")
+    # 1. Relative to script's dir/configs
+    try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        potential_paths.append(os.path.join(script_dir, "configs", config_filename_json))
+    except NameError: # __file__ might not be defined (e.g. interactive)
+        script_dir = os.getcwd()
+        potential_paths.append(os.path.join(script_dir, "configs", config_filename_json))
+
+
+    # 2. Relative to base_path/utils/export_repo/configs structure
+    base_path = get_base_path()
+    # Adjust base path if it points directly to the repo folder structure expected
+    utils_parent_dir = base_path # Default assumption
+    if base_path.endswith("GitHub") or base_path.endswith("repo"):
+        utils_parent_dir = os.path.dirname(base_path) # Go up one level if base is GitHub or repo
+
+    potential_paths.append(os.path.join(utils_parent_dir, "utils", "export_repo", "configs", config_filename_json))
+
+    # 3. Relative to current working directory
+    potential_paths.append(os.path.join(os.getcwd(), config_filename_json))
+
+    # 4. The original filename (maybe it was absolute or correctly relative already)
+    potential_paths.append(config_filename)
+
+
+    # Try loading from potential paths
+    config_to_load = None
+    loaded_path = None
+    for p in potential_paths:
+        p_normalized = PathConverter.to_system_path(p)
+        # print(f"Debug: Trying config path: {p_normalized}") # Debugging line
+        if os.path.exists(p_normalized):
+            config_to_load = p_normalized
+            loaded_path = p # Store the path from which it was loaded
+            break
+
+    if not config_to_load:
+         checked_paths_str = "\n - ".join(potential_paths)
+         raise FileNotFoundError(f"Config file '{config_filename}' not found. Checked:\n - {checked_paths_str}")
 
     try:
-        with open(config_path, 'r', encoding='utf-8') as config_file:
+        print(f"Loading config from: {config_to_load}")
+        with open(config_to_load, 'r', encoding='utf-8') as config_file:
             config = json.load(config_file)
+        # Store the actual path loaded from, relative to CWD if possible
+        try:
+            config['_loaded_from_path'] = os.path.relpath(loaded_path)
+        except ValueError:
+            config['_loaded_from_path'] = loaded_path # Keep absolute if on different drive
         return config
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON from {config_path}: {e}")
+        print(f"Error decoding JSON from {config_to_load}: {e}")
         raise
     except Exception as e:
-        print(f"Error loading config {config_path}: {e}")
+        print(f"Error loading config {config_to_load}: {e}")
         raise
+
 
 def get_default_config(repo_root_path: str) -> dict:
     """Provide a default config for direct repository path usage."""
     repo_root_path = PathConverter.to_system_path(os.path.abspath(repo_root_path))
+    repo_name = os.path.basename(repo_root_path) or "repo" # Handle case where path ends in separator
+    # Default to .txt extension now that it's not strictly XML
+    default_export_name = f"{repo_name}_export.txt"
     return {
         'repo_root': repo_root_path,
-        'export_name': f"{os.path.basename(repo_root_path)}_export.xml", # Default to xml
+        'export_name': default_export_name,
         'dirs_to_traverse': ['.'], # Traverse all from root by default
-        'include_top_level_files': 'none', # Let dirs_to_traverse = ['.'] handle it
+        'include_top_level_files': 'all', # Include top-level files by default when traversing '.'
         'included_extensions': 'all',
         'subdirs_to_exclude': [], # Start minimal
         'files_to_exclude': [],
-        'depth': 10, # Sensible default depth
+        'depth': 10,
         'exhaustive_dir_tree': False,
         'files_to_include': [],
         'additional_dirs_to_traverse': [],
-        'always_exclude_patterns': ['export.xml', '.DS_Store', '*.pyc', '*.swp', '*.swo'], # Basic defaults
-        'dump_config': False
+        # Update default excludes for common dev files and the new default export name
+        'always_exclude_patterns': [default_export_name, '.DS_Store', '*.pyc', '*.swp', '*.swo', 'node_modules/', 'build/', 'dist/'],
+        'dump_config': False,
+        'dirs_for_tree': [], # Default to showing all non-excluded dirs in tree
+        'output_dir': None # Default to outputting in repo_root
     }
+
+# Need Path from pathlib for type hinting in RepoExporter if needed
+from pathlib import Path
 
 def main():
     args = sys.argv[1:]
     config_arg = None
-    pop_flag = '--pop' in args
+    pop_flag = '--pop' in args # Handled in get_base_path
     dump_config_flag = '--dump-config' in args
 
-    # Find the first non-flag argument
-    for arg in args:
-        if not arg.startswith('--'):
-            config_arg = arg
-            break
+    # Filter out flags to find the main argument
+    non_flag_args = [arg for arg in args if not arg.startswith('--')]
 
-    if not config_arg:
+    if len(non_flag_args) != 1:
         print("Usage: python export_repo_to_txt.py [--pop] [--dump-config] <config_filename | repo_root_path>")
         sys.exit(1)
+
+    config_arg = non_flag_args[0]
 
     config = {}
     config_filename_label = None
 
     # Detect if arg is a directory or a config file name
     potential_path = PathConverter.to_system_path(config_arg)
+    # Check if it's a directory *first*
     if os.path.isdir(potential_path):
         print(f"Argument '{config_arg}' is a directory. Using default config.")
         config = get_default_config(potential_path)
         config_filename_label = f"default_for_{os.path.basename(potential_path)}"
     else:
         # Assume it's a config file name
-        config_filename = config_arg
-        if not config_filename.lower().endswith('.json'):
-            config_filename += '.json'
         try:
-            config = load_config(config_filename)
-            config_filename_label = config_filename
-            print(f"Loaded config file: {config_filename}")
+            config = load_config(config_arg)
+            # Use the original arg as label unless loaded path is very different?
+            config_filename_label = config.get('_loaded_from_path', config_arg)
         except FileNotFoundError as e:
             print(f"Error: {e}")
-            sys.exit(1)
+            # Fallback: Maybe it's a directory path that *looks* like a filename? Check again.
+            # This case is less likely if isdir failed before, but handles edge cases.
+            if os.path.isdir(potential_path):
+                 print(f"Argument '{config_arg}' resolved to a directory after failed config load. Using default config.")
+                 config = get_default_config(potential_path)
+                 config_filename_label = f"default_for_{os.path.basename(potential_path)}"
+            else:
+                 print(f"Argument '{config_arg}' is not a valid directory or loadable config file.")
+                 sys.exit(1)
         except Exception as e:
             print(f"Error loading or parsing config: {e}")
+            import traceback
+            traceback.print_exc()
             sys.exit(1)
 
-    # --pop flag is now handled internally by get_base_path, but we might need
-    # to re-normalize if the repo_root was changed by it AFTER initial load/normalize.
-    # Let's ensure repo_root is absolute and correct *before* RepoExporter init.
-    # Normalization now happens inside RepoExporter.__init__
-
-    # Set dump_config based on flag, potentially overriding config file value
+    # Override dump_config from command line flag
     if dump_config_flag:
         config['dump_config'] = True
 
@@ -858,7 +1072,7 @@ def main():
         exporter = RepoExporter(config, config_filename=config_filename_label)
         exporter.export_repo()
     except ValueError as e:
-         print(f"Configuration Error: {e}")
+         print(f"Configuration or Execution Error: {e}")
          sys.exit(1)
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
@@ -869,3 +1083,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+# --- END OF FILE export_repo_to_txt.py ---

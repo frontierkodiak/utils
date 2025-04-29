@@ -109,7 +109,7 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
 
 3. Add the following line at the end of the file:
    ```bash
-   alias export_repo='/Users/carbon/repo/utils/.venv/bin/python /Users/carbon/repo/utils/export_repo/export_repo_to_txt.py'
+   alias export_repo="/Users/carbon/venvs/export_repo/bin/python /Users/carbon/repo/utils/export_repo/export_repo_to_txt.py"
    ```
 
 4. Save the file and exit the editor (in nano, press Ctrl+X, then Y, then Enter).
