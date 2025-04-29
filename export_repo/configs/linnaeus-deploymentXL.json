@@ -10,7 +10,7 @@
     "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_mFormerV1_sm_run3_test_Apr21b_noGC.yaml",
     "/home/caleb/repo/linnaeus/tools/docker/Dockerfile",
     "/home/caleb/repo/linnaeus/linnaeus/requirements.txt",
-    "/home/caleb/repo/polliFormer/work/active/assets/dataset_sizes.json"
+    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
     ],
     "additional_dirs_to_traverse": [
       "/home/caleb/repo/linnaeus/docs",

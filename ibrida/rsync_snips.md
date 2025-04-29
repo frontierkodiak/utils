@@ -1,2 +1,0 @@
-rsync -avz /general/generated/v0/r1/pta/images/384p_60q/ carbon@carbon:/Users/carbon/Data/ibrida/v0r1/images/non_localized/pta_full/
-rsync /peach/generated/v0/r1/pta_all_exc_nonrg_sp_inc_oor_fas_elev/labels.h5 carbon@carbon:/Users/carbon/Data/ibrida/v0r1/labels/pta_all_exc_nonrg_sp_inc_oor_fas_elev/labels.h5
