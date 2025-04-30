@@ -234,6 +234,9 @@ class RepoExporter:
         self.token_counts_by_file = {} # Uses display_path as key
         self.line_counts_by_dir = {}  # Uses display_path segments as keys
         self.token_counts_by_dir = {} # Uses display_path segments as keys
+        # NEW: Dictionary to store aggregate stats per extension
+        # Structure: { ".py": {"files": 0, "lines": 0, "tokens": 0}, ... }
+        self.stats_by_extension = {}
 
 
     def get_output_file_path(self) -> str:
@@ -339,23 +342,37 @@ class RepoExporter:
             if any(bf[1] == absolute_path for bf in self.buffered_files):
                  return # Already processed
 
-            # Update stats
+            # Calculate stats for this file
             line_count = content.count('\n') + 1
             token_count = 0
             if self.tokenizer:
                 try:
+                    # Sequential tokenization here. Parallelizing would require restructuring.
                     token_count = len(self.tokenizer.encode(content))
                 except Exception as e:
                     print(f"Warning: Tiktoken failed to encode content for {display_path}. Error: {e}")
 
-            ext_key = file_extension or "._no_extension_" # Handle files without extension
-            self.exported_files_count[ext_key] = self.exported_files_count.get(ext_key, 0) + 1
+            # --- Update Overall and Per-Extension Stats ---
+            ext_key = file_extension or "._no_extension_"
+
+            # Initialize extension stats if first time seeing it
+            if ext_key not in self.stats_by_extension:
+                self.stats_by_extension[ext_key] = {"files": 0, "lines": 0, "tokens": 0}
+
+            # Update aggregate stats
+            self.stats_by_extension[ext_key]["files"] += 1
+            self.stats_by_extension[ext_key]["lines"] += line_count
+            self.stats_by_extension[ext_key]["tokens"] += token_count
+
+            # Update total stats
             self.total_lines += line_count
             self.total_tokens += token_count
-            self.line_counts_by_file[display_path] = line_count
-            self.token_counts_by_file[display_path] = token_count # Store token count
 
-            # Store
+            # Store per-file stats
+            self.line_counts_by_file[display_path] = line_count
+            self.token_counts_by_file[display_path] = token_count
+
+            # Store file info for final output generation
             self.buffered_files.append((display_path, absolute_path, content, is_ipynb_converted))
 
         except Exception as e:
@@ -895,12 +912,25 @@ class RepoExporter:
         print(f"Total number of lines exported: {self.total_lines}")
         if self.tokenizer:
             print(f"Total number of tokens exported (estimated, o200k_base): {self.total_tokens} ({self._format_count(self.total_tokens)})")
-        print("Exported file counts by extension:")
-        if self.exported_files_count:
-             # Sort extensions for consistent output
-             sorted_extensions = sorted(self.exported_files_count.items())
-             for ext, count in sorted_extensions:
-                 print(f"  {ext}: {count}")
+
+        print("\nExported content summary by extension:")
+        if self.stats_by_extension:
+             # Determine max width for alignment
+             max_ext_len = max(len(ext) for ext in self.stats_by_extension.keys()) if self.stats_by_extension else 0
+             max_files_len = max(len(str(s['files'])) for s in self.stats_by_extension.values()) if self.stats_by_extension else 0
+             max_lines_len = max(len(self._format_count(s['lines'])) for s in self.stats_by_extension.values()) if self.stats_by_extension else 0
+             max_tokens_len = max(len(self._format_count(s['tokens'])) for s in self.stats_by_extension.values()) if self.stats_by_extension else 0
+
+             header = f"  {'Extension'.ljust(max_ext_len)}  {'Files'.rjust(max_files_len)}  {'Lines'.rjust(max_lines_len)}  {'Tokens'.rjust(max_tokens_len)}"
+             print(header)
+             print(f"  {'-' * max_ext_len}  {'-' * max(5, max_files_len)}  {'-' * max(5, max_lines_len)}  {'-' * max(6, max_tokens_len)}")
+
+             sorted_extensions = sorted(self.stats_by_extension.items())
+             for ext, stats in sorted_extensions:
+                 files_str = str(stats['files']).rjust(max_files_len)
+                 lines_str = self._format_count(stats['lines']).rjust(max_lines_len)
+                 tokens_str = self._format_count(stats['tokens']).rjust(max_tokens_len)
+                 print(f"  {ext.ljust(max_ext_len)}  {files_str}  {lines_str}  {tokens_str}")
         else:
              print("  (No files exported)")
 
