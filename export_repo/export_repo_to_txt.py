@@ -9,6 +9,16 @@ from nbconvert.preprocessors import ClearOutputPreprocessor
 import xml.sax.saxutils as saxutils # For escaping attribute values safely
 import math
 
+# Attempt to import rich, provide guidance if missing
+try:
+    from rich.console import Console
+    from rich.table import Table
+    console = Console()
+except ImportError:
+    print("Rich library not found. Tables will use basic formatting.")
+    print("Please install it: pip install rich")
+    console = None
+
 # Attempt to import tiktoken, provide guidance if missing
 try:
     import tiktoken
@@ -909,30 +919,48 @@ class RepoExporter:
             print(f"\nError writing output file {self.output_file}: {e}")
 
         # --- Final Summary ---
+        print(f"\nExported to: {self.output_file}")
         print(f"Total number of lines exported: {self.total_lines}")
         if self.tokenizer:
             print(f"Total number of tokens exported (estimated, o200k_base): {self.total_tokens} ({self._format_count(self.total_tokens)})")
 
         print("\nExported content summary by extension:")
         if self.stats_by_extension:
-             # Determine max width for alignment
-             max_ext_len = max(len(ext) for ext in self.stats_by_extension.keys()) if self.stats_by_extension else 0
-             max_files_len = max(len(str(s['files'])) for s in self.stats_by_extension.values()) if self.stats_by_extension else 0
-             max_lines_len = max(len(self._format_count(s['lines'])) for s in self.stats_by_extension.values()) if self.stats_by_extension else 0
-             max_tokens_len = max(len(self._format_count(s['tokens'])) for s in self.stats_by_extension.values()) if self.stats_by_extension else 0
+            if console:  # If Rich is available, use Rich table
+                table = Table(show_header=True, header_style="bold")
+                table.add_column("Extension", style="cyan")
+                table.add_column("Files", justify="right")
+                table.add_column("Lines", justify="right")
+                table.add_column("Tokens", justify="right")
 
-             header = f"  {'Extension'.ljust(max_ext_len)}  {'Files'.rjust(max_files_len)}  {'Lines'.rjust(max_lines_len)}  {'Tokens'.rjust(max_tokens_len)}"
-             print(header)
-             print(f"  {'-' * max_ext_len}  {'-' * max(5, max_files_len)}  {'-' * max(5, max_lines_len)}  {'-' * max(6, max_tokens_len)}")
+                sorted_extensions = sorted(self.stats_by_extension.items())
+                for ext, stats in sorted_extensions:
+                    table.add_row(
+                        ext,
+                        str(stats['files']),
+                        self._format_count(stats['lines']),
+                        self._format_count(stats['tokens'])
+                    )
+                console.print(table)
+            else:  # Fall back to basic formatting
+                # Determine max width for alignment
+                max_ext_len = max(len(ext) for ext in self.stats_by_extension.keys()) if self.stats_by_extension else 0
+                max_files_len = max(len(str(s['files'])) for s in self.stats_by_extension.values()) if self.stats_by_extension else 0
+                max_lines_len = max(len(self._format_count(s['lines'])) for s in self.stats_by_extension.values()) if self.stats_by_extension else 0
+                max_tokens_len = max(len(self._format_count(s['tokens'])) for s in self.stats_by_extension.values()) if self.stats_by_extension else 0
 
-             sorted_extensions = sorted(self.stats_by_extension.items())
-             for ext, stats in sorted_extensions:
-                 files_str = str(stats['files']).rjust(max_files_len)
-                 lines_str = self._format_count(stats['lines']).rjust(max_lines_len)
-                 tokens_str = self._format_count(stats['tokens']).rjust(max_tokens_len)
-                 print(f"  {ext.ljust(max_ext_len)}  {files_str}  {lines_str}  {tokens_str}")
+                header = f"  {'Extension'.ljust(max_ext_len)}  {'Files'.rjust(max_files_len)}  {'Lines'.rjust(max_lines_len)}  {'Tokens'.rjust(max_tokens_len)}"
+                print(header)
+                print(f"  {'-' * max_ext_len}  {'-' * max(5, max_files_len)}  {'-' * max(5, max_lines_len)}  {'-' * max(6, max_tokens_len)}")
+
+                sorted_extensions = sorted(self.stats_by_extension.items())
+                for ext, stats in sorted_extensions:
+                    files_str = str(stats['files']).rjust(max_files_len)
+                    lines_str = self._format_count(stats['lines']).rjust(max_lines_len)
+                    tokens_str = self._format_count(stats['tokens']).rjust(max_tokens_len)
+                    print(f"  {ext.ljust(max_ext_len)}  {files_str}  {lines_str}  {tokens_str}")
         else:
-             print("  (No files exported)")
+            print("  (No files exported)")
 
 
 # --- Helper Functions ---
@@ -1022,7 +1050,6 @@ def get_default_config(repo_root_path: str) -> dict:
     """Provide a default config for direct repository path usage."""
     repo_root_path = PathConverter.to_system_path(os.path.abspath(repo_root_path))
     repo_name = os.path.basename(repo_root_path) or "repo" # Handle case where path ends in separator
-    # Default to .txt extension now that it's not strictly XML
     default_export_name = f"{repo_name}_export.txt"
     return {
         'repo_root': repo_root_path,
@@ -1036,8 +1063,22 @@ def get_default_config(repo_root_path: str) -> dict:
         'exhaustive_dir_tree': False,
         'files_to_include': [],
         'additional_dirs_to_traverse': [],
-        # Update default excludes for common dev files and the new default export name
-        'always_exclude_patterns': [default_export_name, '.DS_Store', '*.pyc', '*.swp', '*.swo', 'node_modules/', 'build/', 'dist/'],
+        'always_exclude_patterns': [
+            default_export_name,
+            '.DS_Store',
+            '*.pyc',
+            '*.swp',
+            '*.swo',
+            'node_modules/',
+            'build/',
+            'dist/',
+            '.venv/',
+            '.git/',
+            '__pycache__/',
+            '.pytest_cache/',
+            '.mypy_cache/',
+            '.coverage'
+        ],
         'dump_config': False,
         'dirs_for_tree': [], # Default to showing all non-excluded dirs in tree
         'output_dir': None # Default to outputting in repo_root
