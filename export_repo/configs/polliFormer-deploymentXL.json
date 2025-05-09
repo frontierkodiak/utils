@@ -7,10 +7,10 @@
     "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
     "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh"],
     "files_to_include": [
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run6a.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run6b.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run6c.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run6d.yaml",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS1_16e.yaml",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS2_16e.yaml",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS5_16e.yaml",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run6d3_16e.yaml",
     "/home/caleb/repo/polliFormer/tools/docker/Dockerfile",
     "/home/caleb/repo/polliFormer/polliFormer/requirements.txt",
     "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
