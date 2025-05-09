@@ -2,12 +2,12 @@
     "repo_root": "/Users/carbon/repo/pollinalysis",
     "export_name": "pollinalysis_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["src", "work"],
+    "dirs_to_traverse": ["src", "configs"],
     "files_to_include": [],
     "files_to_exclude": ["CONTRIBUTING.md", "LICENSE", "LICENSE_cctorch", "CODE_OF_CONDUCT.md", "README.md",
     "prompt.md"],
     "include_top_level_files": "all",
-    "included_extensions": [".py", ".md", ".ipynb", ".toml"],
+    "included_extensions": [".py", ".md", ".yaml", ".toml"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }

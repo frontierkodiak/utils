@@ -1,0 +1,13 @@
+{
+    "repo_root": "/Users/carbon/repo/pollinalysis-tools/preprocessing/squarecrop",
+    "export_name": "squarecrop_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["configs", "logs"],
+    "files_to_include": [],
+    "files_to_exclude": ["CONTRIBUTING.md", "LICENSE", "LICENSE_cctorch", "CODE_OF_CONDUCT.md",
+    "prompt.md"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".json", ".md", ".log"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }

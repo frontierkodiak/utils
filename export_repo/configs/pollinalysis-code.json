@@ -1,0 +1,16 @@
+{
+    "repo_root": "/Users/carbon/repo/pollinalysis",
+    "export_name": "pollinalysis_code_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["src", "app", "docs"],
+    "files_to_include": ["/Users/carbon/repo/pollinalysis/configs/runs/default_with_merge.yaml",
+    "/Users/carbon/repo/pollinalysis/configs/prompts/gemini_prompts.jsonl",
+    "/Users/carbon/repo/pollinalysis/configs/metadata/DiNat17_classes.yaml",
+    "/Users/carbon/repo/pollinalysis/configs/README.md"],
+    "files_to_exclude": ["CONTRIBUTING.md", "LICENSE", "LICENSE_cctorch", "CODE_OF_CONDUCT.md", "README.md",
+    "prompt.md", "debug_gemini_padding.py"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".md", ".ipynb", ".toml"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }

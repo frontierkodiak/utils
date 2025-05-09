@@ -6,7 +6,7 @@
     "files_to_include": [],
     "files_to_exclude": ["CONTRIBUTING.md", "LICENSE", "LICENSE_cctorch", "CODE_OF_CONDUCT.md"],
     "include_top_level_files": "all",
-    "included_extensions": [".py", ".md", ".ipynb", ".Dockerfile", ".yaml", ".yml", ".html", ".graphql", ".ts", ".tsx", ".json", ".css", ".js", ".yaml", ".yml", ".graphql", ".dockerignore"],
+    "included_extensions": [".py", ".md", ".ipynb", ".Dockerfile", ".yaml", ".toml", ".yml", ".html", ".graphql", ".ts", ".tsx", ".json", ".css", ".js", ".yaml", ".yml", ".graphql", ".dockerignore"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }

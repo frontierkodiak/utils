@@ -1,0 +1,18 @@
+{
+    "repo_root": "/Users/carbon/repo/pollinalysis",
+    "export_name": "pollinalysis_code_mini_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["src/pollinalysis/masking", "src/pollinalysis/io"],
+    "files_to_include": ["/Users/carbon/repo/pollinalysis/configs/insecta_only_deepsort_8.json",
+    "/Users/carbon/repo/pollinalysis/src/pollinalysis/cli.py",
+    "/Users/carbon/repo/pollinalysis/src/pollinalysis/config.py"],
+    "files_to_exclude": ["CONTRIBUTING.md", "LICENSE", "LICENSE_cctorch", "CODE_OF_CONDUCT.md", "README.md",
+    "prompt.md",
+    "temp_analyze_masks.py",
+    "CLAUDE.md",
+    "TODO.md"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".md", ".ipynb", ".toml"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false
+  }

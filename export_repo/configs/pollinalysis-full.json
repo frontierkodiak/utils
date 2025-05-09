@@ -1,0 +1,24 @@
+{
+    "repo_root": "/Users/carbon/repo/pollinalysis",
+    "export_name": "pollinalysis_full_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["src", "app", "configs", "docs"],
+    "files_to_include": ["/Users/carbon/repo/pollinalysis/work/active/context/initial_spec.md",
+      "/Users/carbon/repo/pollinalysis/work/active/context/appendix.md",
+      "/Users/carbon/repo/pollinalysis/work/active/May6_25/grid_search.md",
+      "/Users/carbon/repo/pollinalysis/work/misc/simon-willimson-gemini-image-seg.md",
+    "/Users/carbon/repo/pollinalysis-tools/misc/Spatial_understanding.ipynb"],
+    "files_to_exclude": ["CONTRIBUTING.md", "LICENSE", "LICENSE_cctorch", "CODE_OF_CONDUCT.md",
+    "prompt.md"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".md", ".ipynb", ".toml", ".yaml", ".log", ".txt", ".json", ".path"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": false,
+    "additional_dirs_to_traverse": [
+        "/home/caleb/repo/sam2/notebooks",
+        "/home/caleb/repo/sam2/sam2",
+        "/home/caleb/repo/sam2/tools",
+        "/Users/carbon/repo/pollinalysis-tools/preprocessing/squarecrop/squarecrop",
+        "/home/caleb/repo/trackers/trackers"
+      ]
+}

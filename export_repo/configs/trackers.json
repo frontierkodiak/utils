@@ -3,10 +3,10 @@
     "export_name": "trackers_export.txt",
     "delimiter": "----",
     "dirs_to_traverse": ["docs", "trackers"],
-    "files_to_include": [],
+    "files_to_include": ["pyproject.toml", "README.md"],
     "files_to_exclude": ["CONTRIBUTING.md", "LICENSE", "LICENSE_cctorch", "CODE_OF_CONDUCT.md"],
-    "include_top_level_files": "all",
-    "included_extensions": [".py", ".md", ".ipynb"],
+    "include_top_level_files": "none",
+    "included_extensions": [".py", ".md", ".ipynb", ".toml"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }

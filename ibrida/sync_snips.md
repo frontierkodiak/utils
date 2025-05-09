@@ -13,3 +13,21 @@ rclone copy \
   --progress \
   --log-level INFO
 ```
+
+```bash
+rclone copy \
+  ibrida:ibrida-1/datasets/v0/r1/pta_384p_60q/ \
+  /Users/carbon/Data/ibrida/v0r1/images/non_localized/pta_full/ \
+  --transfers=36 \
+  --checkers=36 \
+  --progress \
+  --log-level INFO
+
+rclone copy \
+  ibrida:ibrida-1/datasets/v0/r1/pta_384p_60q/imgs/ \
+  /Users/carbon/Data/ibrida/v0r1/images/non_localized/pta_full/ \
+  --transfers=36 \
+  --checkers=36 \
+  --progress \
+  --log-level INFO
+```
