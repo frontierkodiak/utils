@@ -2,7 +2,7 @@
 
 ## Overview
 
-This tool exports repository content to a text file, including directory structures and file contents. It provides flexible configuration options to control what is included in the export.
+This tool exports repository content to a text file, including directory structures and file contents. It provides flexible configuration options to control what is included in the export, with support for line numbering, token counting, and rich formatting.
 
 ## Usage
 
@@ -20,7 +20,6 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
 
 - `repo_root`: Path to the repository's root directory.
 - `export_name`: Name or path for the export file. If a path, exports there; if a name, exports to `repo_root`.
-- `delimiter`: Separator string for entries in the export file.
 - `dirs_to_traverse`: List of directories within `repo_root` for full traversal and export.
 - `dirs_for_tree`: List of specific directories to include in the directory tree output. If empty, includes all non-hidden directories.
 - `files_to_include`: List of specific files to include in the export, regardless of their location in the repository.
@@ -32,6 +31,73 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
 - `depth`: Depth of directory traversal. `-1` for full traversal (default).
 - `exhaustive_dir_tree`: If `true`, exports full directory tree regardless of other settings.
 - `dump_config`: If `true`, dumps the export configuration JSON at the top of the output file.
+- `output_dir`: Optional directory for output file. If not specified, uses repo_root.
+- `additional_dirs_to_traverse`: List of additional directories outside repo_root to include.
+
+### Line Numbering Configuration
+
+- `line_number_interval`: Interval for line number markers (default: 25)
+- `line_number_min_length`: Minimum file length (in lines) to add line numbers (default: 150)
+- `annotate_extensions`: List of file extensions to annotate with line numbers (default: [".py", ".js", ".ts", ".tsx", ".java", ".cpp", ".c", ".go", ".rs", ".sh", ".sql"])
+- `line_number_prefix`: Prefix for line number markers (default: "|LN|")
+
+## Output Format
+
+The tool generates an XML-formatted output file with the following structure:
+
+```xml
+<codebase_context>
+  <config source="config_filename">...</config>
+  <dirtree root="/path/to/repo">
+    directory_tree_with_stats
+  </dirtree>
+  <files>
+    <file path="relative/path/to/file.py" line_interval="25">
+      #|LN|25|
+      actual code line
+      #|LN|50|
+      another code line
+    </file>
+    <dir path="subdirectory">
+      <file path="nested/file.py">...</file>
+    </dir>
+    <external_files>
+      <file path="/absolute/path/to/file.py">...</file>
+    </external_files>
+  </files>
+</codebase_context>
+```
+
+### Features
+
+1. **Directory Tree**
+   - Shows hierarchical structure with line/token counts
+   - Supports depth limiting
+   - Excludes hidden directories by default
+   - Configurable via `dirs_for_tree`
+
+2. **File Content**
+   - Preserves original file structure
+   - Supports nested directories
+   - Handles external files separately
+   - Converts Jupyter notebooks to markdown
+
+3. **Line Numbering**
+   - Sparse line numbers for code files
+   - Configurable interval and minimum length
+   - Extension-specific annotation
+   - Preserves original code formatting
+
+4. **Statistics**
+   - Line counts per file and directory
+   - Token counts (using tiktoken)
+   - Summary by file extension
+   - Rich table output if available
+
+5. **Path Handling**
+   - Cross-platform path normalization
+   - Support for relative and absolute paths
+   - Automatic path conversion between systems
 
 ## Example Configuration
 
@@ -39,7 +105,6 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
 {
   "repo_root": "/home/user/myrepo",
   "export_name": "repo_export.txt",
-  "delimiter": "----",
   "dirs_to_traverse": ["src", "docs"],
   "files_to_include": ["README.md", "config.json"],
   "include_top_level_files": "all",
@@ -49,20 +114,13 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
   "always_exclude_patterns": ["export.txt", "*.log"],
   "depth": -1,
   "exhaustive_dir_tree": false,
-  "dump_config": false
+  "dump_config": false,
+  "line_number_interval": 25,
+  "line_number_min_length": 150,
+  "annotate_extensions": [".py", ".js", ".ts"],
+  "line_number_prefix": "|LN|"
 }
 ```
-
-## Notes
-
-- The tool will automatically exclude the output file from the export.
-- If no config file is provided, default settings will be used.
-- The `subdirs_to_exclude` option supports partial paths (e.g., "foo/bar" will exclude all "bar" directories under any "foo" directory).
-- Use `always_exclude_patterns` for files you want to exclude regardless of their location or other inclusion rules.
-- To include the export configuration in the output file, use the `--dump-config` flag when running the script.
-- Hidden directories (starting with '.') are automatically excluded from the directory tree.
-- Use `dirs_for_tree` to explicitly specify which directories should appear in the directory tree output. If not specified, all non-hidden directories will be included.
-
 
 ## Example Configurations
 
@@ -72,11 +130,13 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
 {
   "repo_root": "/home/user/nextjs-project",
   "export_name": "nextjs_project_export.txt",
-  "delimiter": "----",
   "dirs_to_traverse": ["components", "pages", "styles", "public"],
-  "dirs_for_tree": ["components", "pages", "styles"],  // Only show main app directories
+  "dirs_for_tree": ["components", "pages", "styles"],
   "include_top_level_files": ["package.json", "next.config.js"],
-  "included_extensions": [".js", ".jsx", ".ts", ".tsx", ".css"]
+  "included_extensions": [".js", ".jsx", ".ts", ".tsx", ".css"],
+  "line_number_interval": 25,
+  "line_number_min_length": 150,
+  "annotate_extensions": [".js", ".jsx", ".ts", ".tsx"]
 }
 ```
 
@@ -86,13 +146,15 @@ python export_repo_to_txt.py <repo_root> [--dump-config]
 {
   "repo_root": "/home/user/python-project",
   "export_name": "python_project_export.txt",
-  "delimiter": "----",
   "dirs_to_traverse": ["src", "tests", "docs"],
-  "dirs_for_tree": ["src", "docs"],  // Only show source and documentation
+  "dirs_for_tree": ["src", "docs"],
   "files_to_include": ["requirements.txt", "setup.py"],
   "include_top_level_files": "all",
   "included_extensions": [".py", ".md", ".yml"],
-  "subdirs_to_exclude": ["__pycache__", ".venv"]
+  "subdirs_to_exclude": ["__pycache__", ".venv"],
+  "line_number_interval": 25,
+  "line_number_min_length": 150,
+  "annotate_extensions": [".py"]
 }
 ```
 

@@ -11,7 +11,6 @@
   "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS2_16e.yaml",
   "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS5_16e.yaml",
   "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run6d3_16e.yaml",
-  "/home/caleb/repo/polliFormer/tools/docker/Dockerfile",
   "/home/caleb/repo/polliFormer/polliFormer/requirements.txt",
   "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
   ],
@@ -19,9 +18,10 @@
     "/home/caleb/repo/polliFormer/docs",
     "/home/caleb/repo/polliFormer/configs/model/archs",
     "/home/caleb/repo/polliFormer/work/active/May9a_25",
-    "/home/caleb/repo/polliFormer/logs/metamask_debug_20250509_192736"
+    "/home/caleb/repo/polliFormer/logs/metamask_debug_20250509_234913",
+    "/home/caleb/repo/polliFormer/logs/metamask_debug_20250509_235245"
   ],
-  "files_to_exclude": ["console_ui.py"],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
   "subdirs_to_exclude": ["utils/inference"],
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
