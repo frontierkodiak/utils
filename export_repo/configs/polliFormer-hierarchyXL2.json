@@ -1,9 +1,9 @@
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
-  "export_name": "polliFormer_hierarchyXL_export.txt",
+  "export_name": "polliFormer_hierarchyXL2_export.txt",
   "delimiter": "----",
   "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
-  "ops_schedule", "optimizers", "lr_schedulers", "tools"],
+  "ops_schedule", "tools"],
   "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
   "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
   "files_to_include": [
@@ -15,10 +15,8 @@
   "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
   ],
   "additional_dirs_to_traverse": [
-    "/home/caleb/repo/polliFormer/docs",
     "/home/caleb/repo/polliFormer/configs/model/archs",
-    "/home/caleb/repo/polliFormer/work/active/May9a_25",
-    "/home/caleb/repo/polliFormer/logs/metamask_debug_20250510_222702/selections2"
+    "/home/caleb/repo/polliFormer/logs/metamask_debug_20250512_182722/selections"
   ],
   "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
   "subdirs_to_exclude": ["utils/inference"],
