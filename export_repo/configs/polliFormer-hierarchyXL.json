@@ -16,9 +16,7 @@
   ],
   "additional_dirs_to_traverse": [
     "/home/caleb/repo/polliFormer/docs",
-    "/home/caleb/repo/polliFormer/configs/model/archs",
-    "/home/caleb/repo/polliFormer/work/active/May9a_25",
-    "/home/caleb/repo/polliFormer/logs/metamask_debug_20250510_222702/selections2"
+    "/home/caleb/repo/polliFormer/configs/model/archs"
   ],
   "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
   "subdirs_to_exclude": ["utils/inference"],

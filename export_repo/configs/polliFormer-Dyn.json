@@ -2,16 +2,18 @@
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_Dyn_export.txt",
   "delimiter": "----",
-  "dirs_to_traverse": ["loss","ops_schedule", "utils/logging", "utils/metrics"],
-  "include_top_level_files": "all",
-  "included_extensions": [".py"],
-  "files_to_include": ["/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_hybrid_ft_sm_19.yaml",
-    "style_guide/metrics.md", "style_guide/schedule_parameters.md",
-  "utils/schedule_utils.py", 
-"/home/caleb/repo/polliFormer/docs/training/metrics.md",
-"/home/caleb/repo/polliFormer/docs/training/scheduling.md",
-"/home/caleb/repo/polliFormer/docs/evaluation/validation.md"],
-  "files_to_exclude": ["console_ui.py", "backblaze.py"],
+  "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
+  "ops_schedule", "optimizers", "lr_schedulers", "tools"],
+  "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
+  "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh"],
+  "files_to_include": [
+  "/home/caleb/repo/polliFormer/polliFormer/requirements.txt"
+  ],
+  "additional_dirs_to_traverse": [
+    "/home/caleb/repo/polliFormer/docs",
+    "/home/caleb/repo/polliFormer/configs/model/archs"
+  ],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
   "subdirs_to_exclude": ["utils/inference"],
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
