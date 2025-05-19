@@ -1,6 +1,6 @@
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
-  "export_name": "polliFormer_hierarchyXL_export.txt",
+  "export_name": "polliFormer_hierarchyXL3_export.txt",
   "delimiter": "----",
   "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
   "ops_schedule", "optimizers", "lr_schedulers", "tools"],
@@ -8,11 +8,15 @@
   "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
   "files_to_include": [
   "/home/caleb/repo/polliFormer/configs/experiments/tests/pta_mFormerV1_sm_r0a_5e.yaml",
-  "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
+  "/datasets/modelWorkshop/mFormerV1/linnaeus/pta_mFormerV1/pta_mFormerV1_sm_r0a_5e/logs/debug_log_rank0.txt",
+  "/datasets/modelWorkshop/mFormerV1/linnaeus/pta_mFormerV1/pta_mFormerV1_sm_r0a_5e/logs/debug_log_rank1.txt",
+  "/datasets/modelWorkshop/mFormerV1/linnaeus/pta_mFormerV1/pta_mFormerV1_sm_r0a_5e/logs/h5data_debug_log_rank0.txt",
+  "/datasets/modelWorkshop/mFormerV1/linnaeus/pta_mFormerV1/pta_mFormerV1_sm_r0a_5e/logs/h5data_debug_log_rank1.txt",
+  "/datasets/modelWorkshop/mFormerV1/linnaeus/pta_mFormerV1/pta_mFormerV1_sm_r0a_5e/logs/h5data_debug_log_rank2.txt"
   ],
   "additional_dirs_to_traverse": [
-    "/home/caleb/repo/polliFormer/docs",
-    "/home/caleb/repo/polliFormer/configs/model/archs"
+    "/home/caleb/repo/polliFormer/configs/model/archs",
+    "/home/caleb/repo/polliFormer/docs/"
   ],
   "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
   "subdirs_to_exclude": ["utils/inference"],

@@ -1,19 +1,20 @@
 {
-    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "repo_root": "/home/caleb/repo/polliFormer",
     "export_name": "polliFormer_deploymentXL_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
-    "ops_schedule", "optimizers", "lr_schedulers", "tools"],
+    "dirs_to_traverse": ["polliFormer/loss", "polliFormer/models", "polliFormer/h5data", "polliFormer/aug", "polliFormer/utils",
+    "polliFormer/ops_schedule", "polliFormer/optimizers", "polliFormer/lr_schedulers", "polliFormer/tools", "migration"],
     "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
     "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh"],
     "files_to_include": [
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS1_16e.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS2_16e.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS5_16e.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run6d3_16e.yaml",
+    "/home/caleb/repo/polliFormer/README.md",
+    "/home/caleb/repo/polliFormer/setup.py",
+    "/home/caleb/repo/polliFormer/.gitignore",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/pta_mFormerV1_sm_r0a_5e.yaml",
+    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json",
     "/home/caleb/repo/polliFormer/tools/docker/Dockerfile",
     "/home/caleb/repo/polliFormer/polliFormer/requirements.txt",
-    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
+    "/home/caleb/repo/polliFormer/work/active/May15a/dataset_sharding_plan.md"
     ],
     "additional_dirs_to_traverse": [
       "/home/caleb/repo/polliFormer/docs",
@@ -22,7 +23,7 @@
       "/home/caleb/repo/polliFormer/dev/deployment/hyperbolic"
     ],
     "files_to_exclude": ["console_ui.py"],
-    "subdirs_to_exclude": ["utils/inference"],
+    "subdirs_to_exclude": ["wandb", "typings"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }

@@ -1,0 +1,29 @@
+{
+    "repo_root": "/home/caleb/repo/typus/src/",
+    "export_name": "typus_prep_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["typus"],
+    "files_to_include": [
+        "/home/caleb/repo/typus/pyproject.toml",
+        "/home/caleb/repo/typus/README.md",
+        "/home/caleb/repo/linnaeus-temp/linnaeus/h5data/vectorized_dataset_processor.py",
+        "/home/caleb/repo/linnaeus-temp/linnaeus/utils/taxonomy/taxonomy_tree.py",
+        "/home/caleb/repo/linnaeus-temp/linnaeus/loss/taxonomy_label_smoothing.py"
+    ],
+    "files_to_exclude": [],
+    "include_top_level_files": ["none"],
+    "included_extensions": [".py", ".json", ".sh", ".md"],
+    "always_exclude_patterns": ["export.txt"],
+    "additional_dirs_to_traverse": [
+        "/home/caleb/repo/linnaeus-temp/docs",
+        "/home/caleb/repo/linnaeus-temp/linnaeus/models/heads",
+        "/home/caleb/repo/ibridaDB/docs",
+        "/home/caleb/repo/ibridaDB/dbTools/export/v0/common",
+        "/home/caleb/repo/ibridaDB/dbTools/taxa/expand",
+        "/home/caleb/repo/ibridaDB/models",
+        "/home/caleb/repo/ibrida/src/ibrida/generator",
+        "/home/caleb/repo/ibrida/src/ibrida/types"
+
+    ],
+    "exhaustive_dir_tree": true
+  }

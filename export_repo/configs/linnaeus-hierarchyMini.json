@@ -1,0 +1,23 @@
+{
+  "repo_root": "/home/caleb/repo/linnaeus-temp/linnaeus",
+  "export_name": "linnaeus_hierarchyMini_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["models", "utils/taxonomy"],
+  "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
+  "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
+  "additional_dirs_to_traverse": [
+    "/home/caleb/repo/linnaeus-temp/configs/model/archs",
+    "/home/caleb/repo/linnaeus-temp/docs/"
+  ],
+  "files_to_include": [
+    "/home/caleb/repo/linnaeus-temp/linnaeus/h5data/vectorized_dataset_processor.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/meta_utils.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/metrics/chain_accuracy.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/hierarchical_loss.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/taxonomy_label_smoothing.py"
+    ],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}
