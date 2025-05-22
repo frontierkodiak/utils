@@ -296,6 +296,17 @@ class RepoExporter:
             # Add more as needed. HTML/XML/CSS use block comments, Markdown <!-- -->.
         }
 
+        # Add data file extensions that should be treated as non-code
+        self.data_file_extensions = {
+            ".tsv",
+            ".csv",
+            ".json",
+            ".xml",
+            ".yaml",
+            ".yml",
+            ".toml",
+        }
+
         # Hardcoded blacklists
         self.blacklisted_dirs = [
             "__pycache__",
@@ -857,6 +868,10 @@ class RepoExporter:
         """
         ext_lower = file_extension.lower()  # Ensure consistent matching
 
+        # Skip annotation for data files
+        if ext_lower in self.data_file_extensions:
+            return content, 0
+
         # Check if annotation is enabled globally and for this specific extension
         if not self.line_number_interval or self.line_number_interval <= 0:
             return content, 0
@@ -982,24 +997,28 @@ class RepoExporter:
         indent = "  " * indent_level
         parts = []
 
-        # Separate files and directories at the current level
+        # Separate files and sub-directories at the current level
         current_level_files = {}  # display_path -> (abs_path, content, is_ipynb, line_interval_used)
         subdirs = {}  # subdir_key (relative path) -> list of file tuples
 
-        # Normalize prefix for comparison
+        # --- Normalise the prefix and prepare it for os.path.relpath ---
+        # PathConverter ensures consistent separators ("/" vs "\").
         norm_prefix = PathConverter.to_system_path(path_prefix)
-        prefix_len = len(norm_prefix) if norm_prefix else -1
+
+        # relpath() requires a non-empty *start* argument; treat root as ".".
+        base_for_relpath = norm_prefix if norm_prefix not in {"", "."} else "."
 
         for file_tuple in files_in_dir:
             display_path, abs_path, content, is_ipynb, line_interval_used = file_tuple
             # Ensure display_path uses system separators for splitting logic
             norm_display_path = PathConverter.to_system_path(display_path)
 
-            # Determine path relative to the current prefix
-            relative_to_prefix = (
-                norm_display_path[prefix_len + 1 :]
-                if prefix_len >= -1
-                else norm_display_path
+            # Determine path **relative** to the current recursion prefix.
+            # Example:  norm_display_path = "tests/conftest.py"
+            #           norm_prefix      = "."   (root call)
+            #           → relative_to_prefix = "tests/conftest.py"
+            relative_to_prefix = os.path.relpath(
+                norm_display_path, start=base_for_relpath
             )
 
             if os.sep in relative_to_prefix:
@@ -1024,7 +1043,7 @@ class RepoExporter:
                     line_interval_used,
                 )
 
-        # Add files at the current level
+        # --------  Emit <file> tags at the current level  --------
         for display_path, file_data_tuple in sorted(current_level_files.items()):
             abs_path, content, is_ipynb, line_interval_used = file_data_tuple
             # Escape path attribute value ONLY

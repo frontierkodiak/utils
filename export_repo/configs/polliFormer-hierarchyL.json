@@ -1,0 +1,21 @@
+{
+  "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+  "export_name": "polliFormer_hierarchyL_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["loss", "models","utils",
+  "ops_schedule", "optimizers", "lr_schedulers"],
+  "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
+  "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
+  "files_to_include": [
+  "/home/caleb/repo/polliFormer/configs/experiments/tests/pta_mFormerV1_sm_r0a_5e.yaml",
+  "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
+  ],
+  "additional_dirs_to_traverse": [
+    "/home/caleb/repo/polliFormer/docs",
+    "/home/caleb/repo/polliFormer/configs/model/archs"
+  ],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}

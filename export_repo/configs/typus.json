@@ -1,0 +1,11 @@
+{
+    "repo_root": "/home/caleb/repo/typus/",
+    "export_name": "typus_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["typus", "tests", "scripts"],
+    "files_to_exclude": [],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".json", ".sh", ".md", ".tsv", ".toml", ".yaml"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }
