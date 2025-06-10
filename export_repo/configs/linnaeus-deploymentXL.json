@@ -2,23 +2,15 @@
     "repo_root": "/home/caleb/repo/linnaeus",
     "export_name": "linnaeus_deploymentXL_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["linnaeus"],
-    "include_top_level_files": ["README.md", "pyproject.toml", ".gitignore"],
-    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh"],
+    "dirs_to_traverse": ["linnaeus", "configs", "tools", "docs", "tests"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".toml"],
     "files_to_include": [
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run4.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_mFormerV1_sm_run3_test_Apr21b_noGC.yaml",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/test_autobatch_reptilia_mFormerV1_lg.yaml",
     "/home/caleb/repo/linnaeus/tools/docker/Dockerfile",
     "/home/caleb/repo/linnaeus/linnaeus/requirements.txt",
     "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
     ],
-    "additional_dirs_to_traverse": [
-      "/home/caleb/repo/linnaeus/docs",
-      "/home/caleb/repo/linnaeus/configs/model/archs",
-      "/home/caleb/repo/linnaeus/tools"
-    ],
-    "files_to_exclude": ["console_ui.py"],
-    "subdirs_to_exclude": ["utils/inference"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }

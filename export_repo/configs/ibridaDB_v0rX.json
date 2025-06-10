@@ -1,14 +1,17 @@
 {
-    "repo_root": "/home/caleb/repo/ibridaDB/dbTools",
+    "repo_root": "/home/caleb/repo/ibridaDB",
     "export_name": "ibridaDB_v0rX_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["ingest/v0", "export/v0", "taxa", "dem"],
+    "dirs_to_traverse": ["models", "docs", "scripts", "docker/stausee",
+      "dbTools/ingest/v0/common", "dbTools/ingest/v0/r1", "dbTools/export/v0/common", "dbTools/export/v0/r1", "dbTools/taxa", "dbTools/dem"],
     "include_top_level_files": "all",
     "subdirs_to_exclude": ["diffs"],
-    "additional_dirs_to_traverse": [
-      "/home/caleb/repo/ibridaDB/docs",
-      "/home/caleb/repo/ibridaDB/dev",
-      "/home/caleb/repo/ibridaDB/docker/stausee"],
+    "files_to_include": [
+      "/home/caleb/repo/ibridaDB/dev/ancestor_aware.md",
+      "/home/caleb/repo/ibridaDB/dbTools/FLOW.md",
+      "/home/caleb/repo/ibridaDB/dbTools/README.md",
+      "/home/caleb/repo/ibridaDB/dbTools/schema.md"
+    ],
     "included_extensions": [".sh", ".md", ".sql", ".txt", ".py"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false

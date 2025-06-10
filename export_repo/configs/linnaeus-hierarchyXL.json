@@ -1,0 +1,17 @@
+{
+    "repo_root": "/home/caleb/repo/linnaeus-temp",
+    "export_name": "linnaeus_hierarchyXL_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["linnaeus", "docs", "configs/model/archs", "tools", "tests"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".toml", ".sh"],
+    "files_to_include": [
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/amphibia_mFormerV1_sm_r3c_40e.yaml",
+    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json",
+    "/home/caleb/repo/linnaeus-temp/work/training_commands.md"
+    ],
+    "files_to_exclude": ["console_ui.py"],
+    "subdirs_to_exclude": ["utils/inference"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

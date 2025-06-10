@@ -1,0 +1,26 @@
+{
+    "repo_root": "/home/caleb/repo/linnaeus-temp",
+    "export_name": "linnaeus_inference_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["linnaeus/utils/taxonomy", "linnaeus/utils/inference", "linnaeus/models/heads", "configs/model/archs"],
+    "additional_dirs_to_traverse": ["/home/caleb/repo/typus/typus"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".toml", ".sh"],
+    "files_to_include": [
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/amphibia_mFormerV1_sm_r0b_40e.yaml",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/main.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/config.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/mFormerV0.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/mFormerV1.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/metrics/chain_accuracy.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/meta_utils.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/dataset_metadata.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/checkpoint.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/checkpoint_utils.py",
+    "/home/caleb/repo/typus/README.md",
+    "/home/caleb/repo/typus/CHANGELOG.md"
+    ],
+    "files_to_exclude": ["console_ui.py"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

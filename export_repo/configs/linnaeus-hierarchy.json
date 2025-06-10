@@ -1,0 +1,35 @@
+{
+    "repo_root": "/home/caleb/repo/linnaeus-temp",
+    "export_name": "linnaeus_hierarchy_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": [
+        "docs",
+        "linnaeus/utils/taxonomy",
+        "linnaeus/inference/"
+    ],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".toml", ".sh"],
+    "files_to_include": [
+    "/home/caleb/repo/linnaeus-temp/linnaeus/h5data/h5dataloader.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/h5data/base_prefetching_dataset.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/h5data/prefetching_hybrid_dataset.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/metrics/chain_accuracy.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/basic_loss.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/core_loss.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/hierarchical_loss.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/masking.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/taxonomy_label_smoothing.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/mFormerV1.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/heads/utils.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/heads/base_hierarchical_head.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/heads/conditional_classifier_head.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/config.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/main.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/train.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/validation.py",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/amphibia_mFormerV1_sm_r3c_40e.yaml",
+    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
+    ],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }
