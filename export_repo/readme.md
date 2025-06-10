@@ -4,16 +4,100 @@
 
 This tool exports repository content to a text file, including directory structures and file contents. It provides flexible configuration options to control what is included in the export, with support for line numbering, token counting, and rich formatting.
 
+## Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/utils.git
+cd utils
+```
+
+2. Create and activate a virtual environment using `uv`:
+```bash
+uv venv
+source .venv/bin/activate
+```
+
+3. Install the package in editable mode:
+```bash
+uv pip install -e .
+```
+
+4. Add the alias to your shell configuration file:
+
+### On PopOS/Ubuntu (Linux)
+
+1. Open your shell configuration file:
+```bash
+nano ~/.bashrc
+```
+
+2. Add the following line at the end of the file:
+```bash
+alias export_repo='/home/caleb/repo/utils/.venv/bin/python /home/caleb/repo/utils/export_repo/export_repo_to_txt.py --pop'
+```
+
+3. Save the file and reload your shell configuration:
+```bash
+source ~/.bashrc
+```
+
+### On macOS
+
+1. Open your shell configuration file:
+```bash
+nano ~/.zshrc
+```
+
+2. Add the following line at the end of the file:
+```bash
+alias export_repo="/Users/yourusername/venvs/export_repo/bin/python /Users/yourusername/repo/utils/export_repo/export_repo_to_txt.py"
+```
+
+3. Save the file and reload your shell configuration:
+```bash
+source ~/.zshrc
+```
+
+### On Windows (PowerShell)
+
+1. Open PowerShell and check if you have a profile:
+```powershell
+Test-Path $PROFILE
+```
+
+2. If it returns False, create one:
+```powershell
+New-Item -Path $PROFILE -Type File -Force
+```
+
+3. Open your PowerShell profile:
+```powershell
+notepad $PROFILE
+```
+
+4. Add this function:
+```powershell
+function export_repo {
+    & "C:\Users\yourusername\repo\utils\.venv\Scripts\python.exe" "C:\Users\yourusername\repo\utils\export_repo\export_repo_to_txt.py" $args
+}
+```
+
+5. Save and reload your profile:
+```powershell
+. $PROFILE
+```
+
 ## Usage
 
 ```bash
-python export_repo_to_txt.py <config_file>.json [--dump-config]
+export_repo <config_file>.json [--dump-config]
 ```
 
 or
 
 ```bash
-python export_repo_to_txt.py <repo_root> [--dump-config]
+export_repo <repo_root> [--dump-config]
 ```
 
 ## Configuration Parameters
@@ -192,7 +276,11 @@ The tool generates an XML-formatted output file with the following structure:
 
 3. Add the following line at the end of the file:
    ```bash
-   alias export_repo='/home/caleb/Documents/GitHub/utils/.venv/bin/python /home/caleb/Documents/GitHub/utils/export_repo/export_repo_to_txt.py --pop'
+   alias export_repo='/home/caleb/repo/utils/.venv/bin/python /home/caleb/repo/utils/export_repo/export_repo_to_txt.py --pop'
+   ```
+
+   ```bash
+   alias export_repo="/Users/carbon/venvs/export_repo/bin/python /Users/carbon/repo/utils/export_repo/export_repo_to_txt.py"
    ```
 
 4. Save the file and exit the editor (in nano, press Ctrl+X, then Y, then Enter).
