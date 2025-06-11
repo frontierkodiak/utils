@@ -1,0 +1,10 @@
+{
+    "repo_root": "/home/caleb/repo/linnaeus-deployment",
+    "export_name": "linnaeus_deployment_notes_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["June2025"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".toml", ".config"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

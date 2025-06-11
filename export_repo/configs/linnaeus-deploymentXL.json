@@ -4,7 +4,7 @@
     "delimiter": "----",
     "dirs_to_traverse": ["linnaeus", "configs", "tools", "docs", "tests"],
     "include_top_level_files": ["all"],
-    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".toml"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".toml", ".json"],
     "files_to_include": [
     "/home/caleb/repo/polliFormer/configs/experiments/tests/test_autobatch_reptilia_mFormerV1_lg.yaml",
     "/home/caleb/repo/linnaeus/tools/docker/Dockerfile",

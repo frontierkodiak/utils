@@ -205,7 +205,7 @@ class PathConverter:
 
 
 class RepoExporter:
-    def __init__(self, config: dict, config_filename: str = None):
+    def __init__(self, config: dict, config_filename: str | None = None):
         """
         Initialize the RepoExporter with the given config dictionary.
         :param config: The loaded or constructed configuration object.
@@ -226,6 +226,12 @@ class RepoExporter:
         self.dump_config = config.get("dump_config", False)
         self.exhaustive_dir_tree = config.get("exhaustive_dir_tree", False)
         self.files_to_include = config.get("files_to_include", [])
+        # Keep a _set_ of the absolute paths after initial normalisation so that we
+        # can recognise "forced" inclusions later, even after further processing.
+        self._explicit_includes: set[str] = {
+            os.path.abspath(PathConverter.to_system_path(p))
+            for p in self.files_to_include
+        }
         self.additional_dirs_to_traverse = config.get("additional_dirs_to_traverse", [])
         self.always_exclude_patterns = config.get(
             "always_exclude_patterns", ["export.txt"]
@@ -434,7 +440,12 @@ class RepoExporter:
             print(f"Error converting ipynb: {e}")
             return f"<!-- Error converting notebook: {e} -->\n{notebook_content}"
 
-    def buffer_file_content(self, absolute_path: str):
+    def buffer_file_content(
+        self,
+        absolute_path: str,
+        *,
+        force_include: bool = False,
+    ):
         """
         Reads, processes (ipynb), calculates stats, and stores file content in memory buffer.
         Updates line/token counts and statistics.
@@ -479,7 +490,8 @@ class RepoExporter:
             ]
 
         if (
-            normalized_included_extensions != "all"
+            not force_include
+            and normalized_included_extensions != "all"
             and file_extension not in normalized_included_extensions
         ):
             return
@@ -689,15 +701,19 @@ class RepoExporter:
 
         print("Processing specific files to include...")
         for file_path_config in self.files_to_include:
-            # Normalize path from config first
-            normalized_file_path = PathConverter.to_system_path(file_path_config)
+            # *Keep* the value that the normaliser stored in self._explicit_includes
+            # but run a last‑chance cross‑platform conversion in case the list was
+            # re‑loaded from disk without normalisation.
+            normalized_file_path = convert_absolute_path(
+                PathConverter.to_system_path(file_path_config)
+            )
 
             if os.path.isabs(normalized_file_path):
                 abs_path = os.path.abspath(
                     normalized_file_path
                 )  # Ensure canonical absolute path
                 if os.path.isfile(abs_path):
-                    self.buffer_file_content(abs_path)
+                    self.buffer_file_content(abs_path, force_include=True)
                 else:
                     print(
                         f"Warning: Specified absolute file to include not found or not a file: {abs_path}"
@@ -708,7 +724,7 @@ class RepoExporter:
                     os.path.join(self.repo_root, normalized_file_path)
                 )
                 if os.path.isfile(abs_path):
-                    self.buffer_file_content(abs_path)
+                    self.buffer_file_content(abs_path, force_include=True)
                 else:
                     print(
                         f"Warning: Specified relative file to include not found relative to repo root: {normalized_file_path} (resolved to {abs_path})"

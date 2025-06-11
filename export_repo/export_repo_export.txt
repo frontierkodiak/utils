@@ -1,7 +1,7 @@
 <codebase_context>
-  <dirtree root="/home/caleb/repo/utils/export_repo">
-export_repo (3.0k/33.1k)
-||-- configs (1.5k lines/20.1k tokens)
+  <dirtree root="/Users/carbon/repo/utils/export_repo">
+export_repo (3.3k/37.0k)
+||-- configs (1.7k lines/23.9k tokens)
 ||   |-- autocrop.json (10/109)
 ||   |-- autocropper.json (12/172)
 ||   |-- bulk_dl.json (14/227)
@@ -16,21 +16,28 @@ export_repo (3.0k/33.1k)
 ||   |-- h5merge.json (12/160)
 ||   |-- h5pull.json (11/121)
 ||   |-- hFormer0-serve.json (10/114)
-||   |-- ibrida.json (19/372)
+||   |-- ibrida.json (20/358)
 ||   |-- ibridaDB_v0r1_export.json (13/296)
 ||   |-- ibridaDB_v0r1_ingest.json (10/117)
-||   |-- ibridaDB_v0rX.json (12/200)
+||   |-- ibridaDB_v0rX.json (18/256)
 ||   |-- ibrida_analysis.json (13/182)
 ||   |-- ibrida_autocrop.json (13/191)
 ||   |-- ladybird_data.json (13/148)
-||   |-- linnaeus-deploymentXL.json (24/331)
+||   |-- linnaeus-autobatch.json (14/178)
+||   |-- linnaeus-deployment-notes.json (15/192)
+||   |-- linnaeus-deploymentMini.json (24/322)
+||   |-- linnaeus-deploymentXL.json (16/221)
+||   |-- linnaeus-hierarchy.json (35/583)
+||   |-- linnaeus-hierarchyMini.json (23/342)
+||   |-- linnaeus-hierarchyXL.json (17/231)
+||   |-- linnaeus-inference.json (26/434)
 ||   |-- metaformer.json (11/84)
 ||   |-- metaformer1.json (12/100)
 ||   |-- metaformer2.json (11/84)
 ||   |-- model-explorer.json (13/120)
 ||   |-- nextjs.json (8/107)
 ||   |-- polliFormer-COPAP.json (12/147)
-||   |-- polliFormer-Dyn.json (18/245)
+||   |-- polliFormer-Dyn.json (20/250)
 ||   |-- polliFormer-DynSlim.json (13/138)
 ||   |-- polliFormer-J25_0e0.json (13/212)
 ||   |-- polliFormer-aug.json (11/103)
@@ -47,15 +54,18 @@ export_repo (3.0k/33.1k)
 ||   |-- polliFormer-configModelMini.json (13/162)
 ||   |-- polliFormer-data.json (12/171)
 ||   |-- polliFormer-debugCOPAP.json (13/157)
-||   |-- polliFormer-deploymentXL.json (28/443)
+||   |-- polliFormer-deploymentXL.json (29/434)
 ||   |-- polliFormer-deploymentXLw.json (56/1.0k)
 ||   |-- polliFormer-doxDyn.json (16/274)
 ||   |-- polliFormer-gradnorm.json (25/278)
 ||   |-- polliFormer-gradnorm2.json (27/310)
 ||   |-- polliFormer-gradnormSlim.json (16/192)
 ||   |-- polliFormer-gradnormSlim2.json (14/161)
-||   |-- polliFormer-hierarchyMini.json (16/222)
-||   |-- polliFormer-hierarchyXL.json (28/462)
+||   |-- polliFormer-hierarchyL.json (21/280)
+||   |-- polliFormer-hierarchyLOGS.json (19/244)
+||   |-- polliFormer-hierarchyXL.json (21/292)
+||   |-- polliFormer-hierarchyXL2.json (23/337)
+||   |-- polliFormer-hierarchyXL3.json (25/481)
 ||   |-- polliFormer-logging.json (14/172)
 ||   |-- polliFormer-loggingSlim.json (14/163)
 ||   |-- polliFormer-loss.json (26/303)
@@ -89,13 +99,16 @@ export_repo (3.0k/33.1k)
 ||   |-- sam2_demo.json (15/280)
 ||   |-- squarecrop.json (13/147)
 ||   |-- trackers.json (12/148)
+||   |-- typus-inference.json (23/277)
+||   |-- typus-prep.json (24/273)
+||   |-- typus.json (11/121)
 ||   |-- uv_docs_raw.json (14/121)
 ||   |-- uv_med.json (46/365)
 ||   |-- uv_mini.json (69/588)
 ||   |-- uv_xl.json (33/288)
 ||   |-- vggt.json (15/174)
 ||   \-- wandb_sweep.json (12/124)
-|\-- export_repo_to_txt.py (1.5k/12.9k)
+|\-- export_repo_to_txt.py (1.5k/13.1k)
   </dirtree>
   <files>
     <file path="export_repo_to_txt.py" line_interval="25">
@@ -123,7 +136,8 @@ except ImportError:
     console = None
 
 # Attempt to import tiktoken, provide guidance if missing
-#|LN|25|try:
+#|LN|25|
+try:
     import tiktoken
 except ImportError:
     print("Tiktoken library not found. Token counts will not be generated.")
@@ -148,7 +162,8 @@ UNIX_PATHS_TO_CONVERT = [
 def convert_absolute_path(path: str) -> str:
     """
     Convert an absolute path from one system's format to another.
-#|LN|50|    Handles known path patterns and converts them appropriately.
+#|LN|50|
+    Handles known path patterns and converts them appropriately.
     """
     if not isinstance(path, str) or not os.path.isabs(path):
         return path
@@ -174,6 +189,7 @@ def convert_absolute_path(path: str) -> str:
         relative_path = path[len(macos_base) :].lstrip("/")
         return os.path.join(target_base, relative_path)
 #|LN|75|
+
     # If path starts with /home/caleb/repo and we are on Windows/macOS, convert it
     linux_base = "/home/caleb/repo"
     if path.startswith(linux_base) and platform.system() not in [
@@ -198,7 +214,8 @@ class PathConverter:
         if not isinstance(path, str):
             return path
 
-#|LN|100|        # Normalize separators first
+#|LN|100|
+        # Normalize separators first
         if platform.system() == "Windows":
             # Prioritize converting known Unix roots if they somehow slipped through
             if path.startswith("/"):
@@ -223,7 +240,8 @@ class PathConverter:
             # Handle cases where normpath might fail on Windows
             print(
                 f"Warning: os.path.normpath failed for path: {normalized_path}. Using original."
-#|LN|125|            )
+#|LN|125|
+            )
             final_path = normalized_path
 
         return final_path
@@ -248,7 +266,8 @@ class PathConverter:
             "files_to_exclude",
             "files_to_include",
             "additional_dirs_to_traverse",
-#|LN|150|            "dirs_for_tree",
+#|LN|150|
+            "dirs_for_tree",
         ]
         for key in path_keys:
             if key in config and isinstance(config[key], list):
@@ -274,6 +293,7 @@ class PathConverter:
             # Ensure output_dir is absolute *after* potential joining later
             # We don't make it absolute here because it might be relative to repo_root
 #|LN|175|
+
         # Ensure additional_dirs_to_traverse contains absolute paths
         if "additional_dirs_to_traverse" in config:
             abs_additional_dirs = []
@@ -298,7 +318,8 @@ class PathConverter:
                     )  # Convert cross-system absolute
                     abs_p = PathConverter.to_system_path(abs_p)  # Normalize format
                     abs_additional_dirs.append(
-#|LN|200|                        os.path.abspath(abs_p)
+#|LN|200|
+                        os.path.abspath(abs_p)
                     )  # Ensure absolute
             config["additional_dirs_to_traverse"] = abs_additional_dirs
 
@@ -323,7 +344,8 @@ class RepoExporter:
         self.included_extensions = config.get("included_extensions", [])
         self.subdirs_to_exclude = config.get("subdirs_to_exclude", [])
         self.files_to_exclude = config.get("files_to_exclude", [])
-#|LN|225|        self.depth = config.get("depth", -1)
+#|LN|225|
+        self.depth = config.get("depth", -1)
         self.dump_config = config.get("dump_config", False)
         self.exhaustive_dir_tree = config.get("exhaustive_dir_tree", False)
         self.files_to_include = config.get("files_to_include", [])
@@ -348,7 +370,8 @@ class RepoExporter:
                     ".c",
                     ".go",
                     ".rs",
-#|LN|250|                    ".sh",
+#|LN|250|
+                    ".sh",
                     ".sql",
                 ]
             )
@@ -373,7 +396,8 @@ class RepoExporter:
             ".yml": "#",
             ".dockerfile": "#",
             ".r": "#",
-#|LN|275|            ".ps1": "#",
+#|LN|275|
+            ".ps1": "#",
             ".js": "//",
             ".ts": "//",
             ".tsx": "//",
@@ -397,8 +421,20 @@ class RepoExporter:
             # Add more as needed. HTML/XML/CSS use block comments, Markdown <!-- -->.
         }
 
+        # Add data file extensions that should be treated as non-code
+#|LN|300|
+        self.data_file_extensions = {
+            ".tsv",
+            ".csv",
+            ".json",
+            ".xml",
+            ".yaml",
+            ".yml",
+            ".toml",
+        }
+
         # Hardcoded blacklists
-#|LN|300|        self.blacklisted_dirs = [
+        self.blacklisted_dirs = [
             "__pycache__",
             ".git",
             ".venv",
@@ -412,6 +448,7 @@ class RepoExporter:
             "LICENSE",
             ".DS_Store",
             "*.pyc",
+#|LN|325|
             "*.swp",
             "*.swo",
         ]  # Added common ignores
@@ -423,7 +460,7 @@ class RepoExporter:
             # Ensure output_dir is absolute. If it wasn't absolute in config, assume relative to CWD.
             if not os.path.isabs(self.output_dir):
                 self.output_dir = os.path.abspath(
-#|LN|325|                    os.path.join(os.getcwd(), self.output_dir)
+                    os.path.join(os.getcwd(), self.output_dir)
                 )
             else:
                 self.output_dir = os.path.abspath(
@@ -437,6 +474,7 @@ class RepoExporter:
         if output_filename not in self.always_exclude_patterns:
             self.always_exclude_patterns.append(output_filename)
 
+#|LN|350|
         # Tiktoken Initializer
         self.tokenizer = None
         if tiktoken:
@@ -448,7 +486,7 @@ class RepoExporter:
                 )
                 self.tokenizer = None
 
-#|LN|350|        # --- Content Buffering & Stats ---
+        # --- Content Buffering & Stats ---
         # Store tuples: (display_path, absolute_path, annotated_content, is_ipynb_converted, line_interval_used)
         self.buffered_files = []
         self.exported_files_count = {}
@@ -462,6 +500,7 @@ class RepoExporter:
         # Structure: { ".py": {"files": 0, "lines": 0, "tokens": 0}, ... }
         self.stats_by_extension = {}
 
+#|LN|375|
     def get_output_file_path(self) -> str:
         """
         Return the absolute path for the export file, handling relative/absolute export_name
@@ -473,7 +512,7 @@ class RepoExporter:
         if os.path.isabs(path):
             print(
                 f"Warning: 'export_name' ({self.export_name}) is absolute. Ignoring 'output_dir' if set."
-#|LN|375|            )
+            )
             output_path = os.path.abspath(
                 path
             )  # Ensure it's truly absolute and normalized
@@ -487,6 +526,7 @@ class RepoExporter:
                         f"Failed to create output directory '{self.output_dir}': {e}"
                     )
             output_path = os.path.abspath(os.path.join(self.output_dir, path))
+#|LN|400|
         else:
             if not self.repo_root or not os.path.isdir(self.repo_root):
                 raise ValueError(
@@ -498,7 +538,7 @@ class RepoExporter:
         output_file_dir = os.path.dirname(output_path)
         if not os.path.exists(output_file_dir):
             print(f"Creating directory for output file: {output_file_dir}")
-#|LN|400|            try:
+            try:
                 os.makedirs(output_file_dir, exist_ok=True)
             except OSError as e:
                 raise ValueError(
@@ -512,6 +552,7 @@ class RepoExporter:
         Convert an IPython notebook JSON string to Markdown, clearing outputs.
         """
         try:
+#|LN|425|
             notebook = nbformat.reads(notebook_content, as_version=4)
             clear_output = ClearOutputPreprocessor()
             processed_notebook, _ = clear_output.preprocess(notebook, {})
@@ -523,7 +564,7 @@ class RepoExporter:
         except Exception as e:
             print(f"Error converting ipynb: {e}")
             return f"<!-- Error converting notebook: {e} -->\n{notebook_content}"
-#|LN|425|
+
     def buffer_file_content(self, absolute_path: str):
         """
         Reads, processes (ipynb), calculates stats, and stores file content in memory buffer.
@@ -537,6 +578,7 @@ class RepoExporter:
             return
 
         # Determine display path (relative if under repo_root, else absolute normalized)
+#|LN|450|
         display_path = absolute_path
         try:
             # Use normpath to handle potential differences in how paths are constructed (e.g. //)
@@ -548,7 +590,7 @@ class RepoExporter:
                 display_path = os.path.relpath(norm_abs_path, norm_repo_root)
             # Ensure display_path uses consistent separators
             display_path = PathConverter.to_system_path(display_path)
-#|LN|450|        except ValueError as e:
+        except ValueError as e:
             # Handle potential errors if paths are malformed (e.g., on Windows with mixed separators)
             print(
                 f"Warning: Could not determine relative path for {absolute_path} against {self.repo_root}. Using absolute path. Error: {e}"
@@ -562,6 +604,7 @@ class RepoExporter:
             1
         ].lower()  # Use lower for case-insensitivity
         # Normalize included extensions if it's a list
+#|LN|475|
         normalized_included_extensions = self.included_extensions
         if isinstance(normalized_included_extensions, list):
             normalized_included_extensions = [
@@ -573,7 +616,7 @@ class RepoExporter:
             and file_extension not in normalized_included_extensions
         ):
             return
-#|LN|475|
+
         try:
             with open(absolute_path, "r", encoding="utf-8", errors="ignore") as f:
                 content_for_stats = f.read()  # This is the original content for stats
@@ -587,6 +630,7 @@ class RepoExporter:
                 return  # Already processed
 
             # --- Calculate stats on original (or .ipynb converted) content BEFORE annotation ---
+#|LN|500|
             line_count = content_for_stats.count("\n") + 1
             token_count = 0
             if self.tokenizer:
@@ -598,7 +642,7 @@ class RepoExporter:
                     )
 
             # --- Annotate content for output (stats are already captured from original) ---
-#|LN|500|            # Use original file_extension for determining annotation rules, even if converted from ipynb
+            # Use original file_extension for determining annotation rules, even if converted from ipynb
             annotated_content, line_interval_used = (
                 self._annotate_content_with_line_numbers(
                     content_for_stats, file_extension
@@ -612,6 +656,7 @@ class RepoExporter:
             self.stats_by_extension[ext_key]["files"] += 1
             self.stats_by_extension[ext_key]["lines"] += line_count
             self.stats_by_extension[ext_key]["tokens"] += token_count
+#|LN|525|
 
             self.total_lines += line_count
             self.total_tokens += token_count
@@ -623,7 +668,7 @@ class RepoExporter:
                 (
                     display_path,
                     absolute_path,
-#|LN|525|                    annotated_content,
+                    annotated_content,
                     is_ipynb_converted,
                     line_interval_used,
                 )
@@ -637,6 +682,7 @@ class RepoExporter:
         filename = os.path.basename(absolute_path)
 
         # 1. Hardcoded blacklist (basename)
+#|LN|550|
         if filename in self.blacklisted_files:
             return True
 
@@ -648,7 +694,7 @@ class RepoExporter:
             return True
 
         # 3. files_to_exclude (match against display_path)
-#|LN|550|        # This checks if the display_path *ends with* one of the exclusion paths.
+        # This checks if the display_path *ends with* one of the exclusion paths.
         # Normalize separators for comparison.
         norm_display_path = PathConverter.to_system_path(display_path)
         if any(
@@ -662,6 +708,7 @@ class RepoExporter:
 
         return False
 
+#|LN|575|
     def should_exclude_dir(self, absolute_dir_path: str) -> bool:
         """Check if a directory should be excluded during traversal."""
         dir_name = os.path.basename(absolute_dir_path)
@@ -673,7 +720,7 @@ class RepoExporter:
         try:
             norm_repo_root = os.path.normpath(self.repo_root)
             norm_abs_dir_path = os.path.normpath(absolute_dir_path)
-#|LN|575|
+
             if norm_abs_dir_path.startswith(norm_repo_root + os.sep):
                 relative_path = os.path.relpath(norm_abs_dir_path, norm_repo_root)
                 relative_path = PathConverter.to_system_path(
@@ -687,6 +734,7 @@ class RepoExporter:
                         norm_exclude + os.sep
                     ):
                         return True
+#|LN|600|
         except ValueError as e:
             print(
                 f"Warning: Error calculating relative path for exclusion check: {absolute_dir_path} vs {self.repo_root}. Error: {e}"
@@ -698,7 +746,7 @@ class RepoExporter:
 
     def traverse_directory(self, relative_start_dir: str):
         """Walk through a directory *relative* to repo_root, buffering eligible files."""
-#|LN|600|        # Ensure relative_start_dir uses native separators for join
+        # Ensure relative_start_dir uses native separators for join
         relative_start_dir_norm = PathConverter.to_system_path(relative_start_dir)
         abs_start_dir = os.path.abspath(
             os.path.join(self.repo_root, relative_start_dir_norm)
@@ -712,6 +760,7 @@ class RepoExporter:
 
         print(f"Traversing internal dir: {relative_start_dir}")
         initial_depth = abs_start_dir.count(os.sep)
+#|LN|625|
 
         for root, dirs, files in os.walk(abs_start_dir, topdown=True):
             current_abs_depth = root.count(os.sep)
@@ -723,7 +772,7 @@ class RepoExporter:
                 continue  # Skip files at this depth too
 
             # Directory exclusion
-#|LN|625|            original_dirs = list(dirs)  # Copy before modifying dirs[:]
+            original_dirs = list(dirs)  # Copy before modifying dirs[:]
             dirs[:] = [
                 d
                 for d in original_dirs
@@ -737,6 +786,7 @@ class RepoExporter:
 
     def traverse_external_directory(self, abs_start_dir: str):
         """Walk through an *absolute* external directory path, buffering eligible files."""
+#|LN|650|
         abs_start_dir = os.path.abspath(PathConverter.to_system_path(abs_start_dir))
 
         if not os.path.isdir(abs_start_dir):
@@ -748,7 +798,7 @@ class RepoExporter:
         print(f"Traversing external dir: {abs_start_dir}")
         initial_depth = abs_start_dir.count(os.sep)
 
-#|LN|650|        for root, dirs, files in os.walk(abs_start_dir, topdown=True):
+        for root, dirs, files in os.walk(abs_start_dir, topdown=True):
             current_abs_depth = root.count(os.sep)
             relative_depth = current_abs_depth - initial_depth
 
@@ -762,6 +812,7 @@ class RepoExporter:
             dirs[:] = [
                 d
                 for d in original_dirs
+#|LN|675|
                 if not self.should_exclude_dir(os.path.join(root, d))
             ]
 
@@ -773,7 +824,7 @@ class RepoExporter:
                 )  # This handles display path correctly
 
     def include_specific_files(self):
-#|LN|675|        """Process the `files_to_include` list, buffering eligible files."""
+        """Process the `files_to_include` list, buffering eligible files."""
         if not self.files_to_include:
             return
 
@@ -787,6 +838,7 @@ class RepoExporter:
                     normalized_file_path
                 )  # Ensure canonical absolute path
                 if os.path.isfile(abs_path):
+#|LN|700|
                     self.buffer_file_content(abs_path)
                 else:
                     print(
@@ -798,7 +850,7 @@ class RepoExporter:
                     os.path.join(self.repo_root, normalized_file_path)
                 )
                 if os.path.isfile(abs_path):
-#|LN|700|                    self.buffer_file_content(abs_path)
+                    self.buffer_file_content(abs_path)
                 else:
                     print(
                         f"Warning: Specified relative file to include not found relative to repo root: {normalized_file_path} (resolved to {abs_path})"
@@ -812,6 +864,7 @@ class RepoExporter:
         dir_name = os.path.basename(abs_dir_path)
 
         if dir_name.startswith(
+#|LN|725|
             "."
         ):  # Exclude hidden dirs unless explicitly included elsewhere?
             # Let's allow hidden dirs if they contain included files or are part of traversal/tree lists
@@ -823,7 +876,7 @@ class RepoExporter:
 
         # Apply subdirs_to_exclude filter unless exhaustive
         if not self.exhaustive_dir_tree:
-#|LN|725|            if self.should_exclude_dir(abs_dir_path):
+            if self.should_exclude_dir(abs_dir_path):
                 return False
 
         # Check against dirs_for_tree if specified
@@ -837,6 +890,7 @@ class RepoExporter:
                 for tree_dir in self.dirs_for_tree:
                     norm_tree_dir = PathConverter.to_system_path(tree_dir)
                     if (
+#|LN|750|
                         relative_path_norm == norm_tree_dir
                         or relative_path_norm.startswith(norm_tree_dir + os.sep)
                     ):
@@ -848,7 +902,7 @@ class RepoExporter:
                     return False
             except ValueError:
                 return False  # Cannot determine relative path
-#|LN|750|
+
         # Final check: Does this directory contain any exported files OR non-empty subdirs?
         try:
             rel_dir_path = os.path.relpath(abs_dir_path, self.repo_root)
@@ -862,6 +916,7 @@ class RepoExporter:
                 == rel_dir_path_norm
                 for display_path in self.line_counts_by_file.keys()
                 if not os.path.isabs(display_path)
+#|LN|775|
             )
             if has_direct_exported_files:
                 return True  # Include if it has direct files
@@ -873,7 +928,7 @@ class RepoExporter:
             if token_count > 0:  # Check token count as primary indicator of content
                 return True
 
-#|LN|775|            # If no direct files and no aggregated content, exclude
+            # If no direct files and no aggregated content, exclude
             return False
 
         except ValueError:
@@ -887,6 +942,7 @@ class RepoExporter:
         self.line_counts_by_dir = {}
         self.token_counts_by_dir = {}
 
+#|LN|800|
         # Iterate through files with counts
         for display_path, lines in self.line_counts_by_file.items():
             tokens = self.token_counts_by_file.get(display_path, 0)
@@ -898,7 +954,7 @@ class RepoExporter:
             parts = display_path.split(os.sep)
             # Aggregate counts up the directory chain (to parent dirs)
             for i in range(1, len(parts)):  # Stop before the filename itself
-#|LN|800|                dir_path_key = os.sep.join(parts[:i])
+                dir_path_key = os.sep.join(parts[:i])
                 self.line_counts_by_dir[dir_path_key] = (
                     self.line_counts_by_dir.get(dir_path_key, 0) + lines
                 )
@@ -912,6 +968,7 @@ class RepoExporter:
         )
         root_tokens = sum(
             t for dp, t in self.token_counts_by_file.items() if not os.path.isabs(dp)
+#|LN|825|
         )
         self.line_counts_by_dir[""] = (
             root_lines  # Use empty string for root aggregate? Or '.'? Let's use ''
@@ -923,7 +980,7 @@ class RepoExporter:
         Return the (line_count, token_count) for a file (from _by_file)
         or directory (from _by_dir) using its display_path relative to repo_root.
         """
-#|LN|825|        # Prioritize file stats if path exists in file dicts
+        # Prioritize file stats if path exists in file dicts
         if display_path in self.line_counts_by_file:
             return (
                 self.line_counts_by_file.get(display_path, 0),
@@ -937,6 +994,7 @@ class RepoExporter:
             self.token_counts_by_dir.get(dir_key, 0),
         )
 
+#|LN|850|
     def _format_count(self, count: int) -> str:
         """Formats counts >= 1000 with 'k' suffix, rounded to one decimal."""
         if count >= 1000:
@@ -948,7 +1006,7 @@ class RepoExporter:
         """Returns the single-line comment token for a given file extension (case-insensitive)."""
         return self.comment_tokens_map.get(ext.lower())
 
-#|LN|850|    def _annotate_content_with_line_numbers(
+    def _annotate_content_with_line_numbers(
         self, content: str, file_extension: str
     ) -> tuple[str, int]:
         """
@@ -958,6 +1016,11 @@ class RepoExporter:
         """
         ext_lower = file_extension.lower()  # Ensure consistent matching
 
+        # Skip annotation for data files
+        if ext_lower in self.data_file_extensions:
+            return content, 0
+
+#|LN|875|
         # Check if annotation is enabled globally and for this specific extension
         if not self.line_number_interval or self.line_number_interval <= 0:
             return content, 0
@@ -973,19 +1036,17 @@ class RepoExporter:
             return content, 0  # File too short to annotate
 
         interval = self.line_number_interval
-#|LN|875|        # Construct the core part of the marker, e.g., "#|LN|"
+        # Construct the core part of the marker, e.g., "#|LN|"
         marker_prefix_core = f"{comment_token}{self.line_number_prefix}"
 
         annotated_lines = []
         for i, line_content in enumerate(lines):
             current_line_number = i + 1  # Line numbers are 1-indexed
             if current_line_number % interval == 0:
-                # Prepend marker to the line: e.g., "#|LN|25|def my_func():"
-                annotated_lines.append(
-                    f"{marker_prefix_core}{current_line_number}|{line_content}"
-                )
-            else:
-                annotated_lines.append(line_content)
+                # Emit marker on its own line before the code line
+                annotated_lines.append(f"{marker_prefix_core}{current_line_number}|")
+            annotated_lines.append(line_content)
+#|LN|900|
 
         return "\n".join(annotated_lines), interval
 
@@ -998,7 +1059,7 @@ class RepoExporter:
     ):
         """
         Generate the ASCII directory tree string, showing only included items
-#|LN|900|        with line and token counts.
+        with line and token counts.
         Operates on paths relative to repo_root for display.
         """
         if self.depth != -1 and current_depth > self.depth:
@@ -1011,6 +1072,7 @@ class RepoExporter:
         try:
             items = sorted(os.listdir(abs_directory))
         except FileNotFoundError:
+#|LN|925|
             return "", stats_units_printed  # Directory doesn't exist
 
         visible_items = []
@@ -1023,7 +1085,7 @@ class RepoExporter:
                 try:
                     item_display_path = os.path.relpath(item_abs_path, self.repo_root)
                     item_display_path_norm = PathConverter.to_system_path(
-#|LN|925|                        item_display_path
+                        item_display_path
                     )
                     # Check if the file was actually buffered (i.e., passed filters and included)
                     if item_display_path_norm in self.line_counts_by_file:
@@ -1036,6 +1098,7 @@ class RepoExporter:
                         # For now, let's only add items relative to repo_root.
                         pass
 
+#|LN|950|
         for i, item in enumerate(visible_items):
             item_abs_path = os.path.join(abs_directory, item)
             try:
@@ -1048,7 +1111,7 @@ class RepoExporter:
 
             connector = "|-- " if i < len(visible_items) - 1 else "\\-- "
 
-#|LN|950|            # Format stats string
+            # Format stats string
             stats_str = ""
             # Check if item has content OR is a directory (even if empty)
             is_dir = os.path.isdir(item_abs_path)
@@ -1061,6 +1124,7 @@ class RepoExporter:
                 else:
                     stats_str = f" ({line_str}/{token_str})"
 
+#|LN|975|
             tree_str += f"{prefix}{connector}{item}{stats_str}\n"
 
             if is_dir:
@@ -1073,7 +1137,7 @@ class RepoExporter:
 
         # If depth limit was hit AND we omitted visible items, add indicator
         # This check is tricky. Let's skip the indicator for now.
-#|LN|975|
+
         return tree_str, stats_units_printed
 
     def _build_files_string_recursive(
@@ -1086,27 +1150,33 @@ class RepoExporter:
         indent = "  " * indent_level
         parts = []
 
-        # Separate files and directories at the current level
+#|LN|1000|
+        # Separate files and sub-directories at the current level
         current_level_files = {}  # display_path -> (abs_path, content, is_ipynb, line_interval_used)
         subdirs = {}  # subdir_key (relative path) -> list of file tuples
 
-        # Normalize prefix for comparison
+        # --- Normalise the prefix and prepare it for os.path.relpath ---
+        # PathConverter ensures consistent separators ("/" vs "\").
         norm_prefix = PathConverter.to_system_path(path_prefix)
-        prefix_len = len(norm_prefix) if norm_prefix else -1
+
+        # relpath() requires a non-empty *start* argument; treat root as ".".
+        base_for_relpath = norm_prefix if norm_prefix not in {"", "."} else "."
 
         for file_tuple in files_in_dir:
             display_path, abs_path, content, is_ipynb, line_interval_used = file_tuple
             # Ensure display_path uses system separators for splitting logic
             norm_display_path = PathConverter.to_system_path(display_path)
-#|LN|1000|
-            # Determine path relative to the current prefix
-            relative_to_prefix = (
-                norm_display_path[prefix_len + 1 :]
-                if prefix_len >= -1
-                else norm_display_path
+
+            # Determine path **relative** to the current recursion prefix.
+            # Example:  norm_display_path = "tests/conftest.py"
+            #           norm_prefix      = "."   (root call)
+            #           → relative_to_prefix = "tests/conftest.py"
+            relative_to_prefix = os.path.relpath(
+                norm_display_path, start=base_for_relpath
             )
 
             if os.sep in relative_to_prefix:
+#|LN|1025|
                 # Subdirectory file
                 subdir_name = relative_to_prefix.split(os.sep)[0]
                 # Construct key using the *original* (potentially non-normalized) prefix + separator + subdir_name
@@ -1123,15 +1193,16 @@ class RepoExporter:
                 # File in current directory
                 current_level_files[display_path] = (
                     abs_path,
-#|LN|1025|                    content,
+                    content,
                     is_ipynb,
                     line_interval_used,
                 )
 
-        # Add files at the current level
+        # --------  Emit <file> tags at the current level  --------
         for display_path, file_data_tuple in sorted(current_level_files.items()):
             abs_path, content, is_ipynb, line_interval_used = file_data_tuple
             # Escape path attribute value ONLY
+#|LN|1050|
             escaped_path_attr = saxutils.quoteattr(display_path)
             ipynb_attr = ' converted_from_ipynb="true"' if is_ipynb else ""
             line_interval_attr = (
@@ -1148,7 +1219,7 @@ class RepoExporter:
             parts.append(f"{indent}</file>")
 
         # Recurse into subdirectories
-#|LN|1050|        for subdir_key, files_list in sorted(subdirs.items()):
+        for subdir_key, files_list in sorted(subdirs.items()):
             # Escape subdir path attribute value ONLY
             escaped_subdir_path_attr = saxutils.quoteattr(subdir_key)
             parts.append(f"{indent}<dir path={escaped_subdir_path_attr}>")
@@ -1157,6 +1228,7 @@ class RepoExporter:
                 self._build_files_string_recursive(
                     subdir_key, files_list, indent_level + 1
                 )
+#|LN|1075|
             )
             parts.append(f"{indent}</dir>")
 
@@ -1173,7 +1245,7 @@ class RepoExporter:
             print("Processing top-level files...")
             try:
                 items = os.listdir(self.repo_root)
-#|LN|1075|                for item in items:
+                for item in items:
                     abs_item_path = os.path.join(self.repo_root, item)
                     if os.path.isfile(abs_item_path):
                         is_included_top_level = (
@@ -1182,6 +1254,7 @@ class RepoExporter:
                                 isinstance(self.include_top_level_files, list)
                                 and item in self.include_top_level_files
                             )
+#|LN|1100|
                         )
                         if is_included_top_level:
                             self.buffer_file_content(abs_item_path)
@@ -1198,7 +1271,7 @@ class RepoExporter:
 
         # 3. Traverse additional external directories
         if self.additional_dirs_to_traverse:
-#|LN|1100|            for abs_dir in self.additional_dirs_to_traverse:
+            for abs_dir in self.additional_dirs_to_traverse:
                 self.traverse_external_directory(abs_dir)
 
         # 4. Include specific files
@@ -1207,6 +1280,7 @@ class RepoExporter:
         # --- Post-Gathering Steps ---
         print("File gathering complete. Computing stats and generating output...")
 
+#|LN|1125|
         # 5. Compute aggregated directory stats
         self.compute_directory_stats()
 
@@ -1223,7 +1297,7 @@ class RepoExporter:
                 config_tag_label
             )  # Escape label just in case
             output_parts.append(f'  <config source="{escaped_label}">')
-#|LN|1125|            try:
+            try:
                 config_data = {
                     k: v
                     for k, v in self.__dict__.items()
@@ -1232,6 +1306,7 @@ class RepoExporter:
                 }  # Exclude non-serializable
                 # Convert Path objects to strings for JSON serialization
                 serializable_config = {}
+#|LN|1150|
                 for k, v in config_data.items():
                     if isinstance(v, Path):
                         serializable_config[k] = str(v)
@@ -1248,7 +1323,7 @@ class RepoExporter:
         print("Generating directory tree...")
         escaped_repo_root_attr = saxutils.quoteattr(self.repo_root)
         output_parts.append(f"  <dirtree root={escaped_repo_root_attr}>")
-#|LN|1150|        directory_tree_str, _ = self.get_directory_tree(
+        directory_tree_str, _ = self.get_directory_tree(
             self.repo_root, prefix="|", stats_units_printed=False
         )  # Start prefix with '|'
         # Add repo root node itself with total stats
@@ -1257,6 +1332,7 @@ class RepoExporter:
         )  # Get aggregated root stats
         root_line_str = self._format_count(root_lines)
         root_token_str = self._format_count(root_tokens)
+#|LN|1175|
         # Determine if units were printed in the subtree
         # Hacky way: check if "lines" appears in the generated tree string
         units_already_printed = " lines/" in directory_tree_str
@@ -1273,7 +1349,7 @@ class RepoExporter:
         )  # Add the rest of the tree, remove trailing newline
         output_parts.append("  </dirtree>")
 
-#|LN|1175|        # Files (Nested Structure)
+        # Files (Nested Structure)
         print("Generating files section...")
         output_parts.append("  <files>")
 
@@ -1282,6 +1358,7 @@ class RepoExporter:
         external_files = []
         norm_repo_root = os.path.normpath(self.repo_root)
         for bf in self.buffered_files:
+#|LN|1200|
             display_path, abs_path, content, is_ipynb, line_interval_used = bf
             norm_abs_path = os.path.normpath(abs_path)
             # Check if the file's directory is the repo root or a subdirectory of it
@@ -1298,7 +1375,7 @@ class RepoExporter:
         # Add external files (under a separate tag)
         if external_files:
             output_parts.append("    <external_files>")
-#|LN|1200|            # Sort external files by their absolute path for consistent ordering
+            # Sort external files by their absolute path for consistent ordering
             sorted_external = sorted(external_files, key=lambda x: x[1])
             for (
                 display_path,
@@ -1307,6 +1384,7 @@ class RepoExporter:
                 is_ipynb,
                 line_interval_used,
             ) in sorted_external:
+#|LN|1225|
                 escaped_path_attr = saxutils.quoteattr(
                     display_path
                 )  # display_path is absolute here
@@ -1323,7 +1401,7 @@ class RepoExporter:
                 output_parts.append("      </file>")
             output_parts.append("    </external_files>")
 
-#|LN|1225|        output_parts.append("  </files>")
+        output_parts.append("  </files>")
         output_parts.append("</codebase_context>")
 
         # --- Write Output ---
@@ -1332,6 +1410,7 @@ class RepoExporter:
             with open(self.output_file, "w", encoding="utf-8") as f:
                 f.write(final_output_string)
             print(f"\nExported to: {self.output_file}")
+#|LN|1250|
         except Exception as e:
             print(f"\nError writing output file {self.output_file}: {e}")
 
@@ -1348,7 +1427,7 @@ class RepoExporter:
             if console:  # If Rich is available, use Rich table
                 table = Table(show_header=True, header_style="bold")
                 table.add_column("Extension", style="cyan")
-#|LN|1250|                table.add_column("Files", justify="right")
+                table.add_column("Files", justify="right")
                 table.add_column("Lines", justify="right")
                 table.add_column("Tokens", justify="right")
 
@@ -1357,6 +1436,7 @@ class RepoExporter:
                     table.add_row(
                         ext,
                         str(stats["files"]),
+#|LN|1275|
                         self._format_count(stats["lines"]),
                         self._format_count(stats["tokens"]),
                     )
@@ -1373,7 +1453,7 @@ class RepoExporter:
                     if self.stats_by_extension
                     else 0
                 )
-#|LN|1275|                max_lines_len = (
+                max_lines_len = (
                     max(
                         len(self._format_count(s["lines"]))
                         for s in self.stats_by_extension.values()
@@ -1382,6 +1462,7 @@ class RepoExporter:
                     else 0
                 )
                 max_tokens_len = (
+#|LN|1300|
                     max(
                         len(self._format_count(s["tokens"]))
                         for s in self.stats_by_extension.values()
@@ -1398,7 +1479,7 @@ class RepoExporter:
 
                 sorted_extensions = sorted(self.stats_by_extension.items())
                 for ext, stats in sorted_extensions:
-#|LN|1300|                    files_str = str(stats["files"]).rjust(max_files_len)
+                    files_str = str(stats["files"]).rjust(max_files_len)
                     lines_str = self._format_count(stats["lines"]).rjust(max_lines_len)
                     tokens_str = self._format_count(stats["tokens"]).rjust(
                         max_tokens_len
@@ -1407,6 +1488,7 @@ class RepoExporter:
                         f"  {ext.ljust(max_ext_len)}  {files_str}  {lines_str}  {tokens_str}"
                     )
         else:
+#|LN|1325|
             print("  (No files exported)")
 
 
@@ -1423,7 +1505,7 @@ def get_base_path() -> str:
         return PathConverter.to_system_path(BASE_PATHS["Darwin"])
     elif system == "Windows":
         return PathConverter.to_system_path(BASE_PATHS["Windows"])
-#|LN|1325|    else:  # Linux default
+    else:  # Linux default
         return PathConverter.to_system_path(BASE_PATHS["Linux"])
 
 
@@ -1432,6 +1514,7 @@ def load_config(config_filename: str) -> dict:
     # Append .json if not present
     if not config_filename.lower().endswith(".json"):
         config_filename_json = config_filename + ".json"
+#|LN|1350|
     else:
         config_filename_json = config_filename
 
@@ -1448,7 +1531,7 @@ def load_config(config_filename: str) -> dict:
         potential_paths.append(
             os.path.join(script_dir, "configs", config_filename_json)
         )
-#|LN|1350|
+
     # 2. Relative to base_path/utils/export_repo/configs structure
     base_path = get_base_path()
     # Adjust base path if it points directly to the repo folder structure expected
@@ -1457,6 +1540,7 @@ def load_config(config_filename: str) -> dict:
         utils_parent_dir = os.path.dirname(
             base_path
         )  # Go up one level if base is GitHub or repo
+#|LN|1375|
 
     potential_paths.append(
         os.path.join(
@@ -1473,7 +1557,7 @@ def load_config(config_filename: str) -> dict:
     # Try loading from potential paths
     config_to_load = None
     loaded_path = None
-#|LN|1375|    for p in potential_paths:
+    for p in potential_paths:
         p_normalized = PathConverter.to_system_path(p)
         # print(f"Debug: Trying config path: {p_normalized}") # Debugging line
         if os.path.exists(p_normalized):
@@ -1482,6 +1566,7 @@ def load_config(config_filename: str) -> dict:
             break
 
     if not config_to_load:
+#|LN|1400|
         checked_paths_str = "\n - ".join(potential_paths)
         raise FileNotFoundError(
             f"Config file '{config_filename}' not found. Checked:\n - {checked_paths_str}"
@@ -1498,7 +1583,7 @@ def load_config(config_filename: str) -> dict:
             config["_loaded_from_path"] = (
                 loaded_path  # Keep absolute if on different drive
             )
-#|LN|1400|        return config
+        return config
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON from {config_to_load}: {e}")
         raise
@@ -1507,6 +1592,7 @@ def load_config(config_filename: str) -> dict:
         raise
 
 
+#|LN|1425|
 def get_default_config(repo_root_path: str) -> dict:
     """Provide a default config for direct repository path usage."""
     repo_root_path = PathConverter.to_system_path(os.path.abspath(repo_root_path))
@@ -1523,7 +1609,7 @@ def get_default_config(repo_root_path: str) -> dict:
         "subdirs_to_exclude": [],  # Start minimal
         "files_to_exclude": [],
         "depth": 10,
-#|LN|1425|        "exhaustive_dir_tree": False,
+        "exhaustive_dir_tree": False,
         "files_to_include": [],
         "additional_dirs_to_traverse": [],
         "always_exclude_patterns": [
@@ -1532,6 +1618,7 @@ def get_default_config(repo_root_path: str) -> dict:
             "*.pyc",
             "*.swp",
             "*.swo",
+#|LN|1450|
             "node_modules/",
             "build/",
             "dist/",
@@ -1548,7 +1635,7 @@ def get_default_config(repo_root_path: str) -> dict:
         "line_number_interval": 25,  # Default 25
         "line_number_min_length": 150,
         "annotate_extensions": [
-#|LN|1450|            ".py",
+            ".py",
             ".js",
             ".ts",
             ".tsx",
@@ -1557,6 +1644,7 @@ def get_default_config(repo_root_path: str) -> dict:
             ".c",
             ".go",
             ".rs",
+#|LN|1475|
             ".sh",
             ".sql",
         ],
@@ -1573,7 +1661,7 @@ def main():
     config_arg = None
     pop_flag = "--pop" in args  # Handled in get_base_path
     dump_config_flag = "--dump-config" in args
-#|LN|1475|
+
     # Filter out flags to find the main argument
     non_flag_args = [arg for arg in args if not arg.startswith("--")]
 
@@ -1582,6 +1670,7 @@ def main():
             "Usage: python export_repo_to_txt.py [--pop] [--dump-config] <config_filename | repo_root_path>"
         )
         sys.exit(1)
+#|LN|1500|
 
     config_arg = non_flag_args[0]
 
@@ -1598,7 +1687,7 @@ def main():
     else:
         # Assume it's a config file name
         try:
-#|LN|1500|            config = load_config(config_arg)
+            config = load_config(config_arg)
             # Use the original arg as label unless loaded path is very different?
             config_filename_label = config.get("_loaded_from_path", config_arg)
         except FileNotFoundError as e:
@@ -1607,6 +1696,7 @@ def main():
             # This case is less likely if isdir failed before, but handles edge cases.
             if os.path.isdir(potential_path):
                 print(
+#|LN|1525|
                     f"Argument '{config_arg}' resolved to a directory after failed config load. Using default config."
                 )
                 config = get_default_config(potential_path)
@@ -1623,7 +1713,7 @@ def main():
             import traceback
 
             traceback.print_exc()
-#|LN|1525|            sys.exit(1)
+            sys.exit(1)
 
     # Override dump_config from command line flag
     if dump_config_flag:
@@ -1632,6 +1722,7 @@ def main():
     try:
         exporter = RepoExporter(config, config_filename=config_filename_label)
         exporter.export_repo()
+#|LN|1550|
     except ValueError as e:
         print(f"Configuration or Execution Error: {e}")
         sys.exit(1)
@@ -1647,9 +1738,8 @@ if __name__ == "__main__":
     main()
 # --- END OF FILE export_repo_to_txt.py ---
     </file>
-    <dir path="nfigs">
-      <dir path="nfigs/s">
-        <file path="configs/autocrop.json">
+    <dir path="configs">
+      <file path="configs/autocrop.json">
 {
     "repo_root": "/home/caleb/repo/ibrida/ibrida/s3/postprocess/autocrop",
     "export_name": "autocrop_export.txt",
@@ -1660,8 +1750,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/autocropper.json">
+      </file>
+      <file path="configs/autocropper.json">
 {
     "repo_root": "/home/caleb/repo/autocropper/src/autocropper",
     "export_name": "autocropper_export.txt",
@@ -1674,8 +1764,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/bulk_dl.json">
+      </file>
+      <file path="configs/bulk_dl.json">
 {
   "repo_root": "/home/caleb/repo/ibrida/ibrida",
   "export_name": "ibrida_export.txt",
@@ -1690,8 +1780,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt", "other_pattern.txt"],
   "exhaustive_dir_tree": false
 }
-        </file>
-        <file path="configs/convnext.json">
+      </file>
+      <file path="configs/convnext.json">
 {
   "repo_root": "/home/caleb/repo/ConvNeXt",
   "export_name": "convnext_export.txt",
@@ -1707,8 +1797,8 @@ if __name__ == "__main__":
   "dump_config": false
 }
 
-        </file>
-        <file path="configs/cosm-c360-data.json">
+      </file>
+      <file path="configs/cosm-c360-data.json">
 {
     "repo_root": "/home/caleb/repo/cosm-c360-tools",
     "export_name": "cosm-c360-data_export.txt",
@@ -1721,8 +1811,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/cosm-c360-tools.json">
+      </file>
+      <file path="configs/cosm-c360-tools.json">
 {
     "repo_root": "/home/caleb/repo/cosm-c360-tools",
     "export_name": "cosm-c360-tools_export.txt",
@@ -1735,8 +1825,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/export_repo.json">
+      </file>
+      <file path="configs/export_repo.json">
 {
     "repo_root": "/home/caleb/repo/utils/export_repo",
     "export_name": "export_repo_export.txt",
@@ -1750,8 +1840,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/ezmd.json">
+      </file>
+      <file path="configs/ezmd.json">
 {
     "repo_root": "/home/caleb/repo/ezmd",
     "export_name": "ezmd_export.txt",
@@ -1763,8 +1853,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["uv.lock", "export.txt", ".log", ".venv", ".gitignore"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/ezprompt.json">
+      </file>
+      <file path="configs/ezprompt.json">
 {
     "repo_root": "/home/caleb/repo/ezprompt",
     "export_name": "ezprompt_export.txt",
@@ -1776,8 +1866,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["uv.lock", "export.txt", ".log", ".venv", ".gitignore"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/flash-attn.json">
+      </file>
+      <file path="configs/flash-attn.json">
 {
   "repo_root": "/home/caleb/repo/flash-attention/",
   "export_name": "flash-attn_export.txt",
@@ -1800,8 +1890,8 @@ if __name__ == "__main__":
   "dump_config": false
 }
 
-        </file>
-        <file path="configs/h5merge-mini.json">
+      </file>
+      <file path="configs/h5merge-mini.json">
 {
     "repo_root": "/home/caleb/repo/ibrida/ibrida/hdf5/merge",
     "export_name": "hdf5_merge_mini_export.txt",
@@ -1814,8 +1904,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/h5merge.json">
+      </file>
+      <file path="configs/h5merge.json">
 {
     "repo_root": "/home/caleb/repo/ibrida/ibrida/hdf5/merge",
     "export_name": "hdf5_merge_export.txt",
@@ -1828,8 +1918,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/h5pull.json">
+      </file>
+      <file path="configs/h5pull.json">
 {
     "repo_root": "/home/caleb/repo/ibrida/ibrida/hdf5",
     "export_name": "h5pull_export.txt",
@@ -1841,8 +1931,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/hFormer0-serve.json">
+      </file>
+      <file path="configs/hFormer0-serve.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/torchserve/hFormer0",
     "export_name": "polliFormer_serve_export.txt",
@@ -1853,29 +1943,30 @@ if __name__ == "__main__":
     "subdirs_to_exclude": ["pkgs", "test"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/ibrida.json">
+      </file>
+      <file path="configs/ibrida.json">
 {
-    "repo_root": "/home/caleb/repo/ibrida/src/ibrida",
+    "repo_root": "/home/caleb/repo/ibrida/src/",
     "export_name": "ibrida_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["generator", "types", "utils"],
+    "dirs_to_traverse": ["ibrida"],
     "files_to_include": ["/home/caleb/repo/ibrida/pyproject.toml", "/home/caleb/repo/ibrida/README.md",
     "/home/caleb/repo/ibrida/extra/generator/configs/prod/amphibia_v0r1_full_hybrid_384.json",
     "/home/caleb/repo/ibrida/extra/generator/configs/prod/amphibia_v0r1_mini_hybrid_384.json",
     "/home/caleb/repo/ibrida/extra/generator/configs/prod/angiospermae_v0r1_full_hybrid_384.json",
     "/home/caleb/repo/ibrida/extra/generator/configs/prod/aves_v0r1_full_hybrid_384.json",
     "/home/caleb/repo/ibrida/extra/generator/configs/prod/mammalia_v0r1_full_hybrid_384.json",
-    "/home/caleb/repo/ibrida/extra/generator/configs/prod/reptilia_v0r1_full_hybrid_384.json"],
+    "/home/caleb/repo/ibrida/extra/generator/configs/prod/reptilia_v0r1_full_hybrid_384.json",
+    "/home/caleb/repo/coldp/README.md"],
     "files_to_exclude": [],
-    "include_top_level_files": ["pyproject.toml", "README.md"],
-    "included_extensions": [".py", ".json", ".sh"],
+    "include_top_level_files": ["none"],
+    "included_extensions": [".py", ".json", ".sh", ".md"],
     "always_exclude_patterns": ["export.txt"],
-    "additional_dirs_to_traverse": ["/home/caleb/repo/ibrida/extra/generator/configs"],
+    "additional_dirs_to_traverse": [],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/ibridaDB_v0r1_export.json">
+      </file>
+      <file path="configs/ibridaDB_v0r1_export.json">
 {
     "repo_root": "/home/caleb/repo/ibridaDB/dbTools/export/v0",
     "export_name": "ibridaDB_v0r1_export.txt",
@@ -1889,8 +1980,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", ".log", "wrapper_*"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/ibridaDB_v0r1_ingest.json">
+      </file>
+      <file path="configs/ibridaDB_v0r1_ingest.json">
 {
     "repo_root": "/home/caleb/repo/ibridaDB/dbTools/ingest/v0",
     "export_name": "ibridaDB_v0r1_ingest.txt",
@@ -1901,22 +1992,28 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", ".log", "wrapper_*"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/ibridaDB_v0rX.json">
+      </file>
+      <file path="configs/ibridaDB_v0rX.json">
 {
-    "repo_root": "/home/caleb/repo/ibridaDB/dbTools",
+    "repo_root": "/home/caleb/repo/ibridaDB",
     "export_name": "ibridaDB_v0rX_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["ingest/v0", "export/v0"],
-    "files_to_include": ["/home/caleb/repo/ibridaDB/docker/stausee/docker-compose.yml", "/home/caleb/repo/ibridaDB/docker/stausee/entrypoint.sh",
-    "/home/caleb/repo/ibridaDB/dbTools/README.md", "/home/caleb/repo/ibridaDB/dbTools/FLOW.md", "/home/caleb/repo/ibridaDB/dbTools/schema.md"],
+    "dirs_to_traverse": ["models", "docs", "scripts", "docker/stausee",
+      "dbTools/ingest/v0/common", "dbTools/ingest/v0/r1", "dbTools/export/v0/common", "dbTools/export/v0/r1", "dbTools/taxa", "dbTools/dem"],
     "include_top_level_files": "all",
-    "included_extensions": [".sh", ".md", ".sql"],
+    "subdirs_to_exclude": ["diffs"],
+    "files_to_include": [
+      "/home/caleb/repo/ibridaDB/dev/ancestor_aware.md",
+      "/home/caleb/repo/ibridaDB/dbTools/FLOW.md",
+      "/home/caleb/repo/ibridaDB/dbTools/README.md",
+      "/home/caleb/repo/ibridaDB/dbTools/schema.md"
+    ],
+    "included_extensions": [".sh", ".md", ".sql", ".txt", ".py"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/ibrida_analysis.json">
+      </file>
+      <file path="configs/ibrida_analysis.json">
 {
     "repo_root": "/home/caleb/repo/ibrida/src/ibrida",
     "export_name": "ibrida_analysis_export.txt",
@@ -1930,8 +2027,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/ibrida_autocrop.json">
+      </file>
+      <file path="configs/ibrida_autocrop.json">
 {
     "repo_root": "/home/caleb/repo/ibrida/src/ibrida",
     "export_name": "ibrida_autocrop_export.txt",
@@ -1945,8 +2042,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/ladybird_data.json">
+      </file>
+      <file path="configs/ladybird_data.json">
 {
     "repo_root": "/home/caleb/ladybird_failed_copy",
     "export_name": "ladybird_data_export.txt",
@@ -1960,34 +2057,194 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", ".egg-info", "__pycache__", ".DS_Store", ":Zone.Identifier"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/linnaeus-deploymentXL.json">
+      </file>
+      <file path="configs/linnaeus-autobatch.json">
+{
+    "repo_root": "/home/caleb/repo/linnaeus-temp",
+    "export_name": "linnaeus_autobatch_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["linnaeus", "docs", "configs/model/archs", "tools/scripts"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".toml", ".sh"],
+    "files_to_include": [
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/amphibia_mFormerV1_sm_r0b_40e.yaml"
+    ],
+    "subdirs_to_exclude": ["utils/inference"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }
+      </file>
+      <file path="configs/linnaeus-deployment-notes.json">
+{
+    "repo_root": "/home/caleb/repo/linnaeus-deployment",
+    "export_name": "linnaeus_deployment_notes_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["June2025"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".toml", ".config"],
+    "files_to_include": [
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/test_autobatch_reptilia_mFormerV1_lg.yaml",
+    "/home/caleb/repo/linnaeus/tools/docker/Dockerfile",
+    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
+    ],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }
+      </file>
+      <file path="configs/linnaeus-deploymentMini.json">
+{
+  "repo_root": "/home/caleb/repo/linnaeus-temp/linnaeus",
+  "export_name": "linnaeus_deploymentMini_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["utils"],
+  "include_top_level_files": ["all"],
+  "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
+  "additional_dirs_to_traverse": [
+    "/home/caleb/repo/linnaeus-temp/configs/model/archs",
+    "/home/caleb/repo/linnaeus-temp/docs/",
+    "/home/caleb/repo/linnaeus-temp/setup/"
+  ],
+  "files_to_include": [
+    "/home/caleb/repo/linnaeus-temp/work/training_commands.md",
+    "/home/caleb/repo/linnaeus-temp/pyproject.toml",
+    "/home/caleb/repo/linnaeus-temp/ruff.toml",
+    "/home/caleb/repo/linnaeus-temp/README.md",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/amphibia_mFormerV1_sm_r0b_40e.yaml"
+    ],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}
+      </file>
+      <file path="configs/linnaeus-deploymentXL.json">
 {
     "repo_root": "/home/caleb/repo/linnaeus",
     "export_name": "linnaeus_deploymentXL_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["linnaeus"],
-    "include_top_level_files": ["README.md", "pyproject.toml", ".gitignore"],
-    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh"],
+    "dirs_to_traverse": ["linnaeus", "configs", "tools", "docs", "tests"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".toml", ".json"],
     "files_to_include": [
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run4.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_mini_mFormerV1_sm_run3_test_Apr21b_noGC.yaml",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/test_autobatch_reptilia_mFormerV1_lg.yaml",
     "/home/caleb/repo/linnaeus/tools/docker/Dockerfile",
     "/home/caleb/repo/linnaeus/linnaeus/requirements.txt",
     "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
     ],
-    "additional_dirs_to_traverse": [
-      "/home/caleb/repo/linnaeus/docs",
-      "/home/caleb/repo/linnaeus/configs/model/archs",
-      "/home/caleb/repo/linnaeus/tools"
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }
+      </file>
+      <file path="configs/linnaeus-hierarchy.json">
+{
+    "repo_root": "/home/caleb/repo/linnaeus-temp",
+    "export_name": "linnaeus_hierarchy_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": [
+        "docs",
+        "linnaeus/utils/taxonomy",
+        "linnaeus/inference/"
+    ],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".toml", ".sh"],
+    "files_to_include": [
+    "/home/caleb/repo/linnaeus-temp/linnaeus/h5data/h5dataloader.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/h5data/base_prefetching_dataset.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/h5data/prefetching_hybrid_dataset.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/metrics/chain_accuracy.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/basic_loss.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/core_loss.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/hierarchical_loss.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/masking.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/taxonomy_label_smoothing.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/mFormerV1.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/heads/utils.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/heads/base_hierarchical_head.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/heads/conditional_classifier_head.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/config.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/main.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/train.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/validation.py",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/amphibia_mFormerV1_sm_r3c_40e.yaml",
+    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
+    ],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }
+      </file>
+      <file path="configs/linnaeus-hierarchyMini.json">
+{
+  "repo_root": "/home/caleb/repo/linnaeus-temp/linnaeus",
+  "export_name": "linnaeus_hierarchyMini_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["models", "utils/taxonomy"],
+  "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
+  "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
+  "additional_dirs_to_traverse": [
+    "/home/caleb/repo/linnaeus-temp/configs/model/archs",
+    "/home/caleb/repo/linnaeus-temp/docs/"
+  ],
+  "files_to_include": [
+    "/home/caleb/repo/linnaeus-temp/linnaeus/h5data/vectorized_dataset_processor.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/meta_utils.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/metrics/chain_accuracy.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/hierarchical_loss.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/loss/taxonomy_label_smoothing.py"
+    ],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}
+      </file>
+      <file path="configs/linnaeus-hierarchyXL.json">
+{
+    "repo_root": "/home/caleb/repo/linnaeus-temp",
+    "export_name": "linnaeus_hierarchyXL_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["linnaeus", "docs", "configs/model/archs", "tools", "tests"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".toml", ".sh"],
+    "files_to_include": [
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/amphibia_mFormerV1_sm_r3c_40e.yaml",
+    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json",
+    "/home/caleb/repo/linnaeus-temp/work/training_commands.md"
     ],
     "files_to_exclude": ["console_ui.py"],
     "subdirs_to_exclude": ["utils/inference"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/metaformer.json">
+      </file>
+      <file path="configs/linnaeus-inference.json">
+{
+    "repo_root": "/home/caleb/repo/linnaeus-temp",
+    "export_name": "linnaeus_inference_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["linnaeus/utils/taxonomy", "linnaeus/utils/inference", "linnaeus/models/heads", "configs/model/archs"],
+    "additional_dirs_to_traverse": ["/home/caleb/repo/typus/typus"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".toml", ".sh"],
+    "files_to_include": [
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/amphibia_mFormerV1_sm_r0b_40e.yaml",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/main.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/config.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/mFormerV0.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/models/mFormerV1.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/metrics/chain_accuracy.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/meta_utils.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/dataset_metadata.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/checkpoint.py",
+    "/home/caleb/repo/linnaeus-temp/linnaeus/utils/checkpoint_utils.py",
+    "/home/caleb/repo/typus/README.md",
+    "/home/caleb/repo/typus/CHANGELOG.md"
+    ],
+    "files_to_exclude": ["console_ui.py"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }
+      </file>
+      <file path="configs/metaformer.json">
 {
   "repo_root": "/home/caleb/repo/Polli-Brain/metaformer",
   "export_name": "metaformer_repo_export.txt",
@@ -1999,8 +2256,8 @@ if __name__ == "__main__":
 }
 
 
-        </file>
-        <file path="configs/metaformer1.json">
+      </file>
+      <file path="configs/metaformer1.json">
 {
   "repo_root": "/home/caleb/repo/Polli-Brain/metaformer",
   "export_name": "metaformer_repo_export.txt",
@@ -2013,8 +2270,8 @@ if __name__ == "__main__":
 }
 
 
-        </file>
-        <file path="configs/metaformer2.json">
+      </file>
+      <file path="configs/metaformer2.json">
 {
   "repo_root": "/home/caleb/repo/Polli-Brain/metaformer",
   "export_name": "metaformer_repo_export.txt",
@@ -2026,8 +2283,8 @@ if __name__ == "__main__":
 }
 
 
-        </file>
-        <file path="configs/model-explorer.json">
+      </file>
+      <file path="configs/model-explorer.json">
 {
     "repo_root": "/home/caleb/repo/Polli-Brain/model-explorer",
     "export_name": "model-explorer-repo-export.txt",
@@ -2041,8 +2298,8 @@ if __name__ == "__main__":
   }
   
   
-        </file>
-        <file path="configs/nextjs.json">
+      </file>
+      <file path="configs/nextjs.json">
 {
     "repo_root": "/home/caleb/repo/polli-labs-mantine/",
     "export_name": "polli_labs_nextjs_repo_export.txt",
@@ -2051,8 +2308,8 @@ if __name__ == "__main__":
     "include_top_level_files": ["package.json", "tsconfig.json"],
     "included_extensions": [".ts", ".js", ".tsx", ".jsx", ".json"]
   }
-        </file>
-        <file path="configs/polliFormer-COPAP.json">
+      </file>
+      <file path="configs/polliFormer-COPAP.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_copap_export.txt",
@@ -2065,28 +2322,30 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-Dyn.json">
+      </file>
+      <file path="configs/polliFormer-Dyn.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_Dyn_export.txt",
   "delimiter": "----",
-  "dirs_to_traverse": ["loss","ops_schedule", "utils/logging", "utils/metrics"],
-  "include_top_level_files": "all",
-  "included_extensions": [".py"],
-  "files_to_include": ["/home/caleb/repo/polliFormer/configs/experiments/tests/blade_amphibia_hybrid_ft_sm_19.yaml",
-    "style_guide/metrics.md", "style_guide/schedule_parameters.md",
-  "utils/schedule_utils.py", 
-"/home/caleb/repo/polliFormer/docs/training/metrics.md",
-"/home/caleb/repo/polliFormer/docs/training/scheduling.md",
-"/home/caleb/repo/polliFormer/docs/evaluation/validation.md"],
-  "files_to_exclude": ["console_ui.py", "backblaze.py"],
+  "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
+  "ops_schedule", "optimizers", "lr_schedulers", "tools"],
+  "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
+  "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh"],
+  "files_to_include": [
+  "/home/caleb/repo/polliFormer/polliFormer/requirements.txt"
+  ],
+  "additional_dirs_to_traverse": [
+    "/home/caleb/repo/polliFormer/docs",
+    "/home/caleb/repo/polliFormer/configs/model/archs"
+  ],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
   "subdirs_to_exclude": ["utils/inference"],
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-DynSlim.json">
+      </file>
+      <file path="configs/polliFormer-DynSlim.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_DynSlim_export.txt",
@@ -2100,8 +2359,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-J25_0e0.json">
+      </file>
+      <file path="configs/polliFormer-J25_0e0.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer",
     "export_name": "polliFormer_buildData_export.txt",
@@ -2115,8 +2374,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", "224.yaml", ".bak.py"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-aug.json">
+      </file>
+      <file path="configs/polliFormer-aug.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer-aug_export.txt",
@@ -2128,8 +2387,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-autobatch.json">
+      </file>
+      <file path="configs/polliFormer-autobatch.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_autobatch_export.txt",
@@ -2143,8 +2402,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-autoresume.json">
+      </file>
+      <file path="configs/polliFormer-autoresume.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer-autoresume_export.txt",
@@ -2160,8 +2419,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-autoscale.json">
+      </file>
+      <file path="configs/polliFormer-autoscale.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_autoscale_export.txt",
@@ -2182,8 +2441,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-blade-angio-0.json">
+      </file>
+      <file path="configs/polliFormer-blade-angio-0.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer",
     "export_name": "polliFormer_blade_angio_0_export.txt",
@@ -2198,8 +2457,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", ".egg-info", "__pycache__", ".DS_Store"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-buildData.json">
+      </file>
+      <file path="configs/polliFormer-buildData.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_buildData_export.txt",
@@ -2212,8 +2471,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", "224.yaml", ".bak.py"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-classification0.json">
+      </file>
+      <file path="configs/polliFormer-classification0.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_classification0_export.txt",
@@ -2235,8 +2494,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-classification1.json">
+      </file>
+      <file path="configs/polliFormer-classification1.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_classification1_export.txt",
@@ -2258,8 +2517,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-codeOnly.json">
+      </file>
+      <file path="configs/polliFormer-codeOnly.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_codeOnly_export.txt",
@@ -2271,8 +2530,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-configData.json">
+      </file>
+      <file path="configs/polliFormer-configData.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_configData_export.txt",
@@ -2285,8 +2544,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", "224.yaml", ".bak.py"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-configModel.json">
+      </file>
+      <file path="configs/polliFormer-configModel.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer",
     "export_name": "polliFormer_configModel_export.txt",
@@ -2301,8 +2560,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", ".egg-info", "__pycache__", ".DS_Store"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-configModelMini.json">
+      </file>
+      <file path="configs/polliFormer-configModelMini.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer",
     "export_name": "polliFormer_configModelMini_export.txt",
@@ -2316,8 +2575,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", ".egg-info", "__pycache__", ".DS_Store"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-data.json">
+      </file>
+      <file path="configs/polliFormer-data.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_data_export.txt",
@@ -2330,8 +2589,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", "224.yaml", ".bak.py"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-debugCOPAP.json">
+      </file>
+      <file path="configs/polliFormer-debugCOPAP.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_debugCOPAP_export.txt",
@@ -2345,24 +2604,25 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-deploymentXL.json">
+      </file>
+      <file path="configs/polliFormer-deploymentXL.json">
 {
-    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+    "repo_root": "/home/caleb/repo/polliFormer",
     "export_name": "polliFormer_deploymentXL_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
-    "ops_schedule", "optimizers", "lr_schedulers", "tools"],
+    "dirs_to_traverse": ["polliFormer/loss", "polliFormer/models", "polliFormer/h5data", "polliFormer/aug", "polliFormer/utils",
+    "polliFormer/ops_schedule", "polliFormer/optimizers", "polliFormer/lr_schedulers", "polliFormer/tools", "migration"],
     "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
     "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh"],
     "files_to_include": [
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS1_16e.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS2_16e.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS5_16e.yaml",
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run6d3_16e.yaml",
+    "/home/caleb/repo/polliFormer/README.md",
+    "/home/caleb/repo/polliFormer/setup.py",
+    "/home/caleb/repo/polliFormer/.gitignore",
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/pta_mFormerV1_sm_r0a_5e.yaml",
+    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json",
     "/home/caleb/repo/polliFormer/tools/docker/Dockerfile",
     "/home/caleb/repo/polliFormer/polliFormer/requirements.txt",
-    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
+    "/home/caleb/repo/polliFormer/work/active/May15a/dataset_sharding_plan.md"
     ],
     "additional_dirs_to_traverse": [
       "/home/caleb/repo/polliFormer/docs",
@@ -2371,12 +2631,12 @@ if __name__ == "__main__":
       "/home/caleb/repo/polliFormer/dev/deployment/hyperbolic"
     ],
     "files_to_exclude": ["console_ui.py"],
-    "subdirs_to_exclude": ["utils/inference"],
+    "subdirs_to_exclude": ["wandb", "typings"],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-deploymentXLw.json">
+      </file>
+      <file path="configs/polliFormer-deploymentXLw.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_deploymentXLw_export.txt",
@@ -2433,8 +2693,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-doxDyn.json">
+      </file>
+      <file path="configs/polliFormer-doxDyn.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer",
   "export_name": "polliFormer_doxDyn_export.txt",
@@ -2451,8 +2711,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": false
 }
-        </file>
-        <file path="configs/polliFormer-gradnorm.json">
+      </file>
+      <file path="configs/polliFormer-gradnorm.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_gradnorm_export.txt",
@@ -2478,8 +2738,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-gradnorm2.json">
+      </file>
+      <file path="configs/polliFormer-gradnorm2.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_gradnorm2_export.txt",
@@ -2507,8 +2767,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-gradnormSlim.json">
+      </file>
+      <file path="configs/polliFormer-gradnormSlim.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_gradnormSlim_export.txt",
@@ -2525,8 +2785,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-gradnormSlim2.json">
+      </file>
+      <file path="configs/polliFormer-gradnormSlim2.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_gradnormSlim2_export.txt",
@@ -2541,26 +2801,52 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-hierarchyMini.json">
+      </file>
+      <file path="configs/polliFormer-hierarchyL.json">
 {
-    "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
-    "export_name": "polliFormer_classificationMini_export.txt",
-    "delimiter": "----",
-    "dirs_to_traverse": ["loss", "models/heads"],
-    "include_top_level_files": "all",
-    "included_extensions": [".py", ".md"],
-    "files_to_include": [
-    "models/mFormerV0.py", "models/build.py", "models/model_factory.py", "models/base_model.py",
-    "/home/caleb/repo/polliFormer/configs/model/archs/mFormerV0/mFormerV0_sm.yaml",
-    "/home/caleb/repo/polliFormer/docs/advanced_topics/hierarchical_approaches.md"],
-    "files_to_exclude": ["console_ui.py", "backblaze.py", "optimizer.py", "validation.py"],
-    "subdirs_to_exclude": ["utils/inference"],
-    "always_exclude_patterns": ["export.txt"],
-    "exhaustive_dir_tree": true
-  }
-        </file>
-        <file path="configs/polliFormer-hierarchyXL.json">
+  "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+  "export_name": "polliFormer_hierarchyL_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["loss", "models","utils",
+  "ops_schedule", "optimizers", "lr_schedulers"],
+  "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
+  "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
+  "files_to_include": [
+  "/home/caleb/repo/polliFormer/configs/experiments/tests/pta_mFormerV1_sm_r0a_5e.yaml",
+  "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
+  ],
+  "additional_dirs_to_traverse": [
+    "/home/caleb/repo/polliFormer/docs",
+    "/home/caleb/repo/polliFormer/configs/model/archs"
+  ],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}
+      </file>
+      <file path="configs/polliFormer-hierarchyLOGS.json">
+{
+  "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+  "export_name": "polliFormer_hierarchyLOGS_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["h5data"],
+  "include_top_level_files": ["none"],
+  "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
+  "files_to_include": [
+  "/home/caleb/repo/polliFormer/tools/scripts/extract_log_selection.sh",
+  "/home/caleb/repo/polliFormer/work/active/May9a_25/run_metamask_debug.sh"
+  ],
+  "additional_dirs_to_traverse": [
+    "/home/caleb/repo/polliFormer/logs/metamask_debug_20250513_043318/selections"
+  ],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}
+      </file>
+      <file path="configs/polliFormer-hierarchyXL.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_hierarchyXL_export.txt",
@@ -2570,27 +2856,72 @@ if __name__ == "__main__":
   "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
   "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
   "files_to_include": [
-  "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS1_16e.yaml",
-  "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS2_16e.yaml",
-  "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS5_16e.yaml",
-  "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run6d3_16e.yaml",
-  "/home/caleb/repo/polliFormer/tools/docker/Dockerfile",
-  "/home/caleb/repo/polliFormer/polliFormer/requirements.txt",
+  "/home/caleb/repo/polliFormer/configs/experiments/tests/pta_mFormerV1_sm_r0a_5e.yaml",
   "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
   ],
   "additional_dirs_to_traverse": [
     "/home/caleb/repo/polliFormer/docs",
-    "/home/caleb/repo/polliFormer/configs/model/archs",
-    "/home/caleb/repo/polliFormer/work/active/May9a_25",
-    "/home/caleb/repo/polliFormer/logs/metamask_debug_20250509_192736"
+    "/home/caleb/repo/polliFormer/configs/model/archs"
   ],
-  "files_to_exclude": ["console_ui.py"],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
   "subdirs_to_exclude": ["utils/inference"],
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-logging.json">
+      </file>
+      <file path="configs/polliFormer-hierarchyXL2.json">
+{
+  "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+  "export_name": "polliFormer_hierarchyXL2_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
+  "ops_schedule", "tools"],
+  "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
+  "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
+  "files_to_include": [
+  "/home/caleb/repo/polliFormer/configs/experiments/tests/blade_reptilia_mFormerV1_sm_run7_NS1_16e.yaml",
+  "/home/caleb/repo/polliFormer/tools/scripts/extract_log_selection.sh",
+  "/home/caleb/repo/polliFormer/work/active/May9a_25/run_metamask_debug.sh"
+  ],
+  "additional_dirs_to_traverse": [
+    "/home/caleb/repo/polliFormer/configs/model/archs",
+    "/home/caleb/repo/polliFormer/logs/metamask_debug_20250514_214055/selections",
+    "/home/caleb/repo/polliFormer/docs/"
+  ],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}
+      </file>
+      <file path="configs/polliFormer-hierarchyXL3.json">
+{
+  "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
+  "export_name": "polliFormer_hierarchyXL3_export.txt",
+  "delimiter": "----",
+  "dirs_to_traverse": ["loss", "models", "h5data", "aug", "utils",
+  "ops_schedule", "optimizers", "lr_schedulers", "tools"],
+  "include_top_level_files": ["README.md", "setup.py", ".gitignore"],
+  "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".out", ".err"],
+  "files_to_include": [
+  "/home/caleb/repo/polliFormer/configs/experiments/tests/pta_mFormerV1_sm_r0a_5e.yaml",
+  "/datasets/modelWorkshop/mFormerV1/linnaeus/pta_mFormerV1/pta_mFormerV1_sm_r0a_5e/logs/debug_log_rank0.txt",
+  "/datasets/modelWorkshop/mFormerV1/linnaeus/pta_mFormerV1/pta_mFormerV1_sm_r0a_5e/logs/debug_log_rank1.txt",
+  "/datasets/modelWorkshop/mFormerV1/linnaeus/pta_mFormerV1/pta_mFormerV1_sm_r0a_5e/logs/h5data_debug_log_rank0.txt",
+  "/datasets/modelWorkshop/mFormerV1/linnaeus/pta_mFormerV1/pta_mFormerV1_sm_r0a_5e/logs/h5data_debug_log_rank1.txt",
+  "/datasets/modelWorkshop/mFormerV1/linnaeus/pta_mFormerV1/pta_mFormerV1_sm_r0a_5e/logs/h5data_debug_log_rank2.txt"
+  ],
+  "additional_dirs_to_traverse": [
+    "/home/caleb/repo/polliFormer/configs/model/archs",
+    "/home/caleb/repo/polliFormer/docs/"
+  ],
+  "files_to_exclude": ["console_ui.py", "bugs.md", "refining_early_exit_handling_plan0.md"],
+  "subdirs_to_exclude": ["utils/inference"],
+  "always_exclude_patterns": ["export.txt"],
+  "exhaustive_dir_tree": true
+}
+      </file>
+      <file path="configs/polliFormer-logging.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_logging_export.txt",
@@ -2605,8 +2936,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-loggingSlim.json">
+      </file>
+      <file path="configs/polliFormer-loggingSlim.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_loggingSlim_export.txt",
@@ -2621,8 +2952,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-loss.json">
+      </file>
+      <file path="configs/polliFormer-loss.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_loss_export.txt",
@@ -2649,8 +2980,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-loss2.json">
+      </file>
+      <file path="configs/polliFormer-loss2.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_loss2_export.txt",
@@ -2672,8 +3003,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-loss3.json">
+      </file>
+      <file path="configs/polliFormer-loss3.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_loss3_export.txt",
@@ -2692,8 +3023,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-mFormerV1.json">
+      </file>
+      <file path="configs/polliFormer-mFormerV1.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer-mFormerV1_export.txt",
@@ -2712,8 +3043,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-meta.json">
+      </file>
+      <file path="configs/polliFormer-meta.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_meta_export.txt",
@@ -2732,8 +3063,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", "224.yaml", ".bak.py"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-metrics.json">
+      </file>
+      <file path="configs/polliFormer-metrics.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_metrics_export.txt",
@@ -2748,8 +3079,8 @@ if __name__ == "__main__":
     "exhaustive_dir_tree": true,
     "dump_config": true
   }
-        </file>
-        <file path="configs/polliFormer-models-codeOnly.json">
+      </file>
+      <file path="configs/polliFormer-models-codeOnly.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer-models-codeOnly_export.txt",
@@ -2761,8 +3092,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-models.json">
+      </file>
+      <file path="configs/polliFormer-models.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer-models_export.txt",
@@ -2778,8 +3109,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-modelsDyn.json">
+      </file>
+      <file path="configs/polliFormer-modelsDyn.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_modelsDyn_export.txt",
@@ -2796,8 +3127,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-modelsPruned-codeOnly.json">
+      </file>
+      <file path="configs/polliFormer-modelsPruned-codeOnly.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer/models",
     "export_name": "polliFormer_modelsPruned_codeOnly_export.txt",
@@ -2809,8 +3140,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-modelsPrunedInv-codeOnly.json">
+      </file>
+      <file path="configs/polliFormer-modelsPrunedInv-codeOnly.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer/models",
     "export_name": "polliFormer_modelsPrunedInv_codeOnly_export.txt",
@@ -2822,8 +3153,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-modelsSlim.json">
+      </file>
+      <file path="configs/polliFormer-modelsSlim.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer-modelsSlim_export.txt",
@@ -2842,8 +3173,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-modelsSlim2.json">
+      </file>
+      <file path="configs/polliFormer-modelsSlim2.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer-modelsSlim2_export.txt",
@@ -2860,8 +3191,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer-paramFilters.json">
+      </file>
+      <file path="configs/polliFormer-paramFilters.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_paramFilters_export.txt",
@@ -2878,8 +3209,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-serve.json">
+      </file>
+      <file path="configs/polliFormer-serve.json">
 {
     "repo_root": "/home/caleb/repo/Polli-Brain/metaformer/torchserve/polliFormer0",
     "export_name": "polliFormer_serve_export.txt",
@@ -2890,8 +3221,8 @@ if __name__ == "__main__":
     "subdirs_to_exclude": ["pkgs", "test"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-tests.json">
+      </file>
+      <file path="configs/polliFormer-tests.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_tests_export.txt",
@@ -2904,8 +3235,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/polliFormer-train.json">
+      </file>
+      <file path="configs/polliFormer-train.json">
 {
   "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
   "export_name": "polliFormer_train_export.txt",
@@ -2922,8 +3253,8 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-        <file path="configs/polliFormer-utils.json">
+      </file>
+      <file path="configs/polliFormer-utils.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer-utils_export.txt",
@@ -2935,8 +3266,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliFormer.json">
+      </file>
+      <file path="configs/polliFormer.json">
 {
     "repo_root": "/home/caleb/repo/polliFormer/polliFormer",
     "export_name": "polliFormer_export.txt",
@@ -2950,8 +3281,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt", ".egg-info", "__pycache__", ".DS_Store"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/polliOS-codeOnly.json">
+      </file>
+      <file path="configs/polliOS-codeOnly.json">
 {
     "repo_root": "/home/caleb/repo/polliOS-core/PolliOS",
     "export_name": "polliOS-core-codeOnly-export.txt",
@@ -2965,8 +3296,8 @@ if __name__ == "__main__":
   }
   
   
-        </file>
-        <file path="configs/polliOS.json">
+      </file>
+      <file path="configs/polliOS.json">
 {
     "repo_root": "/home/caleb/repo/polliOS-core/PolliOS",
     "export_name": "polliOS-core-repo-export.txt",
@@ -2980,8 +3311,8 @@ if __name__ == "__main__":
   }
   
   
-        </file>
-        <file path="configs/pollinalysis-code-mini.json">
+      </file>
+      <file path="configs/pollinalysis-code-mini.json">
 {
     "repo_root": "/Users/carbon/repo/pollinalysis",
     "export_name": "pollinalysis_code_mini_export.txt",
@@ -3000,8 +3331,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/pollinalysis-code.json">
+      </file>
+      <file path="configs/pollinalysis-code.json">
 {
     "repo_root": "/Users/carbon/repo/pollinalysis",
     "export_name": "pollinalysis_code_export.txt",
@@ -3018,8 +3349,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/pollinalysis-full.json">
+      </file>
+      <file path="configs/pollinalysis-full.json">
 {
     "repo_root": "/Users/carbon/repo/pollinalysis",
     "export_name": "pollinalysis_full_export.txt",
@@ -3044,8 +3375,8 @@ if __name__ == "__main__":
         "/home/caleb/repo/trackers/trackers"
       ]
 }
-        </file>
-        <file path="configs/pollinalysis.json">
+      </file>
+      <file path="configs/pollinalysis.json">
 {
     "repo_root": "/Users/carbon/repo/pollinalysis",
     "export_name": "pollinalysis_export.txt",
@@ -3059,8 +3390,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/rope-vit.json">
+      </file>
+      <file path="configs/rope-vit.json">
 {
   "repo_root": "/home/caleb/repo/rope-vit/",
   "export_name": "rope-vit_export.txt",
@@ -3076,8 +3407,8 @@ if __name__ == "__main__":
   "dump_config": false
 }
 
-        </file>
-        <file path="configs/sam2-webapp.json">
+      </file>
+      <file path="configs/sam2-webapp.json">
 {
     "repo_root": "/home/caleb/repo/sam2/",
     "export_name": "sam2-webapp_export.txt",
@@ -3090,8 +3421,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/sam2.json">
+      </file>
+      <file path="configs/sam2.json">
 {
     "repo_root": "/home/caleb/repo/sam2/",
     "export_name": "sam2_export.txt",
@@ -3104,8 +3435,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/sam2_demo.json">
+      </file>
+      <file path="configs/sam2_demo.json">
 {
     "repo_root": "/home/caleb/repo/sam2/demo",
     "export_name": "sam2_demo_export.txt",
@@ -3121,8 +3452,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/squarecrop.json">
+      </file>
+      <file path="configs/squarecrop.json">
 {
     "repo_root": "/Users/carbon/repo/pollinalysis-tools/preprocessing/squarecrop",
     "export_name": "squarecrop_export.txt",
@@ -3136,8 +3467,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/trackers.json">
+      </file>
+      <file path="configs/trackers.json">
 {
     "repo_root": "/home/caleb/repo/trackers",
     "export_name": "trackers_export.txt",
@@ -3150,8 +3481,72 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": false
   }
-        </file>
-        <file path="configs/uv_docs_raw.json">
+      </file>
+      <file path="configs/typus-inference.json">
+{
+    "repo_root": "/home/caleb/repo/typus/",
+    "export_name": "typus_inference_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["typus", "tests", "scripts"],
+    "files_to_include": [
+        "/home/caleb/repo/linnaeus-temp/linnaeus/config.py",
+        "/home/caleb/repo/linnaeus-temp/linnaeus/main.py",
+        "/home/caleb/repo/linnaeus-temp/linnaeus/utils/taxonomy/taxonomy_tree.py",
+        "/home/caleb/repo/linnaeus-temp/pyproject.toml"
+    ],
+    "files_to_exclude": [],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".json", ".sh", ".md", ".tsv", ".toml", ".yaml"],
+    "always_exclude_patterns": ["export.txt"],
+    "additional_dirs_to_traverse": [
+        "/home/caleb/repo/linnaeus-temp/docs",
+        "/home/caleb/repo/linnaeus-temp/linnaeus/models",
+        "/home/caleb/repo/linnaeus-temp/linnaeus/utils/inference"
+
+    ],
+    "exhaustive_dir_tree": true
+  }
+      </file>
+      <file path="configs/typus-prep.json">
+{
+    "repo_root": "/home/caleb/repo/typus/",
+    "export_name": "typus_prep_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["typus", "tests", "scripts"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".json", ".sh", ".md", ".tsv", ".toml", ".yaml", ".sql"],
+    "files_to_include": [
+        "/home/caleb/repo/typus/pyproject.toml",
+        "/home/caleb/repo/typus/README.md",
+        "/home/caleb/repo/ibridaDB/docs/schemas.md"
+    ],
+    "files_to_exclude": [],
+    "always_exclude_patterns": ["export.txt"],
+    "additional_dirs_to_traverse": [
+        "/home/caleb/repo/ibridaDB/docs",
+        "/home/caleb/repo/ibridaDB/dbTools/export/v0/common",
+        "/home/caleb/repo/ibridaDB/dbTools/taxa/expand",
+        "/home/caleb/repo/ibridaDB/models",
+        "/home/caleb/repo/ibridaDB/scripts/ingest_coldp"
+
+    ],
+    "exhaustive_dir_tree": true
+  }
+      </file>
+      <file path="configs/typus.json">
+{
+    "repo_root": "/home/caleb/repo/typus/",
+    "export_name": "typus_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["typus", "tests", "scripts"],
+    "files_to_exclude": [],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".json", ".sh", ".md", ".tsv", ".toml", ".yaml"],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }
+      </file>
+      <file path="configs/uv_docs_raw.json">
 {
     "repo_root": "/home/caleb/repo/uv",
     "export_name": "uv_docs_raw_export.txt",
@@ -3166,8 +3561,8 @@ if __name__ == "__main__":
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
   }
-        </file>
-        <file path="configs/uv_med.json">
+      </file>
+      <file path="configs/uv_med.json">
 {
   "repo_root": "/home/caleb/repo/uv",
   "output_dir": "/home/caleb/repo/utils/export_repo/context",
@@ -3214,8 +3609,8 @@ if __name__ == "__main__":
   "exhaustive_dir_tree": false,
   "dump_config": false
 } 
-        </file>
-        <file path="configs/uv_mini.json">
+      </file>
+      <file path="configs/uv_mini.json">
 {
   "repo_root": "/home/caleb/repo/uv",
   "output_dir": "/home/caleb/repo/utils/export_repo/context",
@@ -3285,8 +3680,8 @@ if __name__ == "__main__":
   "exhaustive_dir_tree": false,
   "dump_config": false
 } 
-        </file>
-        <file path="configs/uv_xl.json">
+      </file>
+      <file path="configs/uv_xl.json">
 {
   "repo_root": "/home/caleb/repo/uv",
   "output_dir": "/home/caleb/repo/utils/export_repo/context",
@@ -3320,8 +3715,8 @@ if __name__ == "__main__":
   "exhaustive_dir_tree": true,
   "dump_config": false
 } 
-        </file>
-        <file path="configs/vggt.json">
+      </file>
+      <file path="configs/vggt.json">
 {
   "repo_root": "/Users/carbon/repo/vggt",
   "export_name": "vggt_export.txt",
@@ -3337,8 +3732,8 @@ if __name__ == "__main__":
   "dump_config": false
 }
 
-        </file>
-        <file path="configs/wandb_sweep.json">
+      </file>
+      <file path="configs/wandb_sweep.json">
 {
   "repo_root": "/home/caleb/repo/wandb_docs/content/guides/models/sweeps",
   "export_name": "wandb_sweep_export.txt",
@@ -3351,8 +3746,7 @@ if __name__ == "__main__":
   "always_exclude_patterns": ["export.txt"],
   "exhaustive_dir_tree": true
 }
-        </file>
-      </dir>
+      </file>
     </dir>
   </files>
 </codebase_context>
