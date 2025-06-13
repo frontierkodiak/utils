@@ -1,0 +1,23 @@
+{
+    "repo_root": "/home/caleb/repo/linnaeus",
+    "export_name": "linnaeus_deployment_mini_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["linnaeus/models", "configs", "tools/docker"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".toml", ".json"],
+    "files_to_include": [
+    "/home/caleb/repo/polliFormer/configs/experiments/tests/test_autobatch_reptilia_mFormerV1_lg.yaml",
+    "/home/caleb/repo/linnaeus/tools/docker/Dockerfile",
+    "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json",
+    "/Users/carbon/repo/linnaeus/linnaeus/main.py",
+    "/Users/carbon/repo/linnaeus/linnaeus/config.py",
+    "/Users/carbon/repo/linnaeus/docs/installation.md",
+    "/Users/carbon/repo/linnaeus-deployment/README.md"
+    ],
+    "additional_dirs_to_traverse": [
+        "/Users/carbon/repo/linnaeus-deployment/June2025",
+        "/Users/carbon/repo/linnaeus-deployment/linnaeus_deploy"
+    ],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

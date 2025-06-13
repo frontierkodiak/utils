@@ -10,6 +10,7 @@
     "/home/caleb/repo/ibrida/extra/generator/configs/prod/aves_v0r1_full_hybrid_384.json",
     "/home/caleb/repo/ibrida/extra/generator/configs/prod/mammalia_v0r1_full_hybrid_384.json",
     "/home/caleb/repo/ibrida/extra/generator/configs/prod/reptilia_v0r1_full_hybrid_384.json",
+    "/home/caleb/repo/ibrida/extra/generator/configs/prod/amphibia_v0r1_full_hybrid_384_worm.json",
     "/home/caleb/repo/coldp/README.md"],
     "files_to_exclude": [],
     "include_top_level_files": ["none"],
