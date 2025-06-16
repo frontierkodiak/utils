@@ -2,14 +2,16 @@
     "repo_root": "/home/caleb/repo/linnaeus",
     "export_name": "linnaeus_deploymentXL_export.txt",
     "delimiter": "----",
-    "dirs_to_traverse": ["linnaeus", "configs", "tools", "docs", "tests"],
+    "dirs_to_traverse": ["linnaeus", "configs", "tools/docker", "docs", "tests"],
     "include_top_level_files": ["all"],
-    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".toml", ".json"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".yml", ".sh", ".toml", ".json"],
     "files_to_include": [
-    "/home/caleb/repo/polliFormer/configs/experiments/tests/test_autobatch_reptilia_mFormerV1_lg.yaml",
     "/home/caleb/repo/linnaeus/tools/docker/Dockerfile",
     "/home/caleb/repo/linnaeus/linnaeus/requirements.txt",
     "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json"
+    ],
+    "additional_dirs_to_traverse": [
+        "/home/caleb/repo/linnaeus-deployment/linnaeus_deploy"
     ],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true
