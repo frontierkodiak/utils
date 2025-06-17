@@ -1,0 +1,20 @@
+{
+    "repo_root": "/home/caleb/repo/linnaeus",
+    "export_name": "linnaeus_deployment_med0_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["tools/docker", "linnaeus/utils", "docs/advanced_topics", "docs/training",
+    "linnaeus/ops_schedule"],
+    "include_top_level_files": ["all"],
+    "included_extensions": [".py", ".md", ".txt", ".yaml", ".sh", ".toml", ".json"],
+    "files_to_include": [
+        "/home/caleb/repo/linnaeus/tools/docker/Dockerfile",
+        "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json",
+        "/Users/carbon/repo/linnaeus/linnaeus/main.py",
+        "/Users/carbon/repo/linnaeus/linnaeus/config.py"
+    ],
+    "additional_dirs_to_traverse": [
+        "/Users/carbon/repo/linnaeus-deployment/linnaeus_deploy"
+    ],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }
