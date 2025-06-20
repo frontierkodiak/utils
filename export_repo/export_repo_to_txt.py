@@ -178,27 +178,20 @@ class PathConverter:
             abs_additional_dirs = []
             for p in config.get("additional_dirs_to_traverse", []):
                 if isinstance(p, str):
-                    abs_p = p
-                    if not os.path.isabs(abs_p):
-                        # Assume relative to repo_root if not absolute
+                    path_to_process = p
+                    if not os.path.isabs(path_to_process):
+                        # Resolve relative to Current Working Directory (CWD)
                         print(
-                            f"Warning: Path '{p}' in 'additional_dirs_to_traverse' is relative. Assuming relative to repo_root: {config.get('repo_root', 'MISSING')}"
+                            f"Warning: Path '{p}' in 'additional_dirs_to_traverse' is relative. Resolving relative to CWD: {os.getcwd()}"
                         )
-                        if config.get("repo_root"):
-                            abs_p = os.path.join(config["repo_root"], p)
-                        else:
-                            print(
-                                f"Error: Cannot resolve relative path '{p}' because repo_root is not defined. Skipping."
-                            )
-                            continue
+                        path_to_process = os.path.abspath(p)
 
-                    abs_p = convert_absolute_path(
-                        abs_p
-                    )  # Convert cross-system absolute
-                    abs_p = PathConverter.to_system_path(abs_p)  # Normalize format
-                    abs_additional_dirs.append(
-                        os.path.abspath(abs_p)
-                    )  # Ensure absolute
+                    # Existing normalization steps
+                    path_to_process = convert_absolute_path(path_to_process)
+                    path_to_process = PathConverter.to_system_path(path_to_process)
+                    # Ensure canonical absolute path (e.g., resolves '..')
+                    final_abs_path = os.path.abspath(path_to_process)
+                    abs_additional_dirs.append(final_abs_path)
             config["additional_dirs_to_traverse"] = abs_additional_dirs
 
         return config
@@ -730,10 +723,10 @@ class RepoExporter:
                         f"Warning: Specified relative file to include not found relative to repo root: {normalized_file_path} (resolved to {abs_path})"
                     )
 
-    def should_include_in_tree(self, abs_dir_path: str) -> bool:
+    def should_include_in_tree(self, abs_dir_path: str, tree_root_abs_path: str) -> bool:
         """Determine if a directory should appear in the directory tree output."""
-        if not abs_dir_path.startswith(self.repo_root):
-            return False  # Only show dirs within repo_root in the tree
+        if not abs_dir_path.startswith(tree_root_abs_path):
+            return False  # Only show dirs within the current tree_root_abs_path
 
         dir_name = os.path.basename(abs_dir_path)
 
@@ -755,7 +748,7 @@ class RepoExporter:
         # Check against dirs_for_tree if specified
         if self.dirs_for_tree:
             try:
-                relative_path = os.path.relpath(abs_dir_path, self.repo_root)
+                relative_path = os.path.relpath(abs_dir_path, tree_root_abs_path)
                 relative_path_norm = PathConverter.to_system_path(relative_path)
 
                 # Check if this dir is exactly listed OR is a child of a listed dir
@@ -777,25 +770,27 @@ class RepoExporter:
 
         # Final check: Does this directory contain any exported files OR non-empty subdirs?
         try:
-            rel_dir_path = os.path.relpath(abs_dir_path, self.repo_root)
+            rel_dir_path = os.path.relpath(abs_dir_path, tree_root_abs_path)
             rel_dir_path_norm = PathConverter.to_system_path(rel_dir_path)
             if rel_dir_path_norm == ".":
-                rel_dir_path_norm = ""  # Root representation
+                rel_dir_path_norm = "" # Root representation
 
             # Check files directly within this directory
-            has_direct_exported_files = any(
-                os.path.dirname(PathConverter.to_system_path(display_path))
-                == rel_dir_path_norm
-                for display_path in self.line_counts_by_file.keys()
-                if not os.path.isabs(display_path)
-            )
+            has_direct_exported_files = False
+            norm_abs_dir_path = os.path.normpath(abs_dir_path)
+            for disp_path_key, abs_path_for_key, _, _, _ in self.buffered_files: # Assuming buffered_files has (display_path, abs_path, ...)
+                if os.path.isfile(abs_path_for_key) and os.path.normpath(os.path.dirname(abs_path_for_key)) == norm_abs_dir_path:
+                    # Check if this file (by its display_path_key) has line counts
+                    if disp_path_key in self.line_counts_by_file:
+                         has_direct_exported_files = True
+                         break
             if has_direct_exported_files:
-                return True  # Include if it has direct files
+                return True
 
             # Check aggregated stats for the directory (includes content from subdirs)
             _, token_count = self.get_stats_for_path(
-                rel_dir_path_norm
-            )  # Use helper to get aggregated counts
+                rel_dir_path_norm, tree_root_abs_path
+            )
             if token_count > 0:  # Check token count as primary indicator of content
                 return True
 
@@ -844,24 +839,60 @@ class RepoExporter:
         )
         self.token_counts_by_dir[""] = root_tokens
 
-    def get_stats_for_path(self, display_path: str) -> tuple[int, int]:
-        """
-        Return the (line_count, token_count) for a file (from _by_file)
-        or directory (from _by_dir) using its display_path relative to repo_root.
-        """
-        # Prioritize file stats if path exists in file dicts
-        if display_path in self.line_counts_by_file:
-            return (
-                self.line_counts_by_file.get(display_path, 0),
-                self.token_counts_by_file.get(display_path, 0),
-            )
+    def get_aggregated_stats_for_abs_dir(self, abs_dir_path: str) -> tuple[int, int]:
+        # Placeholder implementation:
+        # This method will sum up lines/tokens for all files within this external directory.
+        total_lines = 0
+        total_tokens = 0
 
-        # Otherwise, return directory stats (use '' for root dir)
-        dir_key = display_path if display_path != "." else ""
-        return (
-            self.line_counts_by_dir.get(dir_key, 0),
-            self.token_counts_by_dir.get(dir_key, 0),
-        )
+        norm_abs_external_dir_path = os.path.normpath(abs_dir_path)
+
+        # Iterate through the files we've actually processed and stored stats for
+        for display_path_key, line_count in self.line_counts_by_file.items():
+            token_count = self.token_counts_by_file.get(display_path_key, 0)
+
+            file_abs_path = None
+            # Find the absolute path corresponding to this display_path_key
+            # This is crucial because display_path_key might be relative for repo files
+            # but absolute for external files. We need the original absolute path.
+            for dp_bf, abs_p_bf, _, _, _ in self.buffered_files:
+                if dp_bf == display_path_key: # display_path_key is unique
+                    file_abs_path = abs_p_bf
+                    break
+
+            if file_abs_path: # Ensure we found a corresponding absolute path
+                norm_file_abs_path = os.path.normpath(file_abs_path)
+                # Check if this file's absolute path is within the given external directory
+                # and that it is indeed a file (though buffer_file_content should ensure this)
+                if norm_file_abs_path.startswith(norm_abs_external_dir_path + os.sep) and os.path.isfile(norm_file_abs_path):
+                    total_lines += line_count
+                    total_tokens += token_count
+            # If file_abs_path is None, it means the display_path_key from line_counts_by_file
+            # didn't match any display_path in buffered_files. This shouldn't happen
+            # if line_counts_by_file is populated correctly from buffered_files.
+
+        return total_lines, total_tokens
+
+    def get_stats_for_path(self, display_path_from_tree: str, tree_root_abs_path: str) -> tuple[int, int]:
+        item_abs_path = os.path.normpath(os.path.join(tree_root_abs_path, display_path_from_tree))
+
+        # Check if it's a file we have stats for
+        for bf_display_path, bf_abs_path, _, _, _ in self.buffered_files:
+            if os.path.normpath(bf_abs_path) == item_abs_path:
+                return (
+                    self.line_counts_by_file.get(bf_display_path, 0),
+                    self.token_counts_by_file.get(bf_display_path, 0),
+                )
+
+        # If it's not a file found in buffered_files, assume it's a directory or a file not included
+        # If it's a directory, we need to aggregate its stats.
+        # We rely on should_include_in_tree to have filtered out irrelevant items.
+        # If os.path.isdir(item_abs_path) is true, then it's a directory we want stats for.
+        if os.path.isdir(item_abs_path):
+            return self.get_aggregated_stats_for_abs_dir(item_abs_path)
+
+        # Otherwise, it's something not exported or an empty dir not caught by isdir above
+        return 0, 0
 
     def _format_count(self, count: int) -> str:
         """Formats counts >= 1000 with 'k' suffix, rounded to one decimal."""
@@ -919,6 +950,7 @@ class RepoExporter:
     def get_directory_tree(
         self,
         abs_directory: str,
+        tree_root_abs_path: str,
         prefix: str = "",
         current_depth: int = 0,
         stats_units_printed: bool = False,
@@ -926,7 +958,7 @@ class RepoExporter:
         """
         Generate the ASCII directory tree string, showing only included items
         with line and token counts.
-        Operates on paths relative to repo_root for display.
+        Operates on paths relative to the current tree_root_abs_path for display.
         """
         if self.depth != -1 and current_depth > self.depth:
             # Only add (...) if there might have been more content deeper
@@ -944,34 +976,27 @@ class RepoExporter:
         for item in items:
             item_abs_path = os.path.join(abs_directory, item)
             if os.path.isdir(item_abs_path):
-                if self.should_include_in_tree(item_abs_path):
+                if self.should_include_in_tree(item_abs_path, tree_root_abs_path): # Pass tree_root_abs_path
                     visible_items.append(item)
             elif os.path.isfile(item_abs_path):
-                try:
-                    item_display_path = os.path.relpath(item_abs_path, self.repo_root)
-                    item_display_path_norm = PathConverter.to_system_path(
-                        item_display_path
-                    )
-                    # Check if the file was actually buffered (i.e., passed filters and included)
-                    if item_display_path_norm in self.line_counts_by_file:
-                        visible_items.append(item)
-                except ValueError:
-                    # Cannot make relative path (e.g., different drive on Windows)
-                    # Only include if it was buffered (which implies it was included some other way)
-                    if any(bf[1] == item_abs_path for bf in self.buffered_files):
-                        # How to represent this in the tree? Maybe skip external files in tree?
-                        # For now, let's only add items relative to repo_root.
-                        pass
+                # Check if this absolute file path exists in our buffered_files (meaning it was processed and included)
+                is_file_buffered = any(bf_abs == item_abs_path for _, bf_abs, _, _, _ in self.buffered_files)
+                if is_file_buffered:
+                    visible_items.append(item)
 
         for i, item in enumerate(visible_items):
             item_abs_path = os.path.join(abs_directory, item)
             try:
-                item_rel_path = os.path.relpath(item_abs_path, self.repo_root)
+                item_rel_path = os.path.relpath(item_abs_path, tree_root_abs_path) # Relative to current tree root
                 item_rel_path_norm = PathConverter.to_system_path(item_rel_path)
             except ValueError:
-                continue  # Skip if cannot make relative (shouldn't happen if already filtered)
+                # This can happen if item_abs_path is not under tree_root_abs_path,
+                # though should_include_in_tree and visible_item logic should prevent this.
+                # If it does, it's safer to skip.
+                print(f"Warning: Could not form relative path for {item_abs_path} against {tree_root_abs_path}. Skipping in tree.")
+                continue
 
-            line_count, token_count = self.get_stats_for_path(item_rel_path_norm)
+            line_count, token_count = self.get_stats_for_path(item_rel_path_norm, tree_root_abs_path)
 
             connector = "|-- " if i < len(visible_items) - 1 else "\\-- "
 
@@ -994,7 +1019,7 @@ class RepoExporter:
                 sub_prefix = prefix + ("|   " if i < len(visible_items) - 1 else "    ")
                 # Recurse, passing the current state of stats_units_printed
                 subtree_str, stats_units_printed = self.get_directory_tree(
-                    item_abs_path, sub_prefix, current_depth + 1, stats_units_printed
+                    item_abs_path, tree_root_abs_path, sub_prefix, current_depth + 1, stats_units_printed
                 )
                 tree_str += subtree_str
 
@@ -1166,6 +1191,8 @@ class RepoExporter:
                 for k, v in config_data.items():
                     if isinstance(v, Path):
                         serializable_config[k] = str(v)
+                    elif isinstance(v, set): # Convert set to list
+                        serializable_config[k] = list(v)
                     else:
                         serializable_config[k] = v
                 config_json = json.dumps(serializable_config, indent=2)
@@ -1175,34 +1202,68 @@ class RepoExporter:
                 output_parts.append(f"<!-- Error serializing config: {e} -->")
             output_parts.append("  </config>")
 
-        # Directory Tree
+        # Directory Tree for repo_root
         print("Generating directory tree...")
         escaped_repo_root_attr = saxutils.quoteattr(self.repo_root)
         output_parts.append(f"  <dirtree root={escaped_repo_root_attr}>")
-        directory_tree_str, _ = self.get_directory_tree(
-            self.repo_root, prefix="|", stats_units_printed=False
-        )  # Start prefix with '|'
-        # Add repo root node itself with total stats
-        root_lines, root_tokens = self.get_stats_for_path(
-            ""
-        )  # Get aggregated root stats
+        # Call get_directory_tree for the main repo, passing self.repo_root as the tree_root_abs_path
+        directory_tree_str, units_already_printed_in_main_tree = self.get_directory_tree(
+            self.repo_root,
+            prefix="|",
+            stats_units_printed=False, # Reset for each new tree
+            tree_root_abs_path=self.repo_root # New parameter
+        )
+
+        root_lines, root_tokens = self.get_stats_for_path("", self.repo_root)
         root_line_str = self._format_count(root_lines)
         root_token_str = self._format_count(root_tokens)
-        # Determine if units were printed in the subtree
-        # Hacky way: check if "lines" appears in the generated tree string
-        units_already_printed = " lines/" in directory_tree_str
-        if not units_already_printed and (root_lines > 0 or root_tokens > 0):
-            root_stats_str = f" ({root_line_str} lines/{root_token_str} tokens)"
-        else:
-            root_stats_str = f" ({root_line_str}/{root_token_str})"
+
+        root_stats_display_str = ""
+        if not units_already_printed_in_main_tree and (root_lines > 0 or root_tokens > 0):
+            root_stats_display_str = f" ({root_line_str} lines/{root_token_str} tokens)"
+        elif root_lines > 0 or root_tokens > 0:
+            root_stats_display_str = f" ({root_line_str}/{root_token_str})"
 
         output_parts.append(
-            f"{os.path.basename(self.repo_root) or self.repo_root}{root_stats_str}"
-        )  # Show root stats
+            f"{os.path.basename(self.repo_root) or self.repo_root}{root_stats_display_str}"
+        )
         output_parts.append(
             directory_tree_str.rstrip()
-        )  # Add the rest of the tree, remove trailing newline
+        )
         output_parts.append("  </dirtree>")
+
+        # Directory Trees for additional_dirs_to_traverse
+        for external_dir_abs_path in self.additional_dirs_to_traverse:
+            if not os.path.isdir(external_dir_abs_path):
+                print(f"Warning: External directory {external_dir_abs_path} not found or not a directory. Skipping tree generation.")
+                continue
+
+            print(f"Generating directory tree for external dir: {external_dir_abs_path}")
+            escaped_external_dir_attr = saxutils.quoteattr(external_dir_abs_path)
+            output_parts.append(f"  <dirtree root={escaped_external_dir_attr}>")
+
+            ext_dir_tree_str, units_printed_in_ext_tree = self.get_directory_tree(
+                external_dir_abs_path,
+                prefix="|",
+                stats_units_printed=False,
+                tree_root_abs_path=external_dir_abs_path
+            )
+
+            ext_root_lines, ext_root_tokens = self.get_aggregated_stats_for_abs_dir(external_dir_abs_path)
+            ext_root_line_str = self._format_count(ext_root_lines)
+            ext_root_token_str = self._format_count(ext_root_tokens)
+
+            ext_root_stats_display_str = ""
+            if not units_printed_in_ext_tree and (ext_root_lines > 0 or ext_root_tokens > 0):
+                ext_root_stats_display_str = f" ({ext_root_line_str} lines/{ext_root_token_str} tokens)"
+            elif ext_root_lines > 0 or ext_root_tokens > 0:
+                ext_root_stats_display_str = f" ({ext_root_line_str}/{ext_root_token_str})"
+
+            output_parts.append(
+                f"{os.path.basename(external_dir_abs_path) or external_dir_abs_path}{ext_root_stats_display_str}"
+            )
+            output_parts.append(ext_dir_tree_str.rstrip())
+            output_parts.append("  </dirtree>")
 
         # Files (Nested Structure)
         print("Generating files section...")
