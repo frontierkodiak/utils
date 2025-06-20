@@ -1,0 +1,15 @@
+{
+    "repo_root": "test_repo_main",
+    "export_name": "test_export_output.txt",
+    "output_dir": "test_output",
+    "dirs_to_traverse": ["subdir_repo"],
+    "include_top_level_files": "all",
+    "included_extensions": [".py", ".md", ".txt"],
+    "additional_dirs_to_traverse": [
+        "test_repo_external_1",
+        "test_repo_external_2"
+    ],
+    "always_exclude_patterns": ["test_export_output.txt"],
+    "dump_config": true,
+    "line_number_interval": 0
+}
