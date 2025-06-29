@@ -1,0 +1,33 @@
+{
+    "repo_root": "/home/caleb/repo/ibrida/",
+    "export_name": "polli-distill-0c_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["src", "tests"],
+    "include_top_level_files": ["none"],
+    "included_extensions": [".py", ".json", ".sh", ".md", ".tsv", ".toml", ".yaml", ".sql", ".txt", ".j2"],
+    "files_to_include": [
+        "/home/caleb/repo/ibrida/extra/distill/dev/work/polli-distill-copy.md",
+        "/home/caleb/repo/ibrida/extra/distill/dev/work/polli-distill-prompts-copy.md",
+        "/home/caleb/repo/ibrida/extra/distill/dev/context/input_csv_sample.txt",
+        "/home/caleb/repo/ibrida/extra/generator/configs/prod/angiospermae_v0r1_full_hybrid_384.json",
+        "/home/caleb/repo/ibrida/extra/generator/configs/prod/pta_non_rg_v0r1_hybrid_384.json",
+        "/home/caleb/repo/ibrida/pyproject.toml",
+        "/home/caleb/repo/ibrida/README.md",
+        "/home/caleb/repo/polliFormer/work/active/assets/datasets/dataset_sizes.json",
+        "/home/caleb/repo/ibridaDB/docs/expanded_taxa.md",
+        "/home/caleb/repo/typus/README.md",
+        "/home/caleb/repo/typus/pyproject.toml",
+        "/home/caleb/repo/pollinalysis/debug_gemini_grid_search.py",
+        "/home/caleb/repo/pollinalysis/src/pollinalysis/masking/gemini.py",
+        "/home/caleb/repo/pollinalysis/src/pollinalysis/utils/gemini_utils.py",
+        "/home/caleb/repo/pollinalysis/src/pollinalysis/utils/json_utils.py"
+        ],
+    "files_to_exclude": [],
+    "always_exclude_patterns": ["export.txt"],
+    "additional_dirs_to_traverse": [
+        "/home/caleb/repo/typus/typus",
+        "/home/caleb/repo/typus/docs",
+        "/home/caleb/repo/typus/tests"
+    ],
+    "exhaustive_dir_tree": true
+  }

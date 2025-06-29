@@ -1,0 +1,17 @@
+{
+    "repo_root": "/home/caleb/repo/ibrida/",
+    "export_name": "polli-distill-0b_export.txt",
+    "delimiter": "----",
+    "dirs_to_traverse": ["src"],
+    "include_top_level_files": ["none"],
+    "included_extensions": [".py", ".json", ".sh", ".md", ".tsv", ".toml", ".yaml", ".sql", ".txt", ".j2"],
+    "files_to_include": [
+        "/home/caleb/repo/ibrida/extra/generator/configs/prod/angiospermae_v0r1_full_hybrid_384.json",
+        "/home/caleb/repo/ibrida/extra/generator/configs/prod/pta_non_rg_v0r1_hybrid_384.json",
+        "/home/caleb/repo/ibrida/pyproject.toml",
+        "/home/caleb/repo/ibrida/README.md"
+        ],
+    "files_to_exclude": [],
+    "always_exclude_patterns": ["export.txt"],
+    "exhaustive_dir_tree": true
+  }

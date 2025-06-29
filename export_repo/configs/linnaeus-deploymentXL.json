@@ -9,9 +9,7 @@
     "/home/caleb/repo/linnaeus/tools/docker/Dockerfile"
     ],
     "additional_dirs_to_traverse": [
-        "/home/caleb/repo/linnaeus-deployment/linnaeus_deploy",
-        "/home/caleb/repo/linnaeus-deployment/June2025/deploy_tests",
-        "/home/caleb/repo/linnaeus-deployment/June2025/active"
+        "/home/caleb/repo/linnaeus-deployment/linnaeus_deploy"
     ],
     "always_exclude_patterns": ["export.txt"],
     "exhaustive_dir_tree": true

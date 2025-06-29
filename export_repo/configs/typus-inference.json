@@ -4,20 +4,18 @@
     "delimiter": "----",
     "dirs_to_traverse": ["typus", "tests", "scripts"],
     "files_to_include": [
-        "/home/caleb/repo/linnaeus-temp/linnaeus/config.py",
-        "/home/caleb/repo/linnaeus-temp/linnaeus/main.py",
-        "/home/caleb/repo/linnaeus-temp/linnaeus/utils/taxonomy/taxonomy_tree.py",
-        "/home/caleb/repo/linnaeus-temp/pyproject.toml"
+        "/home/caleb/repo/linnaeus/README.md",
+        "/home/caleb/repo/linnaeus/pyproject.toml"
     ],
     "files_to_exclude": [],
     "include_top_level_files": ["all"],
     "included_extensions": [".py", ".json", ".sh", ".md", ".tsv", ".toml", ".yaml"],
     "always_exclude_patterns": ["export.txt"],
     "additional_dirs_to_traverse": [
-        "/home/caleb/repo/linnaeus-temp/docs",
-        "/home/caleb/repo/linnaeus-temp/linnaeus/models",
-        "/home/caleb/repo/linnaeus-temp/linnaeus/utils/inference"
-
+        "/home/caleb/repo/linnaeus/docs/datasets",
+        "/home/caleb/repo/linnaeus/docs/inference",
+        "/home/caleb/repo/linnaeus/linnaeus/inference",
+        "/home/caleb/repo/linnaeus/linnaeus/utils/inference"
     ],
     "exhaustive_dir_tree": true
   }
